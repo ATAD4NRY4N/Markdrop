@@ -234,8 +234,10 @@ const buildMarpSlidesHTML = (blocks) => {
            justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont,
            'Segoe UI', Roboto, sans-serif; }
     .slide-wrapper { width: 90vw; max-width: 960px; position: relative; padding-top: ${aspectPadding}; }
-    .slide { position: absolute; inset: 0; display: none; flex-direction: column; overflow: hidden; }
-    .slide.active { display: flex; }
+    .slide { position: absolute; inset: 0; flex-direction: column; overflow: hidden;
+             display: none; opacity: 0; transition: opacity 0.35s ease; }
+    .slide.active { display: flex; opacity: 1; }
+    .slide.slide-out { display: flex; opacity: 0; }
     .slide-header { position: absolute; top: 1.5rem; left: 3.5rem; right: 3.5rem;
                     font-size: 0.75rem; opacity: 0.7; }
     .slide-footer { position: absolute; bottom: 1.5rem; left: 3.5rem; right: 3.5rem;
@@ -287,7 +289,9 @@ const buildMarpSlidesHTML = (blocks) => {
     var total = ${slideGroups.length};
     var slides = document.querySelectorAll('.slide');
     function navigate(dir) {
-      slides[current].classList.remove('active');
+      var prev = slides[current];
+      prev.classList.add('slide-out');
+      setTimeout(function() { prev.classList.remove('active', 'slide-out'); }, 350);
       current = Math.max(0, Math.min(total - 1, current + dir));
       slides[current].classList.add('active');
       document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
@@ -443,16 +447,85 @@ export const blocksToMarkdown = (blocks, includeAttribution = true) => {
   return includeAttribution ? content + ATTRIBUTION_FOOTER : content;
 };
 
-export const blocksToHTML = (blocks, includeAttribution = true) => {
+// ---------------------------------------------------------------------------
+// Animation helpers for HTML export
+// ---------------------------------------------------------------------------
+
+const ANIM_KEYFRAMES = `
+@keyframes _md_fadeIn { from { opacity:0 } to { opacity:1 } }
+@keyframes _md_fadeInUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }
+@keyframes _md_slideInLeft { from { opacity:0; transform:translateX(-30px) } to { opacity:1; transform:none } }
+@keyframes _md_slideInRight { from { opacity:0; transform:translateX(30px) } to { opacity:1; transform:none } }
+@keyframes _md_zoomIn { from { opacity:0; transform:scale(0.9) } to { opacity:1; transform:scale(1) } }
+`;
+
+const ANIM_NAME_MAP = {
+  fadeIn: "_md_fadeIn",
+  fadeInUp: "_md_fadeInUp",
+  slideInLeft: "_md_slideInLeft",
+  slideInRight: "_md_slideInRight",
+  zoomIn: "_md_zoomIn",
+};
+
+/**
+ * Build the CSS for all animated blocks and return an IntersectionObserver
+ * script that triggers animations when elements enter the viewport.
+ */
+const buildAnimationExtras = (blocks) => {
+  const hasAny = blocks.some((b) => b.animation && b.animation.type && b.animation.type !== "none");
+  if (!hasAny) return { css: "", script: "" };
+
+  const css = `
+${ANIM_KEYFRAMES}
+[data-md-anim] { opacity: 0; }
+[data-md-anim].md-anim-ready { opacity: 1; animation-fill-mode: both; animation-timing-function: ease-out; }
+`;
+
+  const script = `
+(function() {
+  var els = document.querySelectorAll('[data-md-anim]');
+  if (!els.length) return;
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        var el = e.target;
+        var name = el.getAttribute('data-md-anim');
+        var dur = el.getAttribute('data-md-dur') || '0.5';
+        var delay = el.getAttribute('data-md-delay') || '0';
+        el.style.animationName = name;
+        el.style.animationDuration = dur + 's';
+        el.style.animationDelay = delay + 's';
+        el.classList.add('md-anim-ready');
+        obs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(function(el) { obs.observe(el); });
+})();
+`;
+
+  return { css, script };
+};
+
+/**
+ * Wrap an HTML string in an animation div if the block has an animation set.
+ */
+const wrapWithAnimation = (htmlStr, block) => {
+  const anim = block.animation;
+  if (!anim || !anim.type || anim.type === "none") return htmlStr;
+  const animName = ANIM_NAME_MAP[anim.type];
+  if (!animName) return htmlStr;
+  const dur = (anim.duration ?? 0.5).toFixed(2);
+  const delay = (anim.delay ?? 0).toFixed(2);
+  return `<div data-md-anim="${animName}" data-md-dur="${dur}" data-md-delay="${delay}">${htmlStr}</div>`;
+};
+
+export const blocksToHTML = (blocks, includeAttribution = true, includeAnimations = true) => {
   if (!blocks || blocks.length === 0) {
     return getHTMLTemplate("", includeAttribution);
   }
 
   try {
-    const markdown = blocksToMarkdown(blocks, includeAttribution);
-    const html = marked.parse(markdown, { breaks: true, gfm: true });
-    const container = document.createElement("div");
-    container.innerHTML = html;
     const labelMap = {
       js: "JS",
       javascript: "JS",
@@ -461,51 +534,66 @@ export const blocksToHTML = (blocks, includeAttribution = true) => {
       html: "HTML5",
       css: "CSS",
     };
-    container.querySelectorAll("pre > code").forEach((codeEl) => {
-      const cls = codeEl.className || "";
-      const match = cls.match(/language-([a-z0-9+#]+)/i);
-      const lang = match ? match[1].toLowerCase() : "";
-      const label = labelMap[lang] || (lang ? lang.toUpperCase() : "");
-      if (!label) return;
-      const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
-      const badge = document.createElement("span");
-      badge.textContent = label;
-      badge.style.position = "absolute";
-      badge.style.top = "8px";
-      badge.style.right = "8px";
-      badge.style.fontSize = "10px";
-      badge.style.padding = "2px 6px";
-      badge.style.borderRadius = "6px";
-      if (lang === "js" || lang === "javascript") {
-        badge.style.background = "#fbbf24";
-        badge.style.color = "#111827";
-      } else if (lang === "html") {
-        badge.style.background = "#f97316";
-        badge.style.color = "#ffffff";
-      } else if (lang === "css") {
-        badge.style.background = "#3b82f6";
-        badge.style.color = "#ffffff";
-      } else if (lang === "ts" || lang === "typescript") {
-        badge.style.background = "#2563eb";
-        badge.style.color = "#ffffff";
-      } else {
-        badge.style.background = "#e5e7eb";
-        badge.style.color = "#6b7280";
-      }
-      const pre = codeEl.parentElement;
-      pre.parentElement?.insertBefore(wrapper, pre);
-      wrapper.appendChild(pre);
-      wrapper.appendChild(badge);
+
+    // Render each block's markdown individually so we can wrap with animation divs
+    const blockHtmlParts = blocks.map((block) => {
+      const singleMd = blockToMarkdown(block);
+      if (!singleMd) return "";
+      const html = marked.parse(singleMd, { breaks: true, gfm: true });
+      const container = document.createElement("div");
+      container.innerHTML = html;
+      container.querySelectorAll("pre > code").forEach((codeEl) => {
+        const cls = codeEl.className || "";
+        const match = cls.match(/language-([a-z0-9+#]+)/i);
+        const lang = match ? match[1].toLowerCase() : "";
+        const label = labelMap[lang] || (lang ? lang.toUpperCase() : "");
+        if (!label) return;
+        const wrapper = document.createElement("div");
+        wrapper.style.position = "relative";
+        const badge = document.createElement("span");
+        badge.textContent = label;
+        badge.style.cssText =
+          "position:absolute;top:8px;right:8px;font-size:10px;padding:2px 6px;border-radius:6px;";
+        if (lang === "js" || lang === "javascript") {
+          badge.style.background = "#fbbf24";
+          badge.style.color = "#111827";
+        } else if (lang === "html") {
+          badge.style.background = "#f97316";
+          badge.style.color = "#ffffff";
+        } else if (lang === "css") {
+          badge.style.background = "#3b82f6";
+          badge.style.color = "#ffffff";
+        } else if (lang === "ts" || lang === "typescript") {
+          badge.style.background = "#2563eb";
+          badge.style.color = "#ffffff";
+        } else {
+          badge.style.background = "#e5e7eb";
+          badge.style.color = "#6b7280";
+        }
+        const pre = codeEl.parentElement;
+        pre.parentElement?.insertBefore(wrapper, pre);
+        wrapper.appendChild(pre);
+        wrapper.appendChild(badge);
+      });
+      const rendered = container.innerHTML;
+      return includeAnimations ? wrapWithAnimation(rendered, block) : rendered;
     });
-    return getHTMLTemplate(container.innerHTML, includeAttribution);
+
+    const attribution = includeAttribution
+      ? marked.parse(
+          `\n\n---\n\n<div align="center"><sub>Created with <a href="https://markdrop.vercel.app">Markdrop</a> | <a href="https://github.com/rakheOmar/Markdrop">⭐ Star on GitHub</a></sub></div>`,
+          { breaks: true, gfm: true }
+        )
+      : "";
+
+    const content = blockHtmlParts.filter(Boolean).join("\n") + attribution;
+    const animExtras = includeAnimations ? buildAnimationExtras(blocks) : { css: "", script: "" };
+    return getHTMLTemplate(content, false, animExtras);
   } catch (error) {
     console.error("Error converting blocks to HTML:", error);
     const fallbackHTML = blocks
       .map((block) => {
-        if (block.type === "html") {
-          return block.content;
-        }
+        if (block.type === "html") return block.content;
         return `<p>${escapeHtml(block.content || "")}</p>`;
       })
       .join("\n");
@@ -513,7 +601,7 @@ export const blocksToHTML = (blocks, includeAttribution = true) => {
   }
 };
 
-const getHTMLTemplate = (content, includeAttribution = true) => {
+const getHTMLTemplate = (content, includeAttribution = true, animExtras = { css: "", script: "" }) => {
   const attribution = includeAttribution
     ? `
     <hr style="margin: 3rem 0 2rem; border: none; border-top: 1px solid #e5e7eb;">
@@ -632,11 +720,13 @@ const getHTMLTemplate = (content, includeAttribution = true) => {
             h1, h2 { page-break-after: avoid; }
             pre, blockquote { page-break-inside: avoid; }
         }
+        ${animExtras.css || ""}
     </style>
 </head>
 <body>
     ${content}
     ${attribution}
+    ${animExtras.script ? `<script>${animExtras.script}<\/script>` : ""}
 </body>
 </html>`;
 };
@@ -754,13 +844,18 @@ export const exportToPDF = async (blocks, filename = "document.pdf", includeAttr
   });
 };
 
-export const exportToHTML = (blocks, filename = "document.html", includeAttribution = true) => {
+export const exportToHTML = (
+  blocks,
+  filename = "document.html",
+  includeAttribution = true,
+  includeAnimations = true
+) => {
   if (!blocks || blocks.length === 0) {
     throw new Error("No content to export");
   }
 
   try {
-    const htmlContent = blocksToHTML(blocks, includeAttribution);
+    const htmlContent = blocksToHTML(blocks, includeAttribution, includeAnimations);
     const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

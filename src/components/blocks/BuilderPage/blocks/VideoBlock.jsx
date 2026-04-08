@@ -1,13 +1,45 @@
-import { AlignCenter, AlignLeft, AlignRight, Link as LinkIcon, Type, Video } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, Link as LinkIcon, Type, Upload, Video } from "lucide-react";
+import { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { uploadVideo } from "@/lib/uploadUtils";
 import { cn } from "@/lib/utils";
 
 export default function VideoBlock({ block, onUpdate }) {
+  const [inputTab, setInputTab] = useState("url");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+
   const handleChange = (field, value) => {
     onUpdate(block.id, { ...block, [field]: value });
   };
+
+  const onDrop = useCallback(
+    async (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (!file) return;
+      setIsUploading(true);
+      setUploadError(null);
+      const result = await uploadVideo(file);
+      setIsUploading(false);
+      if (result.error) {
+        setUploadError(result.error);
+      } else {
+        onUpdate(block.id, { ...block, content: result.url });
+      }
+    },
+    [block, onUpdate]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "video/*": [".mp4", ".webm", ".ogg", ".mov"] },
+    multiple: false,
+    maxSize: 50 * 1024 * 1024,
+  });
 
   const getEmbedUrl = (url) => {
     if (!url) return "";
@@ -130,18 +162,63 @@ export default function VideoBlock({ block, onUpdate }) {
           </div>
         )}
 
+        <Tabs value={inputTab} onValueChange={setInputTab} className="w-full">
+          <TabsList className="h-8 w-full grid grid-cols-2 mb-2">
+            <TabsTrigger value="url" className="text-xs h-6">
+              <LinkIcon className="h-3 w-3 mr-1" />
+              URL
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="text-xs h-6">
+              <Upload className="h-3 w-3 mr-1" />
+              Upload
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <div className="grid gap-3">
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <LinkIcon className="h-3.5 w-3.5" />
+          {inputTab === "url" ? (
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <LinkIcon className="h-3.5 w-3.5" />
+              </div>
+              <Input
+                value={block.content || ""}
+                onChange={(e) => handleChange("content", e.target.value)}
+                placeholder="Video URL (YouTube, Vimeo, or direct link)..."
+                className="pl-9 border-0 bg-muted/20 h-9 shadow-none focus-visible:ring-1 focus-visible:bg-background transition-colors font-mono text-xs"
+              />
             </div>
-            <Input
-              value={block.content || ""}
-              onChange={(e) => handleChange("content", e.target.value)}
-              placeholder="Video URL (YouTube, Vimeo, or direct link)..."
-              className="pl-9 border-0 bg-muted/20 h-9 shadow-none focus-visible:ring-1 focus-visible:bg-background transition-colors font-mono text-xs"
-            />
-          </div>
+          ) : (
+            <div
+              {...getRootProps()}
+              className={cn(
+                "border-2 border-dashed rounded-md p-4 text-center cursor-pointer transition-colors",
+                isDragActive
+                  ? "border-primary bg-primary/5"
+                  : "border-border/50 hover:border-primary/50 hover:bg-muted/20"
+              )}
+            >
+              <input {...getInputProps()} />
+              {isUploading ? (
+                <p className="text-xs text-muted-foreground">Uploading…</p>
+              ) : isDragActive ? (
+                <p className="text-xs text-primary">Drop to upload…</p>
+              ) : (
+                <div className="space-y-1">
+                  <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    Drag & drop or click to upload
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60">
+                    MP4, WebM, OGG, MOV — max 50 MB
+                  </p>
+                </div>
+              )}
+              {uploadError && (
+                <p className="text-xs text-destructive mt-1">{uploadError}</p>
+              )}
+            </div>
+          )}
 
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">

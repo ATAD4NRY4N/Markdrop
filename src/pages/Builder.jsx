@@ -17,6 +17,7 @@ import {
   FileCode,
   FileDown,
   FileUp,
+  Film,
   Heading1,
   Heading2,
   Heading3,
@@ -46,12 +47,13 @@ import {
   Video,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import AIAssistantSheet from "@/components/blocks/BuilderPage/AIAssistantSheet";
 import AppSidebar from "@/components/blocks/BuilderPage/AppSidebar";
 import DashboardHome from "@/components/blocks/BuilderPage/DashboardHome";
+import VideoExportDialog from "@/components/blocks/BuilderPage/VideoExportDialog";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -110,7 +112,13 @@ export default function Builder() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportFormat, setExportFormat] = useState("md");
   const [includeAttribution, setIncludeAttribution] = useState(true);
+  const [includeAnimations, setIncludeAnimations] = useState(true);
+  const [showVideoExportDialog, setShowVideoExportDialog] = useState(false);
+  const marpRef = useRef(null);
 
+  const hasMarpBlocks = blocks.some((b) =>
+    ["marp-frontmatter", "slide", "marp-slide-directive", "marp-bg-image", "marp-style"].includes(b.type)
+  );
   useEffect(() => {
     localStorage.setItem("markdown-blocks", JSON.stringify(blocks));
   }, [blocks]);
@@ -329,7 +337,7 @@ export default function Builder() {
           toast.success("Markdown exported!");
           break;
         case "html":
-          exportToHTML(blocks, `${filename}.html`, includeAttribution);
+          exportToHTML(blocks, `${filename}.html`, includeAttribution, includeAnimations);
           toast.success("HTML exported!");
           break;
         case "pdf":
@@ -752,7 +760,7 @@ export default function Builder() {
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList
                   id="builder-tabs"
-                  className="grid w-full grid-cols-3 max-w-[280px] sm:max-w-[300px] bg-muted/50 p-1"
+                  className={`grid w-full ${hasMarpBlocks ? "grid-cols-4 max-w-[370px]" : "grid-cols-3 max-w-[280px]"} sm:max-w-none bg-muted/50 p-1`}
                 >
                   <TabsTrigger
                     value="editor"
@@ -778,6 +786,16 @@ export default function Builder() {
                     <Eye className="h-4 w-4" />
                     <span  className="hidden sm:inline">Preview</span>
                   </TabsTrigger>
+                  {hasMarpBlocks && (
+                    <TabsTrigger
+                      value="slides"
+                      style={{cursor:"pointer"}}
+                      className="text-xs sm:text-sm font-medium data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all duration-200 flex items-center justify-center gap-1.5 hover:scale-105"
+                    >
+                      <Film className="h-4 w-4" />
+                      <span className="hidden sm:inline">Slides</span>
+                    </TabsTrigger>
+                  )}
                 </TabsList>
               </Tabs>
             </div>
@@ -941,6 +959,21 @@ export default function Builder() {
                         </TooltipContent>
                       )}
                     </Tooltip>
+
+                    {hasMarpBlocks && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <DropdownMenuItem
+                              onClick={() => setShowVideoExportDialog(true)}
+                            >
+                              <Film className="w-4 h-4 mr-2" />
+                              Export as Video
+                            </DropdownMenuItem>
+                          </div>
+                        </TooltipTrigger>
+                      </Tooltip>
+                    )}
                   </TooltipProvider>
 
                   <DropdownMenuSeparator />
@@ -994,6 +1027,7 @@ export default function Builder() {
           >
             <div id="builder-content-area" className="flex-1 w-full max-w-none">
               <DashboardHome
+                ref={marpRef}
                 activeTab={activeTab}
                 blocks={blocks}
                 onBlocksChange={handleBlocksChange}
@@ -1064,6 +1098,21 @@ export default function Builder() {
               <p className="text-xs text-muted-foreground mt-2 ml-6">
                 Help us grow by keeping the attribution link
               </p>
+              {exportFormat === "html" && (
+                <div className="flex items-center space-x-2 mt-3">
+                  <Checkbox
+                    id="animations"
+                    checked={includeAnimations}
+                    onCheckedChange={setIncludeAnimations}
+                  />
+                  <Label
+                    htmlFor="animations"
+                    className="text-sm font-normal cursor-pointer leading-relaxed"
+                  >
+                    Include animations (HTML only)
+                  </Label>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>
@@ -1075,6 +1124,12 @@ export default function Builder() {
         </Dialog>
 
         <AIAssistantSheet open={showSparkleDialog} onOpenChange={setShowSparkleDialog} />
+
+        <VideoExportDialog
+          open={showVideoExportDialog}
+          onOpenChange={setShowVideoExportDialog}
+          marpRef={marpRef}
+        />
 
         {isImporting && (
           <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50">

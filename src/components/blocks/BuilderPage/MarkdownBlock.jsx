@@ -1,8 +1,12 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2 } from "lucide-react";
-import { memo, useCallback } from "react";
+import { Clapperboard, GripVertical, Trash2 } from "lucide-react";
+import { memo, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import AlertBlock from "./blocks/AlertBlock";
 import BlockquoteBlock from "./blocks/BlockquoteBlock";
 import CodeBlock from "./blocks/CodeBlock";
@@ -25,6 +29,102 @@ import SlideBlock from "./blocks/SlideBlock";
 import TableBlock from "./blocks/TableBlock";
 import TypingSvgBlock from "./blocks/TypingSvgBlock";
 import VideoBlock from "./blocks/VideoBlock";
+
+const ANIMATION_TYPES = [
+  { value: "none", label: "None" },
+  { value: "fadeIn", label: "Fade In" },
+  { value: "fadeInUp", label: "Fade In Up" },
+  { value: "slideInLeft", label: "Slide In Left" },
+  { value: "slideInRight", label: "Slide In Right" },
+  { value: "zoomIn", label: "Zoom In" },
+];
+
+// Block types that don't benefit from per-block animation (MARP presentation controls)
+const NO_ANIMATION_TYPES = new Set([
+  "marp-frontmatter",
+  "slide",
+  "marp-slide-directive",
+  "marp-bg-image",
+  "marp-style",
+]);
+
+function AnimationPopover({ block, onUpdate }) {
+  const [open, setOpen] = useState(false);
+  const anim = block.animation || { type: "none", duration: 0.5, delay: 0 };
+
+  const handleAnimChange = (field, value) => {
+    onUpdate(block.id, {
+      ...block,
+      animation: { ...anim, [field]: value },
+    });
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`h-8 w-8 md:h-7 md:w-7 touch-manipulation ${anim.type !== "none" ? "text-primary" : ""}`}
+          title="Animation"
+        >
+          <Clapperboard className="h-4 w-4 md:h-3.5 md:w-3.5" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent side="right" className="w-60 p-3 space-y-3" onClick={(e) => e.stopPropagation()}>
+        <p className="text-xs font-semibold">Block Animation</p>
+
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Type</Label>
+          <Select value={anim.type} onValueChange={(v) => handleAnimChange("type", v)}>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ANIMATION_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value} className="text-xs">
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {anim.type !== "none" && (
+          <>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-muted-foreground">Duration</Label>
+                <span className="text-xs text-muted-foreground">{(anim.duration ?? 0.5).toFixed(1)}s</span>
+              </div>
+              <Slider
+                min={0.3}
+                max={1.5}
+                step={0.1}
+                value={[anim.duration ?? 0.5]}
+                onValueChange={([v]) => handleAnimChange("duration", v)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-muted-foreground">Delay</Label>
+                <span className="text-xs text-muted-foreground">{(anim.delay ?? 0).toFixed(1)}s</span>
+              </div>
+              <Slider
+                min={0}
+                max={1}
+                step={0.1}
+                value={[anim.delay ?? 0]}
+                onValueChange={([v]) => handleAnimChange("delay", v)}
+              />
+            </div>
+          </>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 const MarkdownBlock = memo(function MarkdownBlock({
   block,
@@ -157,7 +257,10 @@ const MarkdownBlock = memo(function MarkdownBlock({
           </Button>
         </div>
 
-        <div className="absolute -right-8 top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+        <div className="absolute -right-8 top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+          {!NO_ANIMATION_TYPES.has(block.type) && (
+            <AnimationPopover block={block} onUpdate={onUpdate} />
+          )}
           <Button
             variant="ghost"
             size="icon"

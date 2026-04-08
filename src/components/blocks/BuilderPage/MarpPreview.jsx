@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
@@ -150,9 +150,19 @@ function getSlideDirectives(slideBlocks) {
   return directives;
 }
 
-export default function MarpPreview({ blocks = [] }) {
+const MarpPreview = forwardRef(function MarpPreview(
+  { blocks = [], controlledSlide = null },
+  ref
+) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const containerRef = useRef(null);
+
+  // Expose the slide container element and goTo helper via ref for video export
+  useImperativeHandle(ref, () => ({
+    container: containerRef.current,
+    goTo: (n) => setCurrentSlide(Math.max(0, Math.min(slideGroups.length - 1, n))),
+    get totalSlides() { return slideGroups.length; },
+  }));
 
   const { frontmatter, slideGroups } = useMemo(() => splitBlocksIntoSlides(blocks), [blocks]);
 
@@ -165,6 +175,9 @@ export default function MarpPreview({ blocks = [] }) {
 
   const globalBg = frontmatter?.backgroundColor || "";
   const globalColor = frontmatter?.color || "";
+
+  // When controlledSlide is provided (video export driving the preview), use it
+  const activeSlide = controlledSlide !== null ? controlledSlide : currentSlide;
 
   // Keep currentSlide in range when blocks change
   useEffect(() => {
@@ -179,13 +192,15 @@ export default function MarpPreview({ blocks = [] }) {
   );
 
   useEffect(() => {
+    // Keyboard navigation only applies when not externally controlled
+    if (controlledSlide !== null) return;
     const handleKey = (e) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown") goTo(currentSlide + 1);
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") goTo(currentSlide - 1);
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [currentSlide, goTo]);
+  }, [currentSlide, goTo, controlledSlide]);
 
   if (blocks.length === 0) {
     return (
@@ -207,7 +222,7 @@ export default function MarpPreview({ blocks = [] }) {
     );
   }
 
-  const slideBlocks = slideGroups[currentSlide] || [];
+  const slideBlocks = slideGroups[activeSlide] || [];
   const slideMarkdown = slideBlocksToMarkdown(slideBlocks);
   const bg = getSlideBackground(slideBlocks);
   const directives = getSlideDirectives(slideBlocks);
@@ -229,20 +244,20 @@ export default function MarpPreview({ blocks = [] }) {
             variant="ghost"
             size="icon"
             className="h-7 w-7"
-            onClick={() => goTo(currentSlide - 1)}
-            disabled={currentSlide === 0}
+            onClick={() => goTo(activeSlide - 1)}
+            disabled={activeSlide === 0}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-xs text-muted-foreground font-medium tabular-nums">
-            {currentSlide + 1} / {totalSlides}
+            {activeSlide + 1} / {totalSlides}
           </span>
           <Button
             variant="ghost"
             size="icon"
             className="h-7 w-7"
-            onClick={() => goTo(currentSlide + 1)}
-            disabled={currentSlide === totalSlides - 1}
+            onClick={() => goTo(activeSlide + 1)}
+            disabled={activeSlide === totalSlides - 1}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -346,7 +361,7 @@ export default function MarpPreview({ blocks = [] }) {
                 className="absolute bottom-4 right-6 text-xs opacity-50 tabular-nums"
                 style={{ color: directives._color || globalColor || undefined }}
               >
-                {directives._paginate === "skip" ? "" : currentSlide + 1}
+                {directives._paginate === "skip" ? "" : activeSlide + 1}
               </div>
             )}
           </div>
@@ -362,7 +377,7 @@ export default function MarpPreview({ blocks = [] }) {
               type="button"
               onClick={() => goTo(idx)}
               className={`shrink-0 w-16 h-10 rounded border text-[9px] font-medium transition-all ${
-                idx === currentSlide
+                idx === activeSlide
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border/40 bg-muted/20 text-muted-foreground hover:border-primary/40"
               }`}
@@ -374,7 +389,9 @@ export default function MarpPreview({ blocks = [] }) {
       )}
     </div>
   );
-}
+});
+
+export default MarpPreview;
 
 // Re-export for use in export utilities
 export { splitBlocksIntoSlides, slideBlocksToMarkdown, extractCustomCss };

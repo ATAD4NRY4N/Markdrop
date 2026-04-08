@@ -92,6 +92,24 @@ export const uploadImage = async (file) => {
   }
 };
 
+export const uploadVideo = async (file) => {
+  try {
+    const validVideoTypes = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
+    if (!validVideoTypes.includes(file.type)) {
+      return { error: "Invalid video format. Supported: MP4, WebM, OGG, MOV" };
+    }
+
+    const maxSize = 50 * 1024 * 1024; // 50 MB
+    if (file.size > maxSize) {
+      return { error: "File size exceeds 50 MB limit" };
+    }
+
+    return await uploadFile(file, DEFAULT_BUCKET, "videos");
+  } catch (err) {
+    return { error: err.message };
+  }
+};
+
 export const deleteFile = async (filePath, bucket = DEFAULT_BUCKET) => {
   try {
     if (!filePath) {

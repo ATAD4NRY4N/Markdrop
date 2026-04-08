@@ -1,4 +1,5 @@
 import { AlertCircle, AlertTriangle, Info, Lightbulb, OctagonAlert } from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
@@ -469,8 +470,274 @@ const blocksToMarkdown = (blocks) => {
     .join("\n\n");
 };
 
+// Animation motion variants for the live Preview
+const MOTION_VARIANTS = {
+  none: {},
+  fadeIn: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+  },
+  fadeInUp: {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+  },
+  slideInLeft: {
+    initial: { opacity: 0, x: -30 },
+    animate: { opacity: 1, x: 0 },
+  },
+  slideInRight: {
+    initial: { opacity: 0, x: 30 },
+    animate: { opacity: 1, x: 0 },
+  },
+  zoomIn: {
+    initial: { opacity: 0, scale: 0.9 },
+    animate: { opacity: 1, scale: 1 },
+  },
+};
+
+// Render a single block's markdown within an optionally animated wrapper
+function AnimatedBlockPreview({ block, mdComponents }) {
+  const anim = block.animation || { type: "none" };
+  const variant = MOTION_VARIANTS[anim.type] || MOTION_VARIANTS.none;
+  const blockMd = blocksToMarkdown([block]);
+
+  const content = (
+    <div className="prose prose-slate dark:prose-invert max-w-none prose-sm">
+      <ReactMarkdown
+        remarkPlugins={[[remarkGfm, { singleTilde: false }], remarkMath]}
+        rehypePlugins={[rehypeRaw, rehypeKatex]}
+        skipHtml={false}
+        components={mdComponents}
+      >
+        {blockMd}
+      </ReactMarkdown>
+    </div>
+  );
+
+  if (anim.type === "none" || !variant.initial) {
+    return <div>{content}</div>;
+  }
+
+  return (
+    <motion.div
+      initial={variant.initial}
+      whileInView={variant.animate}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{
+        duration: anim.duration ?? 0.5,
+        delay: anim.delay ?? 0,
+        ease: "easeOut",
+      }}
+    >
+      {content}
+    </motion.div>
+  );
+}
+
 export default function Preview({ blocks = [] }) {
-  const markdown = blocksToMarkdown(blocks);
+  // Shared markdown component overrides — defined once, passed to each per-block renderer
+  const mdComponents = {
+    h1: ({ ...props }) => (
+      <h1 className="text-3xl font-semibold mt-6 mb-4 pb-2 border-b border-border" {...props} />
+    ),
+    h2: ({ ...props }) => (
+      <h2 className="text-2xl font-semibold mt-6 mb-4 pb-2 border-b border-border" {...props} />
+    ),
+    h3: ({ ...props }) => <h3 className="text-xl font-semibold mt-6 mb-2" {...props} />,
+    h4: ({ ...props }) => <h4 className="text-lg font-semibold mt-6 mb-2" {...props} />,
+    h5: ({ ...props }) => <h5 className="text-base font-semibold mt-6 mb-2" {...props} />,
+    h6: ({ ...props }) => (
+      <h6 className="text-sm font-semibold mt-6 mb-2 text-muted-foreground" {...props} />
+    ),
+    p: ({ ...props }) => <p className="text-base leading-7 mb-4" {...props} />,
+    ul: ({ ...props }) => <ul className="list-disc ml-6 mb-4 space-y-2" {...props} />,
+    ol: ({ ...props }) => <ol className="list-decimal ml-6 mb-4 space-y-2" {...props} />,
+    li: ({ ...props }) => <li className="text-base" {...props} />,
+    strong: ({ ...props }) => <strong className="font-bold" {...props} />,
+    em: ({ ...props }) => <em className="italic" {...props} />,
+    del: ({ ...props }) => <del className="line-through" {...props} />,
+    a: ({ href, ...props }) => (
+      <a
+        href={href}
+        className="text-blue-600 dark:text-blue-400 hover:underline inline"
+        target="_blank"
+        rel="noopener noreferrer"
+        {...props}
+      />
+    ),
+    br: () => <br className="my-2" />,
+    code: ({ inline, className, children, ...props }) => {
+      if (className?.includes("language-math")) {
+        return (
+          <code className={className} {...props}>
+            {children}
+          </code>
+        );
+      }
+      return inline ? (
+        <code
+          className="bg-muted px-1.5 py-0 rounded text-sm font-mono align-text-bottom inline-block"
+          {...props}
+        >
+          {children}
+        </code>
+      ) : (
+        <code
+          className={`block bg-transparent p-0 text-sm font-mono whitespace-pre-wrap ${className || ""}`}
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    },
+    pre: ({ children, ...props }) => {
+      let lang = "";
+      const child = Array.isArray(children) ? children[0] : children;
+      lang = child?.props?.className?.match(/language-([a-z0-9+#]+)/i)?.[1] || "";
+
+      if (lang === "math") {
+        return (
+          <div className="my-6 overflow-x-auto">
+            <pre className="text-center" {...props}>
+              {children}
+            </pre>
+          </div>
+        );
+      }
+
+      if (lang === "mermaid") {
+        let code = "";
+        if (typeof child?.props?.children === "string") {
+          code = child.props.children;
+        } else if (Array.isArray(child?.props?.children)) {
+          code = child.props.children[0] || "";
+        }
+        if (code && typeof code === "string" && code.trim()) {
+          return <MermaidDiagram chart={code.trim()} />;
+        }
+        return null;
+      }
+
+      const labelMap = {
+        js: "JS",
+        javascript: "JS",
+        ts: "TS",
+        typescript: "TS",
+        html: "HTML5",
+        css: "CSS",
+      };
+      const label = labelMap[lang?.toLowerCase?.()] || (lang ? lang.toUpperCase() : "");
+      const colorMap = {
+        js: "bg-yellow-400 text-black",
+        javascript: "bg-yellow-400 text-black",
+        html: "bg-orange-500 text-white",
+        css: "bg-blue-500 text-white",
+        ts: "bg-blue-600 text-white",
+        typescript: "bg-blue-600 text-white",
+      };
+      const color = colorMap[lang?.toLowerCase?.()] || "bg-muted text-muted-foreground";
+      return (
+        <div className="relative my-4">
+          {label ? (
+            <span className={`absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded ${color}`}>
+              {label}
+            </span>
+          ) : null}
+          <pre
+            className="bg-muted p-4 rounded-md overflow-x-auto text-sm font-mono whitespace-pre-wrap"
+            {...props}
+          >
+            {children}
+          </pre>
+        </div>
+      );
+    },
+    blockquote: ({ ...props }) => (
+      <blockquote className="border-l-4 border-border pl-4 my-4 text-muted-foreground" {...props} />
+    ),
+    hr: ({ ...props }) => <hr className="my-8 border-border border-t-4" {...props} />,
+    img: ({ src, alt, ...props }) => {
+      if (!src) return null;
+      return (
+        <img
+          src={src}
+          alt={alt || ""}
+          className="max-w-full h-auto rounded my-4 mx-auto block"
+          {...props}
+        />
+      );
+    },
+    video: ({ src, ...props }) => {
+      if (!src) return null;
+      return (
+        <div className="my-4">
+          <video src={src} controls className="max-w-full h-auto rounded" {...props} />
+        </div>
+      );
+    },
+    table: ({ ...props }) => (
+      <div className="overflow-x-auto my-4">
+        <table className="border-collapse border border-border" {...props} />
+      </div>
+    ),
+    thead: ({ ...props }) => <thead className="bg-muted" {...props} />,
+    tbody: ({ ...props }) => <tbody {...props} />,
+    tr: ({ ...props }) => <tr className="border-b border-border" {...props} />,
+    th: ({ ...props }) => (
+      <th className="border border-border px-4 py-2 text-left font-semibold" {...props} />
+    ),
+    td: ({ ...props }) => <td className="border border-border px-4 py-2" {...props} />,
+    div: ({ className, children, ...props }) => {
+      if (className?.includes("alert")) {
+        const alertType = props["data-alert-type"] || "NOTE";
+        const alertTypeClass =
+          className
+            .split(" ")
+            .find((c) => c.startsWith("alert-"))
+            ?.replace("alert-", "") || "note";
+
+        const alertConfig = {
+          note: { icon: Info, borderColor: "border-blue-500", iconColor: "text-blue-500" },
+          tip: { icon: Lightbulb, borderColor: "border-green-500", iconColor: "text-green-500" },
+          important: {
+            icon: AlertCircle,
+            borderColor: "border-purple-500",
+            iconColor: "text-purple-500",
+          },
+          warning: {
+            icon: AlertTriangle,
+            borderColor: "border-yellow-500",
+            iconColor: "text-yellow-600 dark:text-yellow-500",
+          },
+          caution: {
+            icon: OctagonAlert,
+            borderColor: "border-red-500",
+            iconColor: "text-red-500",
+          },
+        };
+
+        const config = alertConfig[alertTypeClass] || alertConfig.note;
+        const Icon = config.icon;
+
+        return (
+          <div className={`border-l-4 p-4 my-4 ${config.borderColor}`} {...props}>
+            <div className="flex items-center gap-2 mb-2">
+              <Icon className={`h-5 w-5 shrink-0 ${config.iconColor}`} />
+              <span className={`font-semibold text-sm ${config.iconColor}`}>{alertType}</span>
+            </div>
+            <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-0 [&>p]:leading-normal">
+              {children}
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className={className} {...props}>
+          {children}
+        </div>
+      );
+    },
+  };
 
   return (
     <div className="w-full h-full rounded-lg transition-colors relative">
@@ -482,263 +749,10 @@ export default function Preview({ blocks = [] }) {
         </div>
       ) : (
         <div className="h-full overflow-y-auto overflow-x-hidden">
-          <div className="p-2 sm:p-4">
-            <div className="prose prose-slate dark:prose-invert max-w-none prose-sm">
-              <ReactMarkdown
-                remarkPlugins={[[remarkGfm, { singleTilde: false }], remarkMath]}
-                rehypePlugins={[rehypeRaw, rehypeKatex]}
-                skipHtml={false}
-                components={{
-                  h1: ({ ...props }) => (
-                    <h1
-                      className="text-3xl font-semibold mt-6 mb-4 pb-2 border-b border-border"
-                      {...props}
-                    />
-                  ),
-                  h2: ({ ...props }) => (
-                    <h2
-                      className="text-2xl font-semibold mt-6 mb-4 pb-2 border-b border-border"
-                      {...props}
-                    />
-                  ),
-                  h3: ({ ...props }) => (
-                    <h3 className="text-xl font-semibold mt-6 mb-2" {...props} />
-                  ),
-                  h4: ({ ...props }) => (
-                    <h4 className="text-lg font-semibold mt-6 mb-2" {...props} />
-                  ),
-                  h5: ({ ...props }) => (
-                    <h5 className="text-base font-semibold mt-6 mb-2" {...props} />
-                  ),
-                  h6: ({ ...props }) => (
-                    <h6
-                      className="text-sm font-semibold mt-6 mb-2 text-muted-foreground"
-                      {...props}
-                    />
-                  ),
-                  p: ({ ...props }) => <p className="text-base leading-7 mb-4" {...props} />,
-                  ul: ({ ...props }) => <ul className="list-disc ml-6 mb-4 space-y-2" {...props} />,
-                  ol: ({ ...props }) => (
-                    <ol className="list-decimal ml-6 mb-4 space-y-2" {...props} />
-                  ),
-                  li: ({ ...props }) => <li className="text-base" {...props} />,
-                  strong: ({ ...props }) => <strong className="font-bold" {...props} />,
-                  em: ({ ...props }) => <em className="italic" {...props} />,
-                  del: ({ ...props }) => <del className="line-through" {...props} />,
-                  a: ({ href, ...props }) => (
-                    <a
-                      href={href}
-                      className="text-blue-600 dark:text-blue-400 hover:underline inline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      {...props}
-                    />
-                  ),
-                  br: () => <br className="my-2" />,
-                  code: ({ inline, className, children, ...props }) => {
-                    if (className?.includes("language-math")) {
-                      return (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      );
-                    }
-                    return inline ? (
-                      <code
-                        className="bg-muted px-1.5 py-0 rounded text-sm font-mono align-text-bottom inline-block"
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    ) : (
-                      <code
-                        className={`block bg-transparent p-0 text-sm font-mono whitespace-pre-wrap ${className || ""}`}
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    );
-                  },
-                  pre: ({ children, ...props }) => {
-                    let lang = "";
-                    const child = Array.isArray(children) ? children[0] : children;
-                    lang = child?.props?.className?.match(/language-([a-z0-9+#]+)/i)?.[1] || "";
-
-                    if (lang === "math") {
-                      return (
-                        <div className="my-6 overflow-x-auto">
-                          <pre className="text-center" {...props}>
-                            {children}
-                          </pre>
-                        </div>
-                      );
-                    }
-
-                    if (lang === "mermaid") {
-                      let code = "";
-                      if (typeof child?.props?.children === "string") {
-                        code = child.props.children;
-                      } else if (Array.isArray(child?.props?.children)) {
-                        code = child.props.children[0] || "";
-                      }
-
-                      if (code && typeof code === "string" && code.trim()) {
-                        return <MermaidDiagram chart={code.trim()} />;
-                      }
-                      return null;
-                    }
-
-                    const labelMap = {
-                      js: "JS",
-                      javascript: "JS",
-                      ts: "TS",
-                      typescript: "TS",
-                      html: "HTML5",
-                      css: "CSS",
-                    };
-                    const label =
-                      labelMap[lang?.toLowerCase?.()] || (lang ? lang.toUpperCase() : "");
-                    const colorMap = {
-                      js: "bg-yellow-400 text-black",
-                      javascript: "bg-yellow-400 text-black",
-                      html: "bg-orange-500 text-white",
-                      css: "bg-blue-500 text-white",
-                      ts: "bg-blue-600 text-white",
-                      typescript: "bg-blue-600 text-white",
-                    };
-                    const color =
-                      colorMap[lang?.toLowerCase?.()] || "bg-muted text-muted-foreground";
-                    return (
-                      <div className="relative my-4">
-                        {label ? (
-                          <span
-                            className={`absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded ${color}`}
-                          >
-                            {label}
-                          </span>
-                        ) : null}
-                        <pre
-                          className="bg-muted p-4 rounded-md overflow-x-auto text-sm font-mono whitespace-pre-wrap"
-                          {...props}
-                        >
-                          {children}
-                        </pre>
-                      </div>
-                    );
-                  },
-                  blockquote: ({ ...props }) => (
-                    <blockquote
-                      className="border-l-4 border-border pl-4 my-4 text-muted-foreground"
-                      {...props}
-                    />
-                  ),
-                  hr: ({ ...props }) => <hr className="my-8 border-border border-t-4" {...props} />,
-                  img: ({ src, alt, ...props }) => {
-                    if (!src) return null;
-                    return (
-                      <img
-                        src={src}
-                        alt={alt || ""}
-                        className="max-w-full h-auto rounded my-4 mx-auto block"
-                        {...props}
-                      />
-                    );
-                  },
-                  video: ({ src, ...props }) => {
-                    if (!src) return null;
-                    return (
-                      <div className="my-4">
-                        <video
-                          src={src}
-                          controls
-                          className="max-w-full h-auto rounded"
-                          {...props}
-                        />
-                      </div>
-                    );
-                  },
-                  table: ({ ...props }) => (
-                    <div className="overflow-x-auto my-4">
-                      <table className="border-collapse border border-border" {...props} />
-                    </div>
-                  ),
-                  thead: ({ ...props }) => <thead className="bg-muted" {...props} />,
-                  tbody: ({ ...props }) => <tbody {...props} />,
-                  tr: ({ ...props }) => <tr className="border-b border-border" {...props} />,
-                  th: ({ ...props }) => (
-                    <th
-                      className="border border-border px-4 py-2 text-left font-semibold"
-                      {...props}
-                    />
-                  ),
-                  td: ({ ...props }) => (
-                    <td className="border border-border px-4 py-2" {...props} />
-                  ),
-                  div: ({ className, children, ...props }) => {
-                    if (className?.includes("alert")) {
-                      const alertType = props["data-alert-type"] || "NOTE";
-                      const alertTypeClass =
-                        className
-                          .split(" ")
-                          .find((c) => c.startsWith("alert-"))
-                          ?.replace("alert-", "") || "note";
-
-                      const alertConfig = {
-                        note: {
-                          icon: Info,
-                          borderColor: "border-blue-500",
-                          iconColor: "text-blue-500",
-                        },
-                        tip: {
-                          icon: Lightbulb,
-                          borderColor: "border-green-500",
-                          iconColor: "text-green-500",
-                        },
-                        important: {
-                          icon: AlertCircle,
-                          borderColor: "border-purple-500",
-                          iconColor: "text-purple-500",
-                        },
-                        warning: {
-                          icon: AlertTriangle,
-                          borderColor: "border-yellow-500",
-                          iconColor: "text-yellow-600 dark:text-yellow-500",
-                        },
-                        caution: {
-                          icon: OctagonAlert,
-                          borderColor: "border-red-500",
-                          iconColor: "text-red-500",
-                        },
-                      };
-
-                      const config = alertConfig[alertTypeClass] || alertConfig.note;
-                      const Icon = config.icon;
-
-                      return (
-                        <div className={`border-l-4 p-4 my-4 ${config.borderColor}`} {...props}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <Icon className={`h-5 w-5 shrink-0 ${config.iconColor}`} />
-                            <span className={`font-semibold text-sm ${config.iconColor}`}>
-                              {alertType}
-                            </span>
-                          </div>
-                          <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-0 [&>p]:leading-normal">
-                            {children}
-                          </div>
-                        </div>
-                      );
-                    }
-                    return (
-                      <div className={className} {...props}>
-                        {children}
-                      </div>
-                    );
-                  },
-                }}
-              >
-                {markdown}
-              </ReactMarkdown>
-            </div>
+          <div className="p-2 sm:p-4 space-y-0">
+            {blocks.map((block) => (
+              <AnimatedBlockPreview key={block.id} block={block} mdComponents={mdComponents} />
+            ))}
           </div>
         </div>
       )}

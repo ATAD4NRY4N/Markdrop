@@ -12,16 +12,28 @@ import HeadingBlock from "./blocks/HeadingBlock";
 import ImageBlock from "./blocks/ImageBlock";
 import LinkBlock from "./blocks/LinkBlock";
 import ListBlock from "./blocks/ListBlock";
+import MarpBgImageBlock from "./blocks/MarpBgImageBlock";
+import MarpFrontmatterBlock from "./blocks/MarpFrontmatterBlock";
+import MarpSlideDirectiveBlock from "./blocks/MarpSlideDirectiveBlock";
+import MarpStyleBlock from "./blocks/MarpStyleBlock";
 import MathBlock from "./blocks/MathBlock";
 import ParagraphBlock from "./blocks/ParagraphBlock";
 import SeparatorBlock from "./blocks/SeparatorBlock";
 import ShieldBadgeBlock from "./blocks/ShieldBadgeBlock";
 import SkillIconsBlock from "./blocks/SkillIconsBlock";
+import SlideBlock from "./blocks/SlideBlock";
 import TableBlock from "./blocks/TableBlock";
 import TypingSvgBlock from "./blocks/TypingSvgBlock";
 import VideoBlock from "./blocks/VideoBlock";
 
-const MarkdownBlock = memo(function MarkdownBlock({ block, onUpdate, onDelete, onBlockAdd }) {
+const MarkdownBlock = memo(function MarkdownBlock({
+  block,
+  onUpdate,
+  onDelete,
+  onBlockAdd,
+  slideNumber,
+  totalSlides,
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: block.id,
   });
@@ -74,6 +86,17 @@ const MarkdownBlock = memo(function MarkdownBlock({ block, onUpdate, onDelete, o
         return <TypingSvgBlock block={block} onUpdate={onUpdate} />;
       case "github-profile-cards":
         return <GithubProfileCardsBlock block={block} onUpdate={onUpdate} />;
+      // MARP-specific blocks
+      case "marp-frontmatter":
+        return <MarpFrontmatterBlock block={block} onUpdate={onUpdate} />;
+      case "slide":
+        return <SlideBlock slideNumber={slideNumber} totalSlides={totalSlides} />;
+      case "marp-slide-directive":
+        return <MarpSlideDirectiveBlock block={block} onUpdate={onUpdate} />;
+      case "marp-bg-image":
+        return <MarpBgImageBlock block={block} onUpdate={onUpdate} />;
+      case "marp-style":
+        return <MarpStyleBlock block={block} onUpdate={onUpdate} />;
       default:
         if (listTypes.includes(block.type)) {
           return <ListBlock block={block} onUpdate={onUpdate} />;
@@ -81,6 +104,37 @@ const MarkdownBlock = memo(function MarkdownBlock({ block, onUpdate, onDelete, o
         return <ParagraphBlock block={block} onUpdate={onUpdate} />;
     }
   };
+
+  // Slide blocks render as full-width separators without the side controls
+  if (block.type === "slide") {
+    return (
+      <div ref={setNodeRef} style={style} className="relative group">
+        <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 md:h-7 md:w-7 cursor-grab active:cursor-grabbing touch-manipulation"
+            {...attributes}
+            {...listeners}
+            style={{ touchAction: "none" }}
+          >
+            <GripVertical className="h-5 w-5 md:h-4 md:w-4" />
+          </Button>
+        </div>
+        <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 md:h-7 md:w-7 text-destructive hover:text-destructive touch-manipulation"
+            onClick={handleDelete}
+          >
+            <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
+          </Button>
+        </div>
+        <div className="w-full">{renderBlock()}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative mx-8">

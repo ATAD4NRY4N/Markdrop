@@ -9,6 +9,20 @@ const Editor = memo(function Editor({ blocks = [], onBlockUpdate, onBlockDelete,
   // Memoize block IDs for SortableContext
   const blockIds = useMemo(() => blocks.map((b) => b.id), [blocks]);
 
+  // Pre-compute slide numbers for slide-type blocks
+  const slideMetadata = useMemo(() => {
+    const meta = {};
+    const totalSlides = blocks.filter((b) => b.type === "slide").length + 1;
+    let currentSlide = 1;
+    for (const block of blocks) {
+      if (block.type === "slide") {
+        currentSlide++;
+        meta[block.id] = { slideNumber: currentSlide, totalSlides };
+      }
+    }
+    return meta;
+  }, [blocks]);
+
   return (
     <div
       ref={setNodeRef}
@@ -34,6 +48,8 @@ const Editor = memo(function Editor({ blocks = [], onBlockUpdate, onBlockDelete,
                     onUpdate={onBlockUpdate}
                     onDelete={onBlockDelete}
                     onBlockAdd={onBlockAdd}
+                    slideNumber={slideMetadata[block.id]?.slideNumber}
+                    totalSlides={slideMetadata[block.id]?.totalSlides}
                   />
                 ))}
                 {/* Extended drop zone at the bottom */}

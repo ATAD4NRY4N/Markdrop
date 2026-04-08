@@ -3,6 +3,7 @@ import {
   AlertCircle,
   Code2,
   CreditCard,
+  FileSliders,
   Heading1,
   Heading2,
   Heading3,
@@ -10,11 +11,15 @@ import {
   Heading5,
   Heading6,
   Image,
+  ImagePlay,
+  Layers,
   Link2,
   ListChecks,
+  MessageSquareCode,
   Minus,
   Network,
   ListOrdered as OrderedList,
+  Palette,
   Pilcrow,
   Quote,
   Shield,
@@ -89,7 +94,7 @@ function DraggableItem({ id, title, icon: Icon, isCollapsed, isMobile, onDoubleC
   return itemContent;
 }
 
-export default function AppSidebar({ onBlockAdd, ...props }) {
+export default function AppSidebar({ onBlockAdd, presentationMode = false, ...props }) {
   const { setNodeRef } = useDroppable({ id: "sidebar" });
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
@@ -122,6 +127,12 @@ export default function AppSidebar({ onBlockAdd, ...props }) {
       "skill-icons": "",
       "typing-svg": "",
       "github-profile-cards": "",
+      // MARP blocks
+      "marp-frontmatter": "",
+      slide: "",
+      "marp-slide-directive": "",
+      "marp-bg-image": "",
+      "marp-style": "",
     };
 
     const newBlock = {
@@ -176,7 +187,25 @@ export default function AppSidebar({ onBlockAdd, ...props }) {
       ...(blockType === "alert" && {
         alertType: "note",
       }),
+      // MARP block defaults
+      ...(blockType === "marp-frontmatter" && {
+        theme: "default",
+        size: "16:9",
+        paginate: false,
+        header: "",
+        footer: "",
+        backgroundColor: "",
+        color: "",
+      }),
+      ...(blockType === "marp-slide-directive" && {
+        directives: [{ key: "_class", value: "" }],
+      }),
+      ...(blockType === "marp-bg-image" && {
+        position: "bg",
+        opacity: "",
+      }),
     };
+
 
     // Add the block using the existing onBlockAdd function structure
     // We need to modify the Builder's handleBlockAdd to accept a block object

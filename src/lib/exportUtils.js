@@ -2,6 +2,327 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { marked } from "marked";
 
+// ---------------------------------------------------------------------------
+// MARP utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert a single block (non-MARP-specific) to its markdown representation.
+ * Shared between blocksToMarkdown and blocksToMarpMarkdown.
+ */
+const blockToMarkdown = (block) => {
+  switch (block.type) {
+    case "h1":
+      return `# ${block.content}`;
+    case "h2":
+      return `## ${block.content}`;
+    case "h3":
+      return `### ${block.content}`;
+    case "h4":
+      return `#### ${block.content}`;
+    case "h5":
+      return `##### ${block.content}`;
+    case "h6":
+      return `###### ${block.content}`;
+    case "paragraph":
+      return block.content;
+    case "blockquote":
+      return `> ${block.content}`;
+    case "alert": {
+      const alertType = (block.alertType || "note").toUpperCase();
+      const content = block.content || "";
+      const lines = content.split("\n");
+      const quotedLines = lines.map((line) => `> ${line}`).join("\n");
+      return `> [!${alertType}]\n${quotedLines}`;
+    }
+    case "code":
+      return block.content;
+    case "html":
+      return block.content;
+    case "math":
+      return block.content;
+    case "diagram":
+      return block.content;
+    case "ul":
+      return block.content;
+    case "ol":
+      return block.content;
+    case "task-list":
+      return block.content;
+    case "separator":
+      return "---";
+    case "image": {
+      const align = block.align || "left";
+      let imageMarkdown;
+      if (block.width || block.height) {
+        const attrs = [`src="${block.content}"`];
+        if (block.alt) attrs.push(`alt="${block.alt}"`);
+        if (block.width) attrs.push(`width="${block.width}"`);
+        if (block.height) attrs.push(`height="${block.height}"`);
+        imageMarkdown = `<img ${attrs.join(" ")} />`;
+      } else {
+        imageMarkdown = `![${block.alt || ""}](${block.content})`;
+      }
+      if (align === "center") return `<p align="center">\n\n${imageMarkdown}\n\n</p>`;
+      if (align === "right") return `<p align="right">\n\n${imageMarkdown}\n\n</p>`;
+      return imageMarkdown;
+    }
+    case "link":
+      return `[${block.content}](${block.url || ""})`;
+    case "table":
+      return block.content;
+    default:
+      return block.content || "";
+  }
+};
+
+/**
+ * Convert blocks (MARP mode) to a valid MARP markdown string.
+ * Handles MARP-specific block types: marp-frontmatter, slide,
+ * marp-slide-directive, marp-bg-image, marp-style.
+ * All standard block types fall through to blockToMarkdown.
+ */
+export const blocksToMarpMarkdown = (blocks) => {
+  if (!blocks || blocks.length === 0) return "";
+
+  const parts = [];
+
+  for (const block of blocks) {
+    switch (block.type) {
+      case "marp-frontmatter": {
+        const lines = ["---", "marp: true"];
+        if (block.theme) lines.push(`theme: ${block.theme}`);
+        if (block.size) lines.push(`size: '${block.size}'`);
+        if (block.paginate) lines.push("paginate: true");
+        if (block.header) lines.push(`header: '${block.header}'`);
+        if (block.footer) lines.push(`footer: '${block.footer}'`);
+        if (block.backgroundColor) lines.push(`backgroundColor: '${block.backgroundColor}'`);
+        if (block.color) lines.push(`color: '${block.color}'`);
+        lines.push("---");
+        parts.push(lines.join("\n"));
+        break;
+      }
+      case "slide":
+        parts.push("---");
+        break;
+      case "marp-slide-directive": {
+        const directives = block.directives || [];
+        const comments = directives
+          .filter((d) => d.key && d.value)
+          .map((d) => `<!-- ${d.key}: ${d.value} -->`);
+        if (comments.length > 0) parts.push(comments.join("\n"));
+        break;
+      }
+      case "marp-bg-image": {
+        if (!block.content) break;
+        let alt = block.position || "bg";
+        if (block.opacity) alt += ` opacity:${block.opacity}`;
+        parts.push(`![${alt}](${block.content})`);
+        break;
+      }
+      case "marp-style": {
+        if (block.content) parts.push(`<style>\n${block.content}\n</style>`);
+        break;
+      }
+      default:
+        parts.push(blockToMarkdown(block));
+        break;
+    }
+  }
+
+  return parts.filter(Boolean).join("\n\n");
+};
+
+/**
+ * Export blocks as a MARP-compatible .md file.
+ */
+export const exportToMarpMarkdown = (blocks, filename = "presentation.md") => {
+  if (!blocks || blocks.length === 0) throw new Error("No content to export");
+
+  const markdown = blocksToMarpMarkdown(blocks);
+  const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return true;
+};
+
+/**
+ * Build a self-contained HTML slide deck from blocks.
+ * Uses a simple slide-based layout (no marp-core dependency).
+ */
+const buildMarpSlidesHTML = (blocks) => {
+  // Collect settings and CSS
+  const frontmatter = blocks.find((b) => b.type === "marp-frontmatter");
+  const customCss = blocks
+    .filter((b) => b.type === "marp-style" && b.content)
+    .map((b) => b.content)
+    .join("\n");
+
+  const isWide = !frontmatter || !frontmatter.size || frontmatter.size === "16:9";
+  const globalBg = frontmatter?.backgroundColor || "#ffffff";
+  const globalColor = frontmatter?.color || "#1a1a1a";
+  const showPageNumbers = !!frontmatter?.paginate;
+  const globalHeader = frontmatter?.header || "";
+  const globalFooter = frontmatter?.footer || "";
+
+  // Split into slides
+  const slideGroups = [];
+  let current = [];
+  for (const block of blocks) {
+    if (block.type === "marp-frontmatter") continue;
+    if (block.type === "slide") {
+      slideGroups.push(current);
+      current = [];
+    } else {
+      current.push(block);
+    }
+  }
+  slideGroups.push(current);
+
+  const slidesHtml = slideGroups.map((slideBlocks, idx) => {
+    // Per-slide directives
+    const directives = {};
+    for (const block of slideBlocks) {
+      if (block.type === "marp-slide-directive") {
+        for (const d of block.directives || []) {
+          if (d.key && d.value) directives[d.key] = d.value;
+        }
+      }
+    }
+
+    const bgBlock = slideBlocks.find((b) => b.type === "marp-bg-image" && b.content);
+    const bgStyle = bgBlock
+      ? `background-image:url('${bgBlock.content}');background-size:cover;background-position:center;`
+      : "";
+    const slideColor = directives._color || globalColor;
+    const slideBg = directives._backgroundColor || globalBg;
+    const header = directives._header || globalHeader;
+    const footer = directives._footer || globalFooter;
+
+    const contentBlocks = slideBlocks.filter(
+      (b) => b.type !== "marp-slide-directive" && b.type !== "marp-bg-image" && b.type !== "marp-style"
+    );
+    const mdContent = contentBlocks.map((b) => blockToMarkdown(b)).filter(Boolean).join("\n\n");
+    const htmlContent = marked.parse(mdContent || "", { breaks: true, gfm: true });
+
+    return `
+  <section id="slide-${idx}" class="slide${idx === 0 ? " active" : ""}" style="background-color:${slideBg};color:${slideColor};${bgStyle}">
+    ${header ? `<div class="slide-header" style="color:${slideColor}">${header}</div>` : ""}
+    <div class="slide-content">${htmlContent}</div>
+    ${footer ? `<div class="slide-footer" style="color:${slideColor}">${footer}</div>` : ""}
+    ${showPageNumbers ? `<div class="slide-number" style="color:${slideColor}">${idx + 1}</div>` : ""}
+  </section>`;
+  });
+
+  const aspectPadding = isWide ? "56.25%" : "75%";
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdrop Presentation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111; display: flex; flex-direction: column; align-items: center;
+           justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont,
+           'Segoe UI', Roboto, sans-serif; }
+    .slide-wrapper { width: 90vw; max-width: 960px; position: relative; padding-top: ${aspectPadding}; }
+    .slide { position: absolute; inset: 0; display: none; flex-direction: column; overflow: hidden; }
+    .slide.active { display: flex; }
+    .slide-header { position: absolute; top: 1.5rem; left: 3.5rem; right: 3.5rem;
+                    font-size: 0.75rem; opacity: 0.7; }
+    .slide-footer { position: absolute; bottom: 1.5rem; left: 3.5rem; right: 3.5rem;
+                    font-size: 0.75rem; opacity: 0.7; }
+    .slide-number { position: absolute; bottom: 1.5rem; right: 2rem;
+                    font-size: 0.75rem; opacity: 0.5; }
+    .slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center;
+                     padding: 3.5rem 4rem; overflow: hidden; }
+    .slide-content h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700;
+                        margin-bottom: 1rem; line-height: 1.2; }
+    .slide-content h2 { font-size: clamp(1.2rem, 3vw, 2rem); font-weight: 600; margin-bottom: 0.75rem; }
+    .slide-content h3 { font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: 600; margin-bottom: 0.5rem; }
+    .slide-content p { margin-bottom: 0.75rem; line-height: 1.6; }
+    .slide-content ul, .slide-content ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    .slide-content li { margin-bottom: 0.3rem; }
+    .slide-content code { background: rgba(0,0,0,0.15); padding: 0.15em 0.4em; border-radius: 3px;
+                          font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.9em; }
+    .slide-content pre { background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 6px;
+                         margin-bottom: 0.75rem; overflow: auto; }
+    .slide-content pre code { background: transparent; padding: 0; }
+    .slide-content blockquote { border-left: 4px solid currentColor; padding-left: 1rem;
+                                opacity: 0.8; margin-bottom: 0.75rem; }
+    .slide-content table { border-collapse: collapse; width: 100%; margin-bottom: 0.75rem; }
+    .slide-content th, .slide-content td { border: 1px solid rgba(128,128,128,0.4);
+                                           padding: 0.5rem 0.75rem; }
+    .slide-content th { background: rgba(0,0,0,0.1); font-weight: 600; }
+    .slide-content img { max-width: 100%; height: auto; border-radius: 4px; }
+    .controls { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; color: #aaa; }
+    .controls button { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+                       color: #fff; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer;
+                       font-size: 0.875rem; transition: background 0.2s; }
+    .controls button:hover { background: rgba(255,255,255,0.2); }
+    .controls button:disabled { opacity: 0.3; cursor: default; }
+    #slide-counter { font-size: 0.875rem; min-width: 60px; text-align: center; }
+    ${customCss}
+  </style>
+</head>
+<body>
+  <div class="slide-wrapper">
+    ${slidesHtml.join("\n")}
+  </div>
+  <div class="controls">
+    <button id="prev-btn" onclick="navigate(-1)" disabled>← Prev</button>
+    <span id="slide-counter">1 / ${slideGroups.length}</span>
+    <button id="next-btn" onclick="navigate(1)">Next →</button>
+  </div>
+  <script>
+    var current = 0;
+    var total = ${slideGroups.length};
+    var slides = document.querySelectorAll('.slide');
+    function navigate(dir) {
+      slides[current].classList.remove('active');
+      current = Math.max(0, Math.min(total - 1, current + dir));
+      slides[current].classList.add('active');
+      document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+      document.getElementById('prev-btn').disabled = current === 0;
+      document.getElementById('next-btn').disabled = current === total - 1;
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+    });
+    if (total <= 1) document.getElementById('next-btn').disabled = true;
+  </script>
+</body>
+</html>`;
+};
+
+/**
+ * Export blocks as a self-contained HTML slide presentation.
+ */
+export const exportToMarpHTML = (blocks, filename = "presentation.html") => {
+  if (!blocks || blocks.length === 0) throw new Error("No content to export");
+
+  const html = buildMarpSlidesHTML(blocks);
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return true;
+};
+
 marked.setOptions({
   breaks: true,
   gfm: true,

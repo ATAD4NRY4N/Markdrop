@@ -1,15 +1,20 @@
+import { forwardRef } from "react";
+import MarpPreview from "../BuilderPage/MarpPreview";
 import Editor from "../BuilderPage/Editor";
 import Preview from "../BuilderPage/Preview";
 import Raw from "../BuilderPage/Raw";
 
-export default function DashboardHome({
-  activeTab,
-  blocks,
-  onBlocksChange,
-  onBlockUpdate,
-  onBlockDelete,
-  onBlockAdd,
-}) {
+const DashboardHome = forwardRef(function DashboardHome(
+  {
+    activeTab,
+    blocks,
+    onBlocksChange,
+    onBlockUpdate,
+    onBlockDelete,
+    onBlockAdd,
+  },
+  marpRef
+) {
   return (
     <div className="w-full h-full">
       <div className="w-full h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-sm overflow-hidden">
@@ -35,7 +40,15 @@ export default function DashboardHome({
             <Raw blocks={blocks} onBlocksChange={onBlocksChange} />
           </div>
         )}
+
+        {activeTab === "slides" && (
+          <div className="w-full h-full">
+            <MarpPreview ref={marpRef} blocks={blocks} />
+          </div>
+        )}
       </div>
     </div>
   );
-}
+});
+
+export default DashboardHome;

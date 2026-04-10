@@ -83,7 +83,7 @@ export const CourseProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from("courses")
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update(updates)
         .eq("id", id)
         .select()
         .single();
@@ -138,7 +138,7 @@ export const CourseProvider = ({ children }) => {
         .eq("course_id", courseId)
         .order("order_index", { ascending: false })
         .limit(1);
-      const nextOrder = existing?.length ? (existing[0].order_index ?? 0) + 1 : 0;
+      const nextOrder = existing?.length ? (existing[0].order_index ?? -1) + 1 : 0;
       const { data, error } = await supabase
         .from("course_modules")
         .insert({ course_id: courseId, title, content: [], order_index: nextOrder })
@@ -159,7 +159,7 @@ export const CourseProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from("course_modules")
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update(updates)
         .eq("id", id)
         .select()
         .single();

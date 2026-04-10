@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { marked } from "marked";
 
 const imsManifest = (course) => `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="com.markdrop.${course.id}" version="1.0"
@@ -111,7 +112,7 @@ const moduleHtml = (course, mod) => `<!DOCTYPE html>
 <body>
   <h1>${escapeXml(mod.title)}</h1>
   <div id="content">
-    <p>${escapeXml(typeof mod.content === "string" ? mod.content : JSON.stringify(mod.content || []))}</p>
+    ${renderModuleContent(mod.content)}
   </div>
   <div class="nav">
     <span>${mod._prevId ? `<a href="${mod._prevId}.html">← Previous</a>` : ""}</span>
@@ -153,6 +154,12 @@ const indexHtml = (course) => `<!DOCTYPE html>
 </body>
 </html>`;
 
+const renderModuleContent = (content) => {
+  if (!content) return "";
+  const text = typeof content === "string" ? content : JSON.stringify(content, null, 2);
+  return marked.parse(text);
+};
+
 export async function generateScormPackage(course) {
   const zip = new JSZip();
 
@@ -182,7 +189,10 @@ export async function downloadScormPackage(course) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${(course.title || "course").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_")}_scorm.zip`;
+  const safeName =
+    (course.title || "").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_").trim() ||
+    "untitled_course";
+  a.download = `${safeName}_scorm.zip`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

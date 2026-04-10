@@ -4,7 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function BranchingBlock({ block, onUpdate }) {
-  const branches = block.branches || [{ id: "1", label: "", url: "" }];
+  const branches = block.branches || [
+    { id: "1", label: "", url: "" },
+    { id: "2", label: "", url: "" },
+  ];
   const update = (changes) => onUpdate(block.id, { ...block, ...changes });
 
   const updateBranch = (id, changes) =>

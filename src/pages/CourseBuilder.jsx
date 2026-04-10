@@ -100,6 +100,8 @@ function CourseBuilderInner() {
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
+  const [clipboardBlock, setClipboardBlock] = useState(null);
+  const [selectedBlockId, setSelectedBlockId] = useState(null);
 
   // Sync local blocks from active module whenever activeModuleId changes
   useEffect(() => {
@@ -208,16 +210,49 @@ function CourseBuilderInner() {
     }
   };
 
+  // Copy/paste helpers
+  const handleCopyBlock = useCallback((blockId) => {
+    const block = blocks.find((b) => b.id === blockId);
+    if (block) {
+      setClipboardBlock(block);
+      toast.success("Block copied");
+    }
+  }, [blocks]);
+
+  const handlePasteBlock = useCallback(() => {
+    if (!clipboardBlock) return;
+    const newBlock = { ...clipboardBlock, id: `${Date.now()}_paste` };
+    let newBlocks;
+    if (selectedBlockId) {
+      const idx = blocks.findIndex((b) => b.id === selectedBlockId);
+      newBlocks = idx !== -1
+        ? [...blocks.slice(0, idx + 1), newBlock, ...blocks.slice(idx + 1)]
+        : [...blocks, newBlock];
+    } else {
+      newBlocks = [...blocks, newBlock];
+    }
+    applyBlocks(newBlocks);
+    toast.success("Block pasted");
+  }, [clipboardBlock, selectedBlockId, blocks, applyBlocks]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) { e.preventDefault(); handleUndo(); }
       else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) { e.preventDefault(); handleRedo(); }
       else if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); handleSave(); }
+      else if ((e.ctrlKey || e.metaKey) && e.key === "c" && selectedBlockId) {
+        e.preventDefault();
+        handleCopyBlock(selectedBlockId);
+      }
+      else if ((e.ctrlKey || e.metaKey) && e.key === "v" && clipboardBlock) {
+        e.preventDefault();
+        handlePasteBlock();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [handleUndo, handleRedo, handleSave]);
+  }, [handleUndo, handleRedo, handleSave, handleCopyBlock, handlePasteBlock, selectedBlockId, clipboardBlock]);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
@@ -295,6 +330,7 @@ function CourseBuilderInner() {
       quiz: "Quiz", "knowledge-check": "Knowledge Check",
       flashcard: "Flashcard", "progress-marker": "Progress Marker",
       "course-nav": "Course Navigation", branching: "Branching Scenario",
+      "time-requirements": "Time Requirement", categorization: "Categorization",
     };
     return labels[blockType] || blockType;
   };

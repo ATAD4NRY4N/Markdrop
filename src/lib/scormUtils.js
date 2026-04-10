@@ -73,6 +73,10 @@ function blockToHtml(block) {
       return buildKnowledgeCheckHtml(block);
     case "quiz":
       return buildQuizHtml(block);
+    case "time-requirements":
+      return buildTimeRequirementsHtml(block);
+    case "categorization":
+      return buildCategorizationHtml(block);
 
     default:
       return `<p>${marked.parseInline(block.content || "")}</p>`;
@@ -177,6 +181,103 @@ function buildQuizHtml(block) {
   ${questionsHtml}
   <button class="btn-submit-quiz" onclick="submitQuiz('${qid}',${correctAnswers},${feedbacks},${points})">Submit Quiz</button>
   <div class="quiz-result" id="${qid}_result" style="display:none"></div>
+</div>`;
+}
+
+function buildTimeRequirementsHtml(block) {
+  const tid = nextHtmlId("tr");
+  const requiredSeconds = (block.requiredMinutes ?? 2) * 60;
+  const showProgress = block.showProgress !== false;
+  const hideOnCompleted = block.hideOnCompleted ?? false;
+  return `<div class="time-requirement" id="${tid}" data-required="${requiredSeconds}" data-show-progress="${showProgress}" data-hide-completed="${hideOnCompleted}">
+  <div class="tr-header">⏱ Time Requirement</div>
+  <div class="tr-body" id="${tid}_body">
+    <p class="tr-message">Please spend at least <strong>${escHtml(String(block.requiredMinutes ?? 2))} minute(s)</strong> on this section before continuing.</p>
+    ${showProgress ? `<div class="tr-progress-wrap" id="${tid}_wrap">
+      <div class="tr-progress-labels"><span id="${tid}_elapsed">0:00 elapsed</span><span id="${tid}_remaining">${Math.floor(requiredSeconds / 60)}:00 remaining</span></div>
+      <div class="tr-progress-bar"><div class="tr-progress-fill" id="${tid}_fill" style="width:0%"></div></div>
+    </div>` : ""}
+  </div>
+  <div class="tr-complete" id="${tid}_complete" style="display:none">⏱ Time requirement met — you may continue.</div>
+  <script>
+  (function(){
+    var el = document.getElementById('${tid}');
+    var required = ${requiredSeconds};
+    var elapsed = 0;
+    var hideOnComplete = ${hideOnCompleted};
+    var iv = setInterval(function(){
+      elapsed++;
+      ${showProgress ? `
+      var pct = Math.min(100, Math.round(elapsed/required*100));
+      var fill = document.getElementById('${tid}_fill');
+      if(fill) fill.style.width = pct+'%';
+      var em = document.getElementById('${tid}_elapsed');
+      var rm = document.getElementById('${tid}_remaining');
+      var rem = Math.max(0, required - elapsed);
+      if(em) em.textContent = Math.floor(elapsed/60)+':'+(elapsed%60<10?'0':'')+(elapsed%60)+' elapsed';
+      if(rm) rm.textContent = Math.floor(rem/60)+':'+(rem%60<10?'0':'')+(rem%60)+' remaining';
+      ` : ""}
+      if(elapsed >= required){
+        clearInterval(iv);
+        var body = document.getElementById('${tid}_body');
+        var complete = document.getElementById('${tid}_complete');
+        if(hideOnComplete && el) { el.style.display='none'; } else { if(body) body.style.display='none'; if(complete) complete.style.display='block'; }
+        if(typeof scormSet === 'function') { scormSet(_scorm && _scorm.version==='1.2' ? 'cmi.core.lesson_status' : 'cmi.completion_status', 'completed'); scormCommit(); }
+      }
+    }, 1000);
+  })();
+  </script>
+</div>`;
+}
+
+function buildCategorizationHtml(block) {
+  const cid = nextHtmlId("cat");
+  const categories = block.categories || [];
+  const items = block.items || [];
+  const mode = block.mode || "checklist";
+  const prompt = block.prompt || "Sort the following items into the correct categories:";
+
+  const correctMap = JSON.stringify(
+    Object.fromEntries(items.map((it) => [it.id, it.categoryId]))
+  );
+
+  if (mode === "checklist") {
+    const headerCols = categories.map((c) => `<th class="cat-col-header">${escHtml(c.label)}</th>`).join("");
+    const itemRows = items.map((it) => {
+      const radioInputs = categories.map((c) =>
+        `<td class="cat-radio-cell"><input type="radio" name="${cid}_${escHtml(it.id)}" value="${escHtml(c.id)}" /></td>`
+      ).join("");
+      return `<tr id="${cid}_row_${escHtml(it.id)}"><td class="cat-item-cell">${escHtml(it.content || "(empty)")}</td>${radioInputs}</tr>`;
+    }).join("\n");
+
+    return `<div class="categorization" id="${cid}">
+  <p class="cat-prompt">${escHtml(prompt)}</p>
+  <table class="cat-table">
+    <thead><tr><th class="cat-item-header">Item</th>${headerCols}</tr></thead>
+    <tbody>${itemRows}</tbody>
+  </table>
+  <button class="btn-submit-cat" onclick="submitCategorization('${cid}',${correctMap})">Submit</button>
+  <div class="cat-result" id="${cid}_result" style="display:none"></div>
+</div>`;
+  }
+
+  // drag-drop mode: simplified for SCORM (no native DnD, use click-to-assign)
+  const categoryZones = categories.map((c, idx) =>
+    `<div class="cat-zone" id="${cid}_zone_${escHtml(c.id)}" data-cat="${escHtml(c.id)}" onclick="catZoneClick('${cid}','${escHtml(c.id)}')">
+  <p class="cat-zone-title" style="color:${["#3b82f6","#22c55e","#a855f7","#f59e0b"][idx % 4]}">${escHtml(c.label)}</p>
+</div>`
+  ).join("\n");
+
+  const itemPills = items.map((it) =>
+    `<button class="cat-pill" id="${cid}_pill_${escHtml(it.id)}" data-item="${escHtml(it.id)}" onclick="catPillClick('${cid}','${escHtml(it.id)}')">${escHtml(it.content || "(empty)")}</button>`
+  ).join("\n");
+
+  return `<div class="categorization" id="${cid}">
+  <p class="cat-prompt">${escHtml(prompt)}</p>
+  <div class="cat-zones">${categoryZones}</div>
+  <div class="cat-pool" id="${cid}_pool">${itemPills}</div>
+  <button class="btn-submit-cat" onclick="submitCategorization('${cid}',${correctMap})">Submit</button>
+  <div class="cat-result" id="${cid}_result" style="display:none"></div>
 </div>`;
 }
 
@@ -327,6 +428,63 @@ function submitQuiz(qid, answers, feedbacks, points) {
     scormFinish(passed ? "passed" : "failed");
   }
 }
+var _catSelected = null;
+function catPillClick(cid, itemId) {
+  _catSelected = itemId;
+  var pills = document.querySelectorAll('#' + cid + '_pool .cat-pill');
+  pills.forEach(function(p) { p.classList.remove('cat-pill-selected'); });
+  var pill = document.getElementById(cid + '_pill_' + itemId);
+  if (pill) pill.classList.add('cat-pill-selected');
+}
+function catZoneClick(cid, catId) {
+  if (!_catSelected) return;
+  var pill = document.getElementById(cid + '_pill_' + _catSelected);
+  if (pill) {
+    var zone = document.getElementById(cid + '_zone_' + catId);
+    if (zone) zone.appendChild(pill);
+    pill.classList.remove('cat-pill-selected');
+    pill.setAttribute('data-assigned', catId);
+  }
+  _catSelected = null;
+}
+function submitCategorization(cid, correctMap) {
+  var container = document.getElementById(cid);
+  var total = Object.keys(correctMap).length;
+  var correct = 0;
+  Object.keys(correctMap).forEach(function(itemId) {
+    var correctCat = correctMap[itemId];
+    var assignedCat = null;
+    // checklist mode
+    var radios = container.querySelectorAll('input[name="' + cid + '_' + itemId + '"]');
+    if (radios.length > 0) {
+      radios.forEach(function(r) { if(r.checked) assignedCat = r.value; r.disabled = true; });
+    } else {
+      // drag-drop mode
+      var pill = document.getElementById(cid + '_pill_' + itemId);
+      if (pill) assignedCat = pill.getAttribute('data-assigned');
+    }
+    var row = document.getElementById(cid + '_row_' + itemId);
+    if (assignedCat === correctCat) {
+      correct++;
+      if (row) row.style.background = '#dcfce7';
+    } else {
+      if (row) row.style.background = '#fee2e2';
+    }
+  });
+  var pct = total ? Math.round(correct / total * 100) : 0;
+  var resultEl = document.getElementById(cid + '_result');
+  if (resultEl) {
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = '<strong>' + correct + '/' + total + ' correct (' + pct + '%)</strong>';
+    resultEl.style.color = pct >= 80 ? '#16a34a' : '#dc2626';
+  }
+  var btn = container.querySelector('.btn-submit-cat');
+  if (btn) btn.disabled = true;
+  if (_scorm) {
+    scormSet(_scorm.version === '1.2' ? 'cmi.core.score.raw' : 'cmi.score.raw', pct);
+    scormFinish(pct >= 80 ? 'passed' : 'failed');
+  }
+}
 `;
 
 const SCORM_CSS = `
@@ -390,14 +548,68 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2rem 0; }
 .branch-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; }
 .branch-btn { background: #fff; border: 2px solid #818cf8; border-radius: 8px; padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; text-align: left; transition: background 0.15s; }
 .branch-btn:hover { background: #e0e7ff; }
+/* Time Requirement */
+.time-requirement { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+.tr-header { font-weight: 600; color: #1d4ed8; margin-bottom: 0.75rem; }
+.tr-message { margin: 0 0 0.75rem; }
+.tr-progress-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: #6b7280; margin-bottom: 0.25rem; }
+.tr-progress-bar { height: 8px; background: #dbeafe; border-radius: 4px; overflow: hidden; }
+.tr-progress-fill { height: 100%; background: #3b82f6; transition: width 0.5s; }
+.tr-complete { color: #15803d; font-weight: 500; }
+/* Categorization */
+.categorization { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+.cat-prompt { font-weight: 500; margin-bottom: 1rem; }
+.cat-table { border-collapse: collapse; width: 100%; font-size: 0.875rem; }
+.cat-item-header, .cat-col-header { padding: 0.5rem 0.75rem; border-bottom: 2px solid #e5e7eb; text-align: center; font-weight: 600; }
+.cat-item-header { text-align: left; }
+.cat-item-cell { padding: 0.5rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
+.cat-radio-cell { text-align: center; padding: 0.5rem; border-bottom: 1px solid #f3f4f6; }
+.cat-zones { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.cat-zone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 0.75rem; min-height: 80px; cursor: pointer; }
+.cat-zone-title { font-size: 0.875rem; font-weight: 600; margin: 0 0 0.5rem; }
+.cat-pool { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+.cat-pill { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 16px; padding: 0.375rem 0.875rem; font-size: 0.8125rem; cursor: pointer; transition: background 0.15s; }
+.cat-pill:hover { background: #e5e7eb; }
+.cat-pill-selected { background: #dbeafe; border-color: #3b82f6; }
+.btn-submit-cat { background: #7c3aed; color: #fff; border: none; padding: 0.5rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; margin-top: 0.5rem; }
+.btn-submit-cat:hover { background: #6d28d9; }
+.btn-submit-cat:disabled { background: #a78bfa; cursor: default; }
+.cat-result { margin-top: 0.75rem; font-size: 0.9375rem; }
+/* Slide navigation bar */
+.slide-nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 1.5rem; background: #f8fafc; border-top: 1px solid #e5e7eb; }
+.slide-nav-bar.nav-top { border-top: none; border-bottom: 1px solid #e5e7eb; }
+.nav-bar-btn { background: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 0.375rem 0.875rem; cursor: pointer; font-size: 0.875rem; color: #374151; text-decoration: none; display: inline-block; }
+.nav-bar-btn:hover { background: #f3f4f6; }
+.nav-bar-btn[aria-disabled="true"] { opacity: 0.35; pointer-events: none; }
+.nav-bar-indicator { font-size: 0.8125rem; color: #6b7280; }
+.sco-outer { display: flex; flex-direction: column; min-height: 100vh; }
+.sco-outer .sco-wrapper { flex: 1; }
 `;
 
-function buildScoHtml(module, courseTitle, cssOverride = "") {
+function buildNavBarHtml(moduleIndex, totalModules, position) {
+  const isFirst = moduleIndex === 0;
+  const isLast = moduleIndex === totalModules - 1;
+  const prevHref = isFirst ? "#" : `../module_${moduleIndex}/index.html`;
+  const nextHref = isLast ? "#" : `../module_${moduleIndex + 2}/index.html`;
+  const posClass = position === "top" ? "nav-top" : "";
+  return `<nav class="slide-nav-bar ${posClass}" aria-label="Course navigation">
+  <a href="${prevHref}" class="nav-bar-btn"${isFirst ? ` aria-disabled="true"` : ""}>&larr; Previous</a>
+  <span class="nav-bar-indicator">${moduleIndex + 1} / ${totalModules}</span>
+  <a href="${nextHref}" class="nav-bar-btn"${isLast ? ` aria-disabled="true"` : ""}>Next &rarr;</a>
+</nav>`;
+}
+
+function buildScoHtml(module, courseTitle, cssOverride = "", navBarOptions = null) {
   const blocks = (() => {
     try { return JSON.parse(module.blocks_json || "[]"); } catch { return []; }
   })();
 
   const bodyHtml = blocks.map((b) => blockToHtml(b)).join("\n");
+
+  const navEnabled = navBarOptions && navBarOptions.position && navBarOptions.position !== "none";
+  const navHtml = navEnabled
+    ? buildNavBarHtml(navBarOptions.moduleIndex, navBarOptions.totalModules, navBarOptions.position)
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -411,9 +623,13 @@ ${cssOverride}
 </style>
 </head>
 <body>
+${navEnabled ? '<div class="sco-outer">' : ""}
+${navEnabled && navBarOptions.position === "top" ? navHtml : ""}
 <div class="sco-wrapper">
 ${bodyHtml}
 </div>
+${navEnabled && navBarOptions.position === "bottom" ? navHtml : ""}
+${navEnabled ? "</div>" : ""}
 <script>
 ${SCORM_RUNTIME_SHIM}
 ${QUIZ_ENGINE_JS}
@@ -529,20 +745,24 @@ ${resources}
  * Generate and download a SCORM 1.2 package.
  * @param {object} course - course record from Supabase
  * @param {Array}  modules - ordered array of course_modules records
+ * @param {object} [options] - export options (e.g. navBar: { position: 'bottom' })
  */
-export async function exportToScorm12(course, modules) {
-  return _buildAndDownload(course, modules, "1.2");
+export async function exportToScorm12(course, modules, options = {}) {
+  return _buildAndDownload(course, modules, "1.2", options);
 }
 
 /**
  * Generate and download a SCORM 2004 4th Edition package.
+ * @param {object} [options] - export options (e.g. navBar: { position: 'bottom' })
  */
-export async function exportToScorm2004(course, modules) {
-  return _buildAndDownload(course, modules, "2004");
+export async function exportToScorm2004(course, modules, options = {}) {
+  return _buildAndDownload(course, modules, "2004", options);
 }
 
-async function _buildAndDownload(course, modules, version) {
+async function _buildAndDownload(course, modules, version, options = {}) {
   if (!modules || modules.length === 0) throw new Error("No modules to export");
+
+  const navBarPosition = options.navBar?.position || "none";
 
   const zip = new JSZip();
   const manifestXml = version === "1.2"
@@ -553,7 +773,10 @@ async function _buildAndDownload(course, modules, version) {
 
   for (let i = 0; i < modules.length; i++) {
     const mod = modules[i];
-    const html = buildScoHtml(mod, course.title || "Course");
+    const navBarOptions = navBarPosition !== "none"
+      ? { position: navBarPosition, moduleIndex: i, totalModules: modules.length }
+      : null;
+    const html = buildScoHtml(mod, course.title || "Course", "", navBarOptions);
     zip.file(`module_${i + 1}/index.html`, html);
   }
 

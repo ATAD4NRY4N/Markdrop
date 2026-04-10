@@ -10,12 +10,14 @@ import "katex/dist/katex.min.css";
 import mermaid from "mermaid";
 import { useTheme } from "@/components/ThemeProvider";
 import BranchingBlock from "@/components/blocks/BuilderPage/blocks/BranchingBlock";
+import CategorizationBlock from "@/components/blocks/BuilderPage/blocks/CategorizationBlock";
 import CourseNavBlock from "@/components/blocks/BuilderPage/blocks/CourseNavBlock";
 import FlashcardBlock from "@/components/blocks/BuilderPage/blocks/FlashcardBlock";
 import KnowledgeCheckBlock from "@/components/blocks/BuilderPage/blocks/KnowledgeCheckBlock";
 import LearningObjectiveBlock from "@/components/blocks/BuilderPage/blocks/LearningObjectiveBlock";
 import ProgressMarkerBlock from "@/components/blocks/BuilderPage/blocks/ProgressMarkerBlock";
 import QuizBlock from "@/components/blocks/BuilderPage/blocks/QuizBlock";
+import TimeRequirementsBlock from "@/components/blocks/BuilderPage/blocks/TimeRequirementsBlock";
 
 function MermaidDiagram({ chart }) {
   const ref = useRef(null);
@@ -478,6 +480,8 @@ const blocksToMarkdown = (blocks) => {
         case "progress-marker":
         case "course-nav":
         case "branching":
+        case "time-requirements":
+        case "categorization":
           return "";
         default:
           return block.content;
@@ -520,6 +524,8 @@ const ELEARNING_TYPES = new Set([
   "progress-marker",
   "course-nav",
   "branching",
+  "time-requirements",
+  "categorization",
 ]);
 
 const ELEARNING_COMPONENTS = {
@@ -530,6 +536,8 @@ const ELEARNING_COMPONENTS = {
   "progress-marker": ProgressMarkerBlock,
   "course-nav": CourseNavBlock,
   branching: BranchingBlock,
+  "time-requirements": TimeRequirementsBlock,
+  categorization: CategorizationBlock,
 };
 
 // Render a single block's markdown within an optionally animated wrapper

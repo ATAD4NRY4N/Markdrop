@@ -12,12 +12,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { exportToScorm12, exportToScorm2004 } from "@/lib/scormUtils";
 
 export default function ScormExportDialog({ open, onOpenChange, course, modules }) {
   const [scormVersion, setScormVersion] = useState("1.2");
   const [passThreshold, setPassThreshold] = useState(course?.pass_threshold ?? 80);
+  const [navBarPosition, setNavBarPosition] = useState("bottom");
   const [isExporting, setIsExporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -32,11 +34,12 @@ export default function ScormExportDialog({ open, onOpenChange, course, modules 
     setProgress(20);
     try {
       const courseData = { ...course, pass_threshold: passThreshold };
+      const options = { navBar: { position: navBarPosition } };
       setProgress(50);
       if (scormVersion === "1.2") {
-        await exportToScorm12(courseData, modules);
+        await exportToScorm12(courseData, modules, options);
       } else {
-        await exportToScorm2004(courseData, modules);
+        await exportToScorm2004(courseData, modules, options);
       }
       setProgress(100);
       setTimeout(() => {
@@ -101,6 +104,24 @@ export default function ScormExportDialog({ open, onOpenChange, course, modules 
               onValueChange={([v]) => setPassThreshold(v)}
               className="w-full"
             />
+          </div>
+
+          {/* Slide Navigation Bar */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Slide Navigation Bar</Label>
+            <Select value={navBarPosition} onValueChange={setNavBarPosition}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bottom">Bottom (prev / indicator / next)</SelectItem>
+                <SelectItem value="top">Top (prev / indicator / next)</SelectItem>
+                <SelectItem value="none">None</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Adds prev/next navigation and a slide position indicator to every module.
+            </p>
           </div>
 
           {/* Package summary */}

@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import AlertBlock from "./blocks/AlertBlock";
 import BlockquoteBlock from "./blocks/BlockquoteBlock";
 import BranchingBlock from "./blocks/BranchingBlock";
+import CategorizationBlock from "./blocks/CategorizationBlock";
 import CodeBlock from "./blocks/CodeBlock";
 import CourseNavBlock from "./blocks/CourseNavBlock";
 import DiagramBlock from "./blocks/DiagramBlock";
@@ -34,6 +35,7 @@ import ShieldBadgeBlock from "./blocks/ShieldBadgeBlock";
 import SkillIconsBlock from "./blocks/SkillIconsBlock";
 import SlideBlock from "./blocks/SlideBlock";
 import TableBlock from "./blocks/TableBlock";
+import TimeRequirementsBlock from "./blocks/TimeRequirementsBlock";
 import TypingSvgBlock from "./blocks/TypingSvgBlock";
 import VideoBlock from "./blocks/VideoBlock";
 
@@ -210,6 +212,10 @@ const MarkdownBlock = memo(function MarkdownBlock({
         return <CourseNavBlock block={block} onUpdate={onUpdate} />;
       case "branching":
         return <BranchingBlock block={block} onUpdate={onUpdate} />;
+      case "time-requirements":
+        return <TimeRequirementsBlock block={block} onUpdate={onUpdate} />;
+      case "categorization":
+        return <CategorizationBlock block={block} onUpdate={onUpdate} />;
       // MARP-specific blocks
       case "marp-frontmatter":
         return <MarpFrontmatterBlock block={block} onUpdate={onUpdate} />;

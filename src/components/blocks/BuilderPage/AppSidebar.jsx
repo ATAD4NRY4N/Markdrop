@@ -2,6 +2,8 @@ import { useDraggable, useDroppable } from "@dnd-kit/core";
 import {
   AlertCircle,
   CheckCircle2,
+  CheckSquare,
+  Clock,
   Code2,
   CreditCard,
   FileSliders,
@@ -255,6 +257,25 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
           { id: "c2", label: "" },
         ],
       }),
+      ...(blockType === "time-requirements" && {
+        requiredMinutes: 2,
+        showProgress: true,
+        hideOnCompleted: false,
+      }),
+      ...(blockType === "categorization" && {
+        prompt: "Sort the following items into the correct categories:",
+        mode: "checklist",
+        categories: [
+          { id: "cat-1", label: "Category A" },
+          { id: "cat-2", label: "Category B" },
+        ],
+        items: [
+          { id: "item-1", content: "", categoryId: "cat-1" },
+          { id: "item-2", content: "", categoryId: "cat-2" },
+          { id: "item-3", content: "", categoryId: "cat-1" },
+          { id: "item-4", content: "", categoryId: "cat-2" },
+        ],
+      }),
     };
 
 
@@ -317,6 +338,8 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
       { title: "Quiz", key: "quiz", icon: CheckCircle2 },
       { title: "Knowledge Check", key: "knowledge-check", icon: HelpCircle },
       { title: "Flashcard", key: "flashcard", icon: RotateCcw },
+      { title: "Categorization", key: "categorization", icon: CheckSquare },
+      { title: "Time Requirement", key: "time-requirements", icon: Clock },
       { title: "Progress Marker", key: "progress-marker", icon: Flag },
       { title: "Course Navigation", key: "course-nav", icon: Layers },
       { title: "Branching Scenario", key: "branching", icon: GitBranch },

@@ -18,6 +18,8 @@ export function CourseProvider({ children }) {
   const [modules, setModules] = useState([]);
   const [activeModuleId, setActiveModuleId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  // Sections: [{id, title, moduleIds: []}]
+  const [sections, setSections] = useState([]);
 
   // Load a course and its modules by ID
   const loadCourse = useCallback(async (courseId) => {
@@ -27,6 +29,13 @@ export function CourseProvider({ children }) {
     ]);
     setCourse(loadedCourse);
     setModules(loadedModules);
+    // Load sections from course metadata
+    try {
+      const parsedSections = JSON.parse(loadedCourse.sections_json || "[]");
+      setSections(Array.isArray(parsedSections) ? parsedSections : []);
+    } catch {
+      setSections([]);
+    }
     if (loadedModules.length > 0) {
       setActiveModuleId(loadedModules[0].id);
     }
@@ -154,9 +163,56 @@ export function CourseProvider({ children }) {
       setCourse(null);
       setModules([]);
       setActiveModuleId(null);
+      setSections([]);
     },
     [course]
   );
+
+  // Section management helpers — sections are persisted in courses.sections_json
+  const persistSections = useCallback(async (newSections) => {
+    setSections(newSections);
+    if (course?.id) {
+      try {
+        await updateCourse(course.id, { sections_json: JSON.stringify(newSections) });
+      } catch {
+        // Non-critical — persist best-effort
+      }
+    }
+  }, [course]);
+
+  const addSection = useCallback(async (title = "New Section") => {
+    const newSection = { id: `sec-${Date.now()}`, title, moduleIds: [] };
+    await persistSections([...sections, newSection]);
+    return newSection;
+  }, [sections, persistSections]);
+
+  const renameSection = useCallback(async (sectionId, title) => {
+    await persistSections(sections.map((s) => (s.id === sectionId ? { ...s, title } : s)));
+  }, [sections, persistSections]);
+
+  const removeSection = useCallback(async (sectionId) => {
+    await persistSections(sections.filter((s) => s.id !== sectionId));
+  }, [sections, persistSections]);
+
+  const assignModuleToSection = useCallback(async (moduleId, sectionId) => {
+    // Remove from all sections first
+    const cleaned = sections.map((s) => ({
+      ...s,
+      moduleIds: s.moduleIds.filter((id) => id !== moduleId),
+    }));
+    if (sectionId === null) {
+      // Unassign — module is now "unsectioned"
+      await persistSections(cleaned);
+    } else {
+      await persistSections(
+        cleaned.map((s) =>
+          s.id === sectionId
+            ? { ...s, moduleIds: [...s.moduleIds, moduleId] }
+            : s
+        )
+      );
+    }
+  }, [sections, persistSections]);
 
   return (
     <CourseContext.Provider
@@ -179,6 +235,12 @@ export function CourseProvider({ children }) {
         getActiveModuleBlocks,
         setActiveModuleBlocksLocal,
         destroyCourse,
+        // Sections
+        sections,
+        addSection,
+        renameSection,
+        removeSection,
+        assignModuleToSection,
       }}
     >
       {children}

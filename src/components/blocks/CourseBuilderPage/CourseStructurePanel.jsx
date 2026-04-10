@@ -4,18 +4,21 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   BookOpen,
   ChevronRight,
+  FolderPlus,
   GripVertical,
+  MoreHorizontal,
   Plus,
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCourse } from "@/context/CourseContext";
 import { cn } from "@/lib/utils";
 
-function SortableModuleItem({ module, isActive, onClick, onRename, onDelete }) {
+function SortableModuleItem({ module, isActive, onClick, onRename, onDelete, sections, onAssignSection }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: module.id,
   });
@@ -40,6 +43,8 @@ function SortableModuleItem({ module, isActive, onClick, onRename, onDelete }) {
   const blocks = (() => {
     try { return JSON.parse(module.blocks_json || "[]"); } catch { return []; }
   })();
+
+  const currentSection = sections.find((s) => s.moduleIds.includes(module.id));
 
   return (
     <div
@@ -92,21 +97,123 @@ function SortableModuleItem({ module, isActive, onClick, onRename, onDelete }) {
         </>
       )}
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:text-destructive"
-        onClick={(e) => { e.stopPropagation(); onDelete(module.id); }}
-        title="Delete module"
-      >
-        <Trash2 className="h-3 w-3" />
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreHorizontal className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditing(true); }}>
+            Rename
+          </DropdownMenuItem>
+          {sections.length > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              {currentSection ? (
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onAssignSection(module.id, null); }}>
+                  Remove from section
+                </DropdownMenuItem>
+              ) : null}
+              {sections.map((sec) => (
+                <DropdownMenuItem
+                  key={sec.id}
+                  onClick={(e) => { e.stopPropagation(); onAssignSection(module.id, sec.id); }}
+                  disabled={sec.id === currentSection?.id}
+                >
+                  Move to: {sec.title}
+                </DropdownMenuItem>
+              ))}
+            </>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={(e) => { e.stopPropagation(); onDelete(module.id); }}
+          >
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
 
+function SectionHeader({ section, onRename, onDelete, moduleCount, defaultCollapsed = false }) {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(section.title);
+
+  const commitRename = () => {
+    setEditing(false);
+    if (editTitle.trim() && editTitle !== section.title) {
+      onRename(section.id, editTitle.trim());
+    } else {
+      setEditTitle(section.title);
+    }
+  };
+
+  return {
+    collapsed,
+    element: (
+      <div className="group flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/30">
+        <button
+          type="button"
+          className="flex items-center gap-1 flex-1 min-w-0 text-left"
+          onClick={() => !editing && setCollapsed((v) => !v)}
+        >
+          <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform text-muted-foreground", !collapsed && "rotate-90")} />
+          {editing ? (
+            <Input
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitRename();
+                if (e.key === "Escape") { setEditing(false); setEditTitle(section.title); }
+              }}
+              className="h-5 text-xs px-1 bg-transparent border-0 border-b border-primary focus-visible:ring-0 rounded-none"
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate"
+              onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }}
+              title="Double-click to rename"
+            >
+              {section.title}
+            </span>
+          )}
+          <span className="text-[10px] text-muted-foreground/40 shrink-0 ml-1">
+            {moduleCount}
+          </span>
+        </button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:text-destructive"
+          onClick={(e) => { e.stopPropagation(); onDelete(section.id); }}
+          title="Delete section"
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
+      </div>
+    ),
+  };
+}
+
 export default function CourseStructurePanel({ className }) {
-  const { course, modules, activeModuleId, setActiveModuleId, addModule, renameModule, removeModule, reorderModuleList } = useCourse();
+  const {
+    course, modules, activeModuleId, setActiveModuleId,
+    addModule, renameModule, removeModule, reorderModuleList,
+    sections, addSection, renameSection, removeSection, assignModuleToSection,
+  } = useCourse();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -121,6 +228,11 @@ export default function CourseStructurePanel({ className }) {
     }
   };
 
+  // Build display order: unsectioned modules first, then each section with its modules
+  const unsectionedModules = modules.filter(
+    (m) => !sections.some((s) => s.moduleIds.includes(m.id))
+  );
+
   return (
     <div className={cn("flex flex-col h-full border-r bg-card", className)}>
       <div className="flex items-center gap-2 px-3 py-3 border-b shrink-0">
@@ -134,31 +246,57 @@ export default function CourseStructurePanel({ className }) {
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="p-2">
-          {modules.length === 0 ? (
+        <div className="p-2 space-y-1">
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+              {/* Unsectioned modules */}
+              {unsectionedModules.map((mod) => (
+                <SortableModuleItem
+                  key={mod.id}
+                  module={mod}
+                  isActive={mod.id === activeModuleId}
+                  onClick={setActiveModuleId}
+                  onRename={renameModule}
+                  onDelete={removeModule}
+                  sections={sections}
+                  onAssignSection={assignModuleToSection}
+                />
+              ))}
+
+              {/* Sections */}
+              {sections.map((section) => {
+                const sectionModules = section.moduleIds
+                  .map((id) => modules.find((m) => m.id === id))
+                  .filter(Boolean);
+
+                return (
+                  <CollapsibleSection
+                    key={section.id}
+                    section={section}
+                    modules={sectionModules}
+                    activeModuleId={activeModuleId}
+                    onModuleClick={setActiveModuleId}
+                    onModuleRename={renameModule}
+                    onModuleDelete={removeModule}
+                    onSectionRename={renameSection}
+                    onSectionDelete={removeSection}
+                    allSections={sections}
+                    onAssignSection={assignModuleToSection}
+                  />
+                );
+              })}
+            </SortableContext>
+          </DndContext>
+
+          {modules.length === 0 && sections.length === 0 && (
             <p className="text-xs text-muted-foreground/60 px-2 py-3 text-center">
               No modules yet
             </p>
-          ) : (
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
-                {modules.map((mod) => (
-                  <SortableModuleItem
-                    key={mod.id}
-                    module={mod}
-                    isActive={mod.id === activeModuleId}
-                    onClick={setActiveModuleId}
-                    onRename={renameModule}
-                    onDelete={removeModule}
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
           )}
         </div>
       </ScrollArea>
 
-      <div className="p-2 border-t shrink-0">
+      <div className="p-2 border-t shrink-0 space-y-1">
         <Button
           variant="outline"
           size="sm"
@@ -168,7 +306,100 @@ export default function CourseStructurePanel({ className }) {
           <Plus className="h-3.5 w-3.5" />
           Add Module
         </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+          onClick={() => addSection()}
+        >
+          <FolderPlus className="h-3.5 w-3.5" />
+          Add Section
+        </Button>
       </div>
+    </div>
+  );
+}
+
+function CollapsibleSection({ section, modules, activeModuleId, onModuleClick, onModuleRename, onModuleDelete, onSectionRename, onSectionDelete, allSections, onAssignSection }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [editTitle, setEditTitle] = useState(section.title);
+
+  const commitRename = () => {
+    setEditingTitle(false);
+    if (editTitle.trim() && editTitle !== section.title) {
+      onSectionRename(section.id, editTitle.trim());
+    } else {
+      setEditTitle(section.title);
+    }
+  };
+
+  return (
+    <div className="mt-1">
+      {/* Section header */}
+      <div className="group flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/30">
+        <button
+          type="button"
+          className="flex items-center gap-1 flex-1 min-w-0 text-left"
+          onClick={() => !editingTitle && setCollapsed((v) => !v)}
+        >
+          <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform text-muted-foreground", !collapsed && "rotate-90")} />
+          {editingTitle ? (
+            <Input
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitRename();
+                if (e.key === "Escape") { setEditingTitle(false); setEditTitle(section.title); }
+              }}
+              className="h-5 text-xs px-1 bg-transparent border-0 border-b border-primary focus-visible:ring-0 rounded-none flex-1"
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate"
+              onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(true); }}
+              title="Double-click to rename section"
+            >
+              {section.title}
+            </span>
+          )}
+          <span className="text-[10px] text-muted-foreground/40 shrink-0 ml-1">{modules.length}</span>
+        </button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:text-destructive"
+          onClick={(e) => { e.stopPropagation(); onSectionDelete(section.id); }}
+          title="Delete section"
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
+      </div>
+
+      {/* Section modules */}
+      {!collapsed && (
+        <div className="pl-4">
+          {modules.length === 0 ? (
+            <p className="text-[10px] text-muted-foreground/40 px-2 py-1">No modules in this section</p>
+          ) : (
+            modules.map((mod) => (
+              <SortableModuleItem
+                key={mod.id}
+                module={mod}
+                isActive={mod.id === activeModuleId}
+                onClick={onModuleClick}
+                onRename={onModuleRename}
+                onDelete={onModuleDelete}
+                sections={allSections}
+                onAssignSection={onAssignSection}
+              />
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

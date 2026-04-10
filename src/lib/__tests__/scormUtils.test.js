@@ -268,6 +268,71 @@ describe("_blockToHtml — eLearning blocks", () => {
     expect(html).toContain("&lt;b&gt;Quiz&lt;/b&gt;");
     expect(html).not.toContain("<b>Quiz</b>");
   });
+
+  it("time-requirements block renders required minutes", () => {
+    const html = _blockToHtml({ type: "time-requirements", requiredMinutes: 5, showProgress: true });
+    expect(html).toContain("5 minute");
+    expect(html).toContain("time-requirement");
+    expect(html).toContain("setInterval");
+  });
+
+  it("time-requirements block defaults to 2 minutes", () => {
+    const html = _blockToHtml({ type: "time-requirements" });
+    expect(html).toContain("2 minute");
+  });
+
+  it("time-requirements block hides on completed when configured", () => {
+    const html = _blockToHtml({ type: "time-requirements", requiredMinutes: 1, hideOnCompleted: true });
+    expect(html).toContain("true"); // hideOnCompleted in script
+  });
+
+  it("categorization block renders prompt and categories (checklist mode)", () => {
+    const html = _blockToHtml({
+      type: "categorization",
+      prompt: "Sort these items:",
+      mode: "checklist",
+      categories: [
+        { id: "c1", label: "Plants" },
+        { id: "c2", label: "Animals" },
+      ],
+      items: [
+        { id: "i1", content: "Oak tree", categoryId: "c1" },
+        { id: "i2", content: "Eagle", categoryId: "c2" },
+      ],
+    });
+    expect(html).toContain("Sort these items:");
+    expect(html).toContain("Plants");
+    expect(html).toContain("Animals");
+    expect(html).toContain("Oak tree");
+    expect(html).toContain("Eagle");
+    expect(html).toContain("submitCategorization(");
+    expect(html).toContain('type="radio"');
+  });
+
+  it("categorization block renders drag-drop zones", () => {
+    const html = _blockToHtml({
+      type: "categorization",
+      mode: "dragdrop",
+      categories: [{ id: "c1", label: "Category A" }, { id: "c2", label: "Category B" }],
+      items: [{ id: "i1", content: "Item 1", categoryId: "c1" }],
+    });
+    expect(html).toContain("cat-zone");
+    expect(html).toContain("cat-pill");
+    expect(html).toContain("catZoneClick(");
+  });
+
+  it("categorization block escapes content", () => {
+    const html = _blockToHtml({
+      type: "categorization",
+      prompt: "<script>xss</script>",
+      mode: "checklist",
+      categories: [{ id: "c1", label: "<b>Cat</b>" }],
+      items: [],
+    });
+    expect(html).not.toContain("<script>xss</script>");
+    expect(html).toContain("&lt;script&gt;");
+    expect(html).toContain("&lt;b&gt;Cat&lt;/b&gt;");
+  });
 });
 
 // ── generateManifest12 ────────────────────────────────────────────────────────
@@ -475,5 +540,69 @@ describe("exportToScorm12 and exportToScorm2004", () => {
     expect(capturedFiles).toContain("module_2/index.html");
 
     JSZip.prototype.generateAsync = originalGenerateAsync;
+  });
+
+  it("exportToScorm12 with navBar=bottom includes nav bar HTML in module pages", async () => {
+    vi.restoreAllMocks();
+    global.URL.createObjectURL = vi.fn(() => "blob:fake");
+    global.URL.revokeObjectURL = vi.fn();
+
+    const course = makeCourse({ id: "abc12345-0000-0000-0000-000000000099" });
+    const modules = [
+      makeModule({ title: "Module A" }),
+      makeModule({ id: "mod-002", title: "Module B", order: 1 }),
+    ];
+
+    let capturedContents = {};
+    const originalGenerateAsync = JSZip.prototype.generateAsync;
+    const originalFile = JSZip.prototype.file;
+    const fileMap = {};
+    JSZip.prototype.file = function (name, content) {
+      if (content !== undefined) { fileMap[name] = content; return this; }
+      return originalFile.call(this, name);
+    };
+    JSZip.prototype.generateAsync = async function (opts) {
+      capturedContents = { ...fileMap };
+      return originalGenerateAsync.call(this, opts);
+    };
+
+    await exportToScorm12(course, modules, { navBar: { position: "bottom" } });
+
+    expect(capturedContents["module_1/index.html"]).toContain("slide-nav-bar");
+    expect(capturedContents["module_1/index.html"]).toContain("1 / 2");
+    expect(capturedContents["module_2/index.html"]).toContain("2 / 2");
+
+    JSZip.prototype.generateAsync = originalGenerateAsync;
+    JSZip.prototype.file = originalFile;
+  });
+
+  it("exportToScorm12 with navBar=none does not include nav bar", async () => {
+    vi.restoreAllMocks();
+    global.URL.createObjectURL = vi.fn(() => "blob:fake");
+    global.URL.revokeObjectURL = vi.fn();
+
+    const course = makeCourse({ id: "abc12345-0000-0000-0000-000000000099" });
+    const modules = [makeModule({ title: "Module A" })];
+
+    let capturedContents = {};
+    const originalGenerateAsync = JSZip.prototype.generateAsync;
+    const originalFile = JSZip.prototype.file;
+    const fileMap = {};
+    JSZip.prototype.file = function (name, content) {
+      if (content !== undefined) { fileMap[name] = content; return this; }
+      return originalFile.call(this, name);
+    };
+    JSZip.prototype.generateAsync = async function (opts) {
+      capturedContents = { ...fileMap };
+      return originalGenerateAsync.call(this, opts);
+    };
+
+    await exportToScorm12(course, modules, { navBar: { position: "none" } });
+
+    // The nav bar HTML element should not be present (CSS classes can still exist in stylesheet)
+    expect(capturedContents["module_1/index.html"]).not.toContain('<nav class="slide-nav-bar');
+
+    JSZip.prototype.generateAsync = originalGenerateAsync;
+    JSZip.prototype.file = originalFile;
   });
 });

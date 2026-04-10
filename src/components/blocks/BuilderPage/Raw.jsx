@@ -482,6 +482,20 @@ const blocksToMarkdown = (blocks) => {
           ];
           return lines.join("\n");
         }
+        case "time-requirements":
+          return `<!-- Time Requirement: ${block.requiredMinutes ?? 2} minute(s) -->`;
+        case "categorization": {
+          const cats = block.categories || [];
+          const itms = block.items || [];
+          const lines = [
+            `<!-- Categorization: ${block.prompt || "Sort items into categories"} -->`,
+            ...cats.map((c) => {
+              const catItems = itms.filter((it) => it.categoryId === c.id);
+              return `  **${c.label}:** ${catItems.map((it) => it.content || "(empty)").join(", ") || "(no items)"}`;
+            }),
+          ];
+          return lines.join("\n");
+        }
         default:
           return block.content;
       }

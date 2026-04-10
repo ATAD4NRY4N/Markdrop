@@ -1,0 +1,106 @@
+=== TEXT ===
+Content-ID: <!DOCTYPE html><li=nk rel="stylesheet" href="https://app.scormstack.io/_next/static/css/ee=b06e32714c4329.css" data-precedence="next"><l=ink href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,0;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400=;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet"><link=href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0=,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,50=="stylesheet" crossorigin="" href="https://client.crisp.chat/static/s=tylesheets/common_default_9af39e7.css"><met=SCORM builder">=My Courses | ScormStackDRDannycommon.settings<=div class="flex-1 space-y-6 px-3 w-full overflow-y-scroll pr-1 nice-scrol=lbar"></di=v>HomeCoursesReviewsShortcuts=Shared with me<d=iv class="flex items-center opacity-20"></g=>scormstackAllLast viewed by me<d=iv class="flex max-w-full items-center gap-2 self-start max-[480px]:w-ful=l" id="new-course-button">=New Course<=/svg><=div class="pointer-events-none invisible absolute left-0 top-0 -z-10 flex=items-center gap-2 whitespace-nowrap" aria-hidden="true"><=button data-slot="button" class="cursor-pointer inline-flex items-cente=r justify-center rounded-sm whitespace-nowrap transition-all duration-300 d=isabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-=none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink=-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-=visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-=destructive/40 aria-invalid:border-destructive h-8 gap-1 px-2 has-[>svg]=:px-2 text-xs overflow-hidden font-medium hover:text-foreground shadow-sm b=g-background dark:bg-foreground/20 text-foreground dark:text-foreground hov=er:bg-background dark:hover:bg-background-muted dark:border max-w-[160px]">=All1</div=><button=data-slot="button" class="cursor-pointer inline-flex items-center just=ify-center rounded-sm whitespace-nowrap font-semibold transition-all durati=on-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer=-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg=]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/5=0 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-inval=id:ring-destructive/40 aria-invalid:border-destructive hover:bg-background-=muted gap-1 has-[>svg]:px-2 text-xs h-7 w-7 p-0" aria-label="List view="><butto=n data-slot="button" class="cursor-pointer inline-flex items-center jus=tify-center rounded-sm whitespace-nowrap font-semibold transition-all durat=ion-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointe=r-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink=-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-=visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-=destructive/40 aria-invalid:border-destructive hover:bg-background-muted ga=p-1 has-[>svg]:px-2 text-xs shrink-0 hover:text-foreground h-7 p-0"><svg=xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox=="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke=-linecap="round" stroke-linejoin="round" class="lucide lucide-folders=size-3.5" aria-hidden="true"></bu=tton><d=iv class="relative">All1<=/div><r=ect width="12" height="12" fill="white"></sv=g>Shared with me0</di=v><div=class="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-t=o-t from-background to-transparent"><button=data-slot="button" class="cursor-pointer inline-flex items-center roun=ded-sm whitespace-nowrap font-semibold transition-all duration-300 disabled=:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&=amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outl=ine-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible=:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destruc=tive/40 aria-invalid:border-destructive h-8 gap-1 px-2 has-[>svg]:px-2 t=ext-xs w-full justify-start text-muted-foreground hover:bg-transparent hove=r:text-foreground !px-1.5">New folder=...<d=iv class="mb-1 px-2 text-[11px] font-medium text-muted-foreground">Status==<=span class="truncate">Draft1</di=v>Danny RyanTestD=raftOpen=menu<=div class="flex min-h-0 flex-1 flex-col">Danny RyanTest<=/h2>Draft</bu=tton>Open menu</di=v></path=>Open navigation<=div id="course-bulk-actions-bar" class="pointer-events-none fixed inset=-x-0 bottom-4 z-50 flex justify-center px-4 pb-[env(safe-area-inset-bottom)=] transition-all duration-200 translate-y-3 opacity-0">0 selected</p=ath>Move toStatus<=/svg><=svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox=="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" str=oke-linecap="round" stroke-linejoin="round" class="lucide lucide-tras=h2 lucide-trash-2 size-3" aria-hidden="true"><=path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"><=/button>Welcome to Scormstack!<div=id="DndDescribedBy-11" style="display: none;">To pick up a draggable item, press the space bar.While dragging, use the arrow keys to move the item.Press space again to drop the item in its new position, or press escape=to cancel.<d=iv class="cc-165wh" id="crisp-chatbox" data-hidden="true" data-force-=show="false" data-color-mode="light" data-availability="online" data-=presentation="default" data-lock-maximized="false" data-website-logo=="false" data-last-operator-face="false" data-ongoing-operator-face="fal=se" data-availability-tooltip="false" data-hide-vacation="false" data-b=locked="false" data-mobile-view="false" data-full-view="false" data-s=mall-view="false" data-large-view="true" data-has-local-messages="fal=se" data-was-availability-online="true" data-is-activity-ongoing="false=" data-hide-on-away="false" data-hide-on-mobile="false" data-position-r=everse="true">Messages<s=vg class="cc-ro90h"></cir=cle></re=ct>Yvain<=/span><=span class="cc-13ftx"><sp=an class="cc-eoluf cc-10cqs">Questions? Chat with us.</span=></spa=n>=Anything you want to ask?</spa=n></=div>S=end a file<te=xtarea class="cc-7jtwt cc-3rfgc cc-1icrj" placeholder="Compose your mes=sage..." aria-label="Compose your message..." name="message" rows="1"=dir="auto" autocapitalize="off" autocomplete="off" aria-controls="=cc-1wc9t" tab="0" tabindex="0" style="overflow: hidden; overflow-wrap=: break-word; height: 18px;">Insert an emoji</di=v></d=iv>We run onCrisp</=div><!-=-v-if--><span=class="cc-1nvx3"><=span id="recharts_measurement_span" aria-hidden="true" style="positio=n: absolute; top: -20000px; left: 0px; padding: 0px; margin: 0px; border: n=one; white-space: pre; color: hsl(var(--foreground)); font-size: 12px; lett=er-spacing: normal;">0
+
+=== STRUCTURE ===
+<DIV> 
+<DIV> DRDannycommon.settings
+<DIV> DRDannycommon.settings
+<BUTTON> DRDanny
+<H2> common.settings
+<DIV> </di=v>HomeCoursesReviewsShortcuts=Shared with me
+<DIV> </di=v>
+<DIV> </di=v>
+<DIV> </di=v>
+<DIV> 
+<DIV> 
+<SECTION> HomeCoursesReviews
+<A> Home
+<A> Courses
+<A> Reviews
+<SECTION> 
+<SECTION> Shortcuts=Shared with me
+<H2> Shortcuts
+<DIV> =Shared with me
+<A> =Shared with me
+<DIV> <d=iv class="flex items-center opacity-20">
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<DIV> AllLast viewed by me<d=iv class="flex max-w-full i
+<DIV> AllLast viewed by me
+<DIV> All
+<H2> All
+<DIV> Last viewed by me
+<BUTTON> Last viewed by me
+<BUTTON> =New Course
+<DIV> <=div class="pointer-events-none invisible absolut
+<DIV> <=button data-slot="button" class="cursor-pointer 
+<DIV> <=button data-slot="button" class="cursor-pointer 
+<DIV> <button=data-slot="button" class="cursor-pointer i
+<BUTTON> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> All1<=/div>
+<DIV> 
+<DIV> 
+<DIV> <button=data-slot="button" class="cursor-pointer i
+<DIV> <d=iv class="mb-1 px-2 text-[11px] font-medium tex
+<DIV> =<=span class="truncate">Draft1
+<BUTTON> =<=span class="truncate">Draft1
+<DIV> 
+<DIV> 
+<DIV> Danny RyanTestD=raftOpen=menu
+<A> 
+<DIV> 
+<DIV> 
+<DIV> Danny RyanTestD=raftOpen=menu
+<DIV> Danny Ryan
+<DIV> Danny Ryan
+<DIV> Test
+<A> Test
+<H3> Test
+<DIV> D=raftOpen=menu
+<BUTTON> D=raft
+<BUTTON> Open=menu
+<DIV> 
+<A> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Danny Ryan
+<DIV> Danny Ryan
+<DIV> 
+<BUTTON> Open menu
+<H2> Welcome to Scormstack!
+<BUTTON> 
+<DIV> <d=iv class="cc-165wh" id="crisp-chatbox" data-hid
+<DIV> 
+<DIV> 
+<DIV> Messages
+<DIV> 
+<DIV> Messages
+<DIV> Messages
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> S=end a file
+<DIV> 
+<DIV> S=end a file
+<DIV> S=end a file
+<DIV> 
+<DIV> S=end a file
+<DIV> <te=xtarea class="cc-7jtwt cc-3rfgc cc-1icrj" plac
+<DIV> <te=xtarea class="cc-7jtwt cc-3rfgc cc-1icrj" plac
+<DIV> <te=xtarea class="cc-7jtwt cc-3rfgc cc-1icrj" plac
+<DIV> Insert an emoji</di=v></d=iv>We run onCrisp</=div>
+<DIV> Insert an emoji</di=v></d=iv>
+<DIV> 
+<DIV> We run onCrisp</=div>
+<A> We run onCrisp
+<DIV> <!-=-v-if--><span=class="cc-1nvx3">
+<DIV> 
+<DIV> 

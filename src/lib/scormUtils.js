@@ -1,0 +1,563 @@
+/**
+ * scormUtils.js
+ *
+ * Client-side SCORM 1.2 and SCORM 2004 4th Edition package generator.
+ * Produces a self-contained ZIP file (imsmanifest.xml + SCO HTML files)
+ * ready for upload to any SCORM-conformant LMS.
+ */
+
+import JSZip from "jszip";
+import { marked } from "marked";
+
+// ---------------------------------------------------------------------------
+// Block → HTML conversion (reused from exportUtils patterns)
+// ---------------------------------------------------------------------------
+
+function blockToHtml(block) {
+  switch (block.type) {
+    case "h1": return `<h1>${escHtml(block.content)}</h1>`;
+    case "h2": return `<h2>${escHtml(block.content)}</h2>`;
+    case "h3": return `<h3>${escHtml(block.content)}</h3>`;
+    case "h4": return `<h4>${escHtml(block.content)}</h4>`;
+    case "h5": return `<h5>${escHtml(block.content)}</h5>`;
+    case "h6": return `<h6>${escHtml(block.content)}</h6>`;
+    case "paragraph": return `<p>${marked.parseInline(block.content || "")}</p>`;
+    case "blockquote": return `<blockquote><p>${marked.parseInline(block.content || "")}</p></blockquote>`;
+    case "alert": {
+      const alertType = (block.alertType || "note").toUpperCase();
+      const colorMap = { NOTE: "#3b82f6", TIP: "#22c55e", IMPORTANT: "#a855f7", WARNING: "#f59e0b", CAUTION: "#ef4444" };
+      const color = colorMap[alertType] || "#6b7280";
+      return `<div style="border-left:4px solid ${color};padding:0.75rem 1rem;background:${color}18;border-radius:0 0.375rem 0.375rem 0;margin:1rem 0"><strong style="color:${color}">${alertType}</strong><p style="margin:0.5rem 0 0">${marked.parseInline(block.content || "")}</p></div>`;
+    }
+    case "code": return marked.parse(block.content || "");
+    case "html": return block.content || "";
+    case "ul": return marked.parse(block.content || "");
+    case "ol": return marked.parse(block.content || "");
+    case "task-list": return marked.parse(block.content || "");
+    case "separator": return "<hr/>";
+    case "image": {
+      const attrs = [`src="${escHtml(block.content)}" alt="${escHtml(block.alt || "")}"`];
+      if (block.width) attrs.push(`width="${escHtml(block.width)}"`);
+      if (block.height) attrs.push(`height="${escHtml(block.height)}"`);
+      const img = `<img ${attrs.join(" ")} style="max-width:100%;height:auto"/>`;
+      if (block.align === "center") return `<p style="text-align:center">${img}</p>`;
+      if (block.align === "right") return `<p style="text-align:right">${img}</p>`;
+      return `<p>${img}</p>`;
+    }
+    case "link": return `<p><a href="${escHtml(block.url || "#")}">${escHtml(block.content)}</a></p>`;
+    case "table": return marked.parse(block.content || "");
+    case "math": return marked.parse(block.content || "");
+    case "diagram": return marked.parse(block.content || "");
+
+    // eLearning blocks
+    case "learning-objective": {
+      const items = (block.objectives || []).filter(Boolean);
+      if (!items.length) return "";
+      return `<div class="learning-objectives"><strong>🎯 Learning Objectives</strong><ul>${items.map((o) => `<li>${escHtml(o)}</li>`).join("")}</ul></div>`;
+    }
+    case "progress-marker":
+      return `<div class="progress-marker"><span>🚩 ${escHtml(block.label || "Checkpoint")}</span></div>`;
+    case "course-nav":
+      return `<div class="course-nav"><button class="btn-prev" onclick="prevModule()">${escHtml(block.prevLabel || "← Previous")}</button><button class="btn-next" onclick="nextModule()"${block.locked ? ' data-locked="true"' : ""}>${escHtml(block.nextLabel || "Next →")}</button></div>`;
+    case "branching":
+      return buildBranchingHtml(block);
+    case "flashcard":
+      return buildFlashcardHtml(block);
+    case "knowledge-check":
+      return buildKnowledgeCheckHtml(block);
+    case "quiz":
+      return buildQuizHtml(block);
+
+    default:
+      return `<p>${marked.parseInline(block.content || "")}</p>`;
+  }
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function buildFlashcardHtml(block) {
+  const id = `fc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  return `<div class="flashcard" id="${id}" onclick="flipCard('${id}')">
+  <div class="flashcard-inner">
+    <div class="flashcard-front"><p>${escHtml(block.front || "(Front)")}</p></div>
+    <div class="flashcard-back"><p>${escHtml(block.back || "(Back)")}</p></div>
+  </div>
+  <p class="flashcard-hint">Click to flip</p>
+</div>`;
+}
+
+function buildBranchingHtml(block) {
+  const choices = (block.choices || []).map((c, i) => {
+    const letter = String.fromCharCode(65 + i);
+    return `<button class="branch-btn" onclick="branchChoice('${escHtml(c.targetLabel || "")}')"><strong>${letter}.</strong> ${escHtml(c.label || `Choice ${letter}`)}</button>`;
+  });
+  return `<div class="branching">
+  <p class="branching-prompt">${escHtml(block.prompt || "")}</p>
+  <div class="branch-choices">${choices.join("\n")}</div>
+</div>`;
+}
+
+function buildKnowledgeCheckHtml(block) {
+  const qid = `kc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const opts = (block.options || []).map((opt, i) => `
+    <button class="mc-option" onclick="kcAnswer('${qid}',${i},${block.correctIndex ?? 0})" data-idx="${i}">
+      ${escHtml(opt || `Option ${i + 1}`)}
+    </button>`).join("");
+  return `<div class="knowledge-check" id="${qid}">
+  <p class="kc-prompt">${escHtml(block.prompt || "Knowledge Check")}</p>
+  <div class="mc-options">${opts}</div>
+  <div class="kc-feedback" id="${qid}_fb" style="display:none"></div>
+</div>`;
+}
+
+function buildQuizHtml(block) {
+  const qid = `quiz_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const questions = block.questions || [];
+  const totalPts = questions.reduce((s, q) => s + (q.points ?? 1), 0);
+
+  const questionsHtml = questions.map((q, qi) => {
+    const qqid = `${qid}_q${qi}`;
+    const type = q.type || "mcq";
+
+    let inputsHtml = "";
+    if (type === "mcq") {
+      inputsHtml = (q.options || []).map((opt, oi) => `
+        <label class="mc-label">
+          <input type="radio" name="${qqid}" value="${oi}" />
+          ${escHtml(opt || `Option ${oi + 1}`)}
+        </label>`).join("");
+    } else if (type === "tf") {
+      inputsHtml = `
+        <label class="mc-label"><input type="radio" name="${qqid}" value="True" /> True</label>
+        <label class="mc-label"><input type="radio" name="${qqid}" value="False" /> False</label>`;
+    } else if (type === "fitb") {
+      inputsHtml = `<input type="text" id="${qqid}_text" class="fitb-input" placeholder="Your answer…" />`;
+    }
+
+    return `<div class="quiz-question" id="${qqid}">
+  <p class="q-prompt"><strong>Q${qi + 1}.</strong> ${escHtml(q.prompt || "")}</p>
+  <div class="q-inputs">${inputsHtml}</div>
+  <div class="q-feedback" id="${qqid}_fb" style="display:none"></div>
+</div>`;
+  }).join("\n");
+
+  const correctAnswers = JSON.stringify(
+    questions.map((q) => {
+      if ((q.type || "mcq") === "mcq") return { type: "mcq", correct: q.correctIndex ?? 0 };
+      if (q.type === "tf") return { type: "tf", correct: q.correctTF ?? "True" };
+      if (q.type === "fitb") return {
+        type: "fitb",
+        accepted: (q.acceptedAnswers || []).map((a) => a.toLowerCase().trim()),
+      };
+      return { type: "mcq", correct: 0 };
+    })
+  );
+
+  const feedbacks = JSON.stringify(
+    questions.map((q) => ({ correct: q.feedbackCorrect || "Correct!", incorrect: q.feedbackIncorrect || "Incorrect." }))
+  );
+
+  const points = JSON.stringify(questions.map((q) => q.points ?? 1));
+
+  return `<div class="quiz-block" id="${qid}" data-total-pts="${totalPts}" data-pass="${block.passThreshold ?? 80}">
+  <p class="quiz-title"><strong>${escHtml(block.title || "Quiz")}</strong></p>
+  ${questionsHtml}
+  <button class="btn-submit-quiz" onclick="submitQuiz('${qid}',${correctAnswers},${feedbacks},${points})">Submit Quiz</button>
+  <div class="quiz-result" id="${qid}_result" style="display:none"></div>
+</div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Full SCO HTML page builder
+// ---------------------------------------------------------------------------
+
+const SCORM_RUNTIME_SHIM = `
+var _scorm = null;
+function findAPI(win) {
+  var attempts = 0;
+  while (!win.API && !win.API_1484_11 && win.parent && win.parent !== win && attempts < 10) {
+    win = win.parent; attempts++;
+  }
+  if (win.API_1484_11) return { version: "2004", api: win.API_1484_11 };
+  if (win.API) return { version: "1.2", api: win.API };
+  return null;
+}
+function initSCORM() {
+  _scorm = findAPI(window);
+  if (!_scorm) return false;
+  if (_scorm.version === "1.2") _scorm.api.LMSInitialize("");
+  else _scorm.api.Initialize("");
+  return true;
+}
+function scormSet(key, value) {
+  if (!_scorm) return;
+  if (_scorm.version === "1.2") _scorm.api.LMSSetValue(key, value);
+  else _scorm.api.SetValue(key, value);
+}
+function scormGet(key) {
+  if (!_scorm) return "";
+  if (_scorm.version === "1.2") return _scorm.api.LMSGetValue(key);
+  return _scorm.api.GetValue(key);
+}
+function scormCommit() {
+  if (!_scorm) return;
+  if (_scorm.version === "1.2") _scorm.api.LMSSave("");
+  else _scorm.api.Commit("");
+}
+function scormFinish(status) {
+  if (!_scorm) return;
+  if (_scorm.version === "1.2") {
+    _scorm.api.LMSSetValue("cmi.core.lesson_status", status);
+    _scorm.api.LMSFinish("");
+  } else {
+    _scorm.api.SetValue("cmi.completion_status", "completed");
+    _scorm.api.SetValue("cmi.success_status", status === "passed" ? "passed" : "failed");
+    _scorm.api.Terminate("");
+  }
+}
+var _startTime = Date.now();
+function getSessionTime() {
+  var secs = Math.round((Date.now() - _startTime) / 1000);
+  var h = Math.floor(secs / 3600);
+  var m = Math.floor((secs % 3600) / 60);
+  var s = secs % 60;
+  // PT##H##M##S (SCORM 2004) / HH:MM:SS (SCORM 1.2) — use ISO 8601 duration, LMS handles both
+  return "PT" + (h ? h + "H" : "") + (m ? m + "M" : "") + s + "S";
+}
+window.addEventListener("load", function() { initSCORM(); });
+window.addEventListener("beforeunload", function() {
+  if (_scorm) {
+    try { scormSet(_scorm.version === "1.2" ? "cmi.core.session_time" : "cmi.session_time", getSessionTime()); scormCommit(); } catch(e) {}
+  }
+});
+`;
+
+const QUIZ_ENGINE_JS = `
+function kcAnswer(qid, chosen, correct) {
+  var container = document.getElementById(qid);
+  var fb = document.getElementById(qid + "_fb");
+  var btns = container.querySelectorAll(".mc-option");
+  btns.forEach(function(b) { b.disabled = true; });
+  if (chosen === correct) {
+    btns[chosen].style.background = "#22c55e22";
+    btns[chosen].style.borderColor = "#22c55e";
+    if (fb) { fb.textContent = "Correct!"; fb.style.color = "#16a34a"; fb.style.display = "block"; }
+  } else {
+    btns[chosen].style.background = "#ef444422";
+    btns[chosen].style.borderColor = "#ef4444";
+    if (btns[correct]) { btns[correct].style.background = "#22c55e22"; btns[correct].style.borderColor = "#22c55e"; }
+    if (fb) { fb.textContent = "Incorrect."; fb.style.color = "#dc2626"; fb.style.display = "block"; }
+  }
+}
+function flipCard(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle("flipped");
+}
+function branchChoice(targetLabel) {
+  alert("Navigating to: " + (targetLabel || "next module"));
+}
+function nextModule() { history.forward(); }
+function prevModule() { history.back(); }
+function submitQuiz(qid, answers, feedbacks, points) {
+  var container = document.getElementById(qid);
+  var totalPts = parseFloat(container.dataset.totalPts) || 1;
+  var passThreshold = parseFloat(container.dataset.pass) || 80;
+  var earned = 0;
+  answers.forEach(function(a, qi) {
+    var qqid = qid + "_q" + qi;
+    var fb = document.getElementById(qqid + "_fb");
+    var correct = false;
+    if (a.type === "mcq") {
+      var selected = container.querySelector('input[name="' + qqid + '"]:checked');
+      correct = selected && parseInt(selected.value) === a.correct;
+    } else if (a.type === "tf") {
+      var sel = container.querySelector('input[name="' + qqid + '"]:checked');
+      correct = sel && sel.value === a.correct;
+    } else if (a.type === "fitb") {
+      var inp = document.getElementById(qqid + "_text");
+      correct = inp && a.accepted.indexOf(inp.value.trim().toLowerCase()) !== -1;
+    }
+    if (correct) earned += points[qi] || 1;
+    if (fb) {
+      fb.textContent = correct ? feedbacks[qi].correct : feedbacks[qi].incorrect;
+      fb.style.color = correct ? "#16a34a" : "#dc2626";
+      fb.style.display = "block";
+    }
+  });
+  var rawScore = totalPts ? Math.round((earned / totalPts) * 100) : 0;
+  var passed = rawScore >= passThreshold;
+  var resultEl = document.getElementById(qid + "_result");
+  if (resultEl) {
+    resultEl.style.display = "block";
+    resultEl.innerHTML = "<strong>Score: " + rawScore + "%</strong> &mdash; " + (passed ? "✅ Passed" : "❌ Failed");
+    resultEl.style.color = passed ? "#16a34a" : "#dc2626";
+  }
+  var submitBtn = container.querySelector(".btn-submit-quiz");
+  if (submitBtn) submitBtn.disabled = true;
+  // Report to SCORM
+  if (_scorm) {
+    var scaledScore = (earned / (totalPts || 1)).toFixed(4);
+    scormSet(_scorm.version === "1.2" ? "cmi.core.score.raw" : "cmi.score.raw", rawScore);
+    scormSet(_scorm.version === "1.2" ? "cmi.core.score.scaled" : "cmi.score.scaled", scaledScore);
+    scormFinish(passed ? "passed" : "failed");
+  }
+}
+`;
+
+const SCORM_CSS = `
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: #fafafa; color: #1a1a1a; }
+.sco-wrapper { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+h1,h2,h3,h4,h5,h6 { margin: 1.25rem 0 0.5rem; line-height: 1.3; }
+h1 { font-size: 2rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+p { line-height: 1.7; margin: 0.75rem 0; }
+a { color: #2563eb; }
+pre { background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.9em; }
+blockquote { border-left: 4px solid #6b7280; margin-left: 0; padding-left: 1rem; color: #4b5563; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #d1d5db; padding: 0.5rem 0.75rem; }
+th { background: #f3f4f6; font-weight: 600; }
+img { max-width: 100%; height: auto; border-radius: 4px; }
+hr { border: none; border-top: 2px solid #e5e7eb; margin: 2rem 0; }
+/* eLearning elements */
+.learning-objectives { background: #ecfdf5; border-left: 4px solid #22c55e; padding: 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
+.learning-objectives ul { margin: 0.5rem 0 0; padding-left: 1.5rem; }
+.progress-marker { display: flex; align-items: center; justify-content: center; margin: 1.5rem 0; }
+.progress-marker span { background: #fff7ed; border: 1px solid #fb923c; border-radius: 20px; padding: 0.25rem 1rem; font-size: 0.875rem; color: #c2410c; }
+.course-nav { display: flex; justify-content: space-between; margin: 2rem 0; gap: 1rem; }
+.btn-prev, .btn-next { padding: 0.5rem 1.25rem; border-radius: 6px; border: 1px solid #d1d5db; cursor: pointer; font-size: 0.875rem; background: #fff; transition: background 0.15s; }
+.btn-next { background: #2563eb; color: #fff; border-color: #2563eb; }
+.btn-next:hover { background: #1d4ed8; }
+.btn-prev:hover { background: #f3f4f6; }
+/* Quiz */
+.quiz-block { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+.quiz-title { font-size: 1.125rem; margin-bottom: 1rem; }
+.quiz-question { margin-bottom: 1.5rem; }
+.q-prompt { font-weight: 500; margin-bottom: 0.75rem; }
+.q-inputs { display: flex; flex-direction: column; gap: 0.5rem; }
+.mc-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 6px; }
+.mc-label:hover { background: #f8fafc; }
+.fitb-input { width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; }
+.q-feedback { margin-top: 0.5rem; font-size: 0.875rem; font-weight: 500; }
+.btn-submit-quiz { background: #7c3aed; color: #fff; border: none; padding: 0.5rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
+.btn-submit-quiz:hover { background: #6d28d9; }
+.btn-submit-quiz:disabled { background: #a78bfa; cursor: default; }
+.quiz-result { margin-top: 1rem; font-size: 1rem; }
+/* Knowledge check */
+.knowledge-check { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+.kc-prompt { font-weight: 500; margin-bottom: 0.75rem; }
+.mc-options { display: flex; flex-direction: column; gap: 0.5rem; }
+.mc-option { background: #fff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.5rem 0.75rem; cursor: pointer; text-align: left; font-size: 0.875rem; transition: background 0.15s; }
+.mc-option:hover:not(:disabled) { background: #dbeafe; }
+.kc-feedback { margin-top: 0.5rem; font-size: 0.875rem; font-weight: 500; }
+/* Flashcard */
+.flashcard { perspective: 800px; cursor: pointer; margin: 1rem 0; }
+.flashcard-inner { position: relative; width: 100%; min-height: 120px; transition: transform 0.5s; transform-style: preserve-3d; }
+.flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+.flashcard-front, .flashcard-back { position: absolute; width: 100%; min-height: 120px; backface-visibility: hidden; background: #fff; border: 2px solid #fbbf24; border-radius: 8px; padding: 1.5rem; display: flex; align-items: center; justify-content: center; }
+.flashcard-back { transform: rotateY(180deg); background: #fffbeb; }
+.flashcard-hint { text-align: center; font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem; }
+/* Branching */
+.branching { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+.branching-prompt { font-weight: 500; margin-bottom: 1rem; }
+.branch-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; }
+.branch-btn { background: #fff; border: 2px solid #818cf8; border-radius: 8px; padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; text-align: left; transition: background 0.15s; }
+.branch-btn:hover { background: #e0e7ff; }
+`;
+
+function buildScoHtml(module, courseTitle, cssOverride = "") {
+  const blocks = (() => {
+    try { return JSON.parse(module.blocks_json || "[]"); } catch { return []; }
+  })();
+
+  const bodyHtml = blocks.map((b) => blockToHtml(b)).join("\n");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>${escHtml(module.title || "Module")} — ${escHtml(courseTitle || "Course")}</title>
+<style>
+${SCORM_CSS}
+${cssOverride}
+</style>
+</head>
+<body>
+<div class="sco-wrapper">
+${bodyHtml}
+</div>
+<script>
+${SCORM_RUNTIME_SHIM}
+${QUIZ_ENGINE_JS}
+</script>
+</body>
+</html>`;
+}
+
+// ---------------------------------------------------------------------------
+// SCORM 1.2 manifest
+// ---------------------------------------------------------------------------
+
+function generateManifest12(course, modules) {
+  const identifier = `MARKDROP_${(course.id || "course").replace(/-/g, "").slice(0, 16)}`;
+  const orgId = `${identifier}_ORG`;
+
+  const items = modules.map((m, i) => {
+    const resId = `res_${i + 1}`;
+    return `      <item identifier="item_${i + 1}" identifierref="${resId}">
+        <title>${escHtml(m.title || `Module ${i + 1}`)}</title>
+      </item>`;
+  }).join("\n");
+
+  const resources = modules.map((m, i) => {
+    const resId = `res_${i + 1}`;
+    const href = `module_${i + 1}/index.html`;
+    return `    <resource identifier="${resId}" type="webcontent" adlcp:scormtype="sco" href="${href}">
+      <file href="${href}"/>
+    </resource>`;
+  }).join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="${identifier}"
+  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd
+                      http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="${orgId}">
+    <organization identifier="${orgId}">
+      <title>${escHtml(course.title || "Course")}</title>
+${items}
+    </organization>
+  </organizations>
+  <resources>
+${resources}
+  </resources>
+</manifest>`;
+}
+
+// ---------------------------------------------------------------------------
+// SCORM 2004 4th Edition manifest
+// ---------------------------------------------------------------------------
+
+function generateManifest2004(course, modules) {
+  const identifier = `MARKDROP_${(course.id || "course").replace(/-/g, "").slice(0, 16)}`;
+  const orgId = `${identifier}_ORG`;
+
+  const items = modules.map((m, i) => {
+    const resId = `res_${i + 1}`;
+    return `      <item identifier="item_${i + 1}" identifierref="${resId}">
+        <title>${escHtml(m.title || `Module ${i + 1}`)}</title>
+        <imsss:sequencing>
+          <imsss:deliveryControls completionSetByContent="true" objectiveSetByContent="true"/>
+        </imsss:sequencing>
+      </item>`;
+  }).join("\n");
+
+  const resources = modules.map((m, i) => {
+    const resId = `res_${i + 1}`;
+    const href = `module_${i + 1}/index.html`;
+    return `    <resource identifier="${resId}" type="webcontent" adlcp:scormType="sco" href="${href}">
+      <file href="${href}"/>
+    </resource>`;
+  }).join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="${identifier}" version="1"
+  xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+  xmlns:adlseq="http://www.adlnet.org/xsd/adlseq_v1p3"
+  xmlns:adlnav="http://www.adlnet.org/xsd/adlnav_v1p3"
+  xmlns:imsss="http://www.imsglobal.org/xsd/imsss"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 imscp_v1p1.xsd
+                      http://www.adlnet.org/xsd/adlcp_v1p3 adlcp_v1p3.xsd
+                      http://www.imsglobal.org/xsd/imsss imsss_v1p0.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>2004 4th Edition</schemaversion>
+  </metadata>
+  <organizations default="${orgId}">
+    <organization identifier="${orgId}" adlseq:objectivesGlobalToSystem="false">
+      <title>${escHtml(course.title || "Course")}</title>
+${items}
+    </organization>
+  </organizations>
+  <resources>
+${resources}
+  </resources>
+</manifest>`;
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate and download a SCORM 1.2 package.
+ * @param {object} course - course record from Supabase
+ * @param {Array}  modules - ordered array of course_modules records
+ */
+export async function exportToScorm12(course, modules) {
+  return _buildAndDownload(course, modules, "1.2");
+}
+
+/**
+ * Generate and download a SCORM 2004 4th Edition package.
+ */
+export async function exportToScorm2004(course, modules) {
+  return _buildAndDownload(course, modules, "2004");
+}
+
+async function _buildAndDownload(course, modules, version) {
+  if (!modules || modules.length === 0) throw new Error("No modules to export");
+
+  const zip = new JSZip();
+  const manifestXml = version === "1.2"
+    ? generateManifest12(course, modules)
+    : generateManifest2004(course, modules);
+
+  zip.file("imsmanifest.xml", manifestXml);
+
+  for (let i = 0; i < modules.length; i++) {
+    const mod = modules[i];
+    const html = buildScoHtml(mod, course.title || "Course");
+    zip.file(`module_${i + 1}/index.html`, html);
+  }
+
+  const blob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
+  const safeName = (course.title || "course").replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
+  const filename = `${safeName}_scorm${version.replace(".", "")}_${new Date().toISOString().slice(0, 10)}.zip`;
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return filename;
+}
+
+/**
+ * Build a preview HTML string for a single module (no SCORM API calls).
+ * Used by CoursePreview component.
+ */
+export function buildPreviewHtml(module, courseTitle) {
+  return buildScoHtml(module, courseTitle || "Preview");
+}

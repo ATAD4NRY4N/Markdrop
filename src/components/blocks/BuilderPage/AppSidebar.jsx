@@ -1,15 +1,19 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import {
   AlertCircle,
+  CheckCircle2,
   Code2,
   CreditCard,
   FileSliders,
+  Flag,
+  GitBranch,
   Heading1,
   Heading2,
   Heading3,
   Heading4,
   Heading5,
   Heading6,
+  HelpCircle,
   Image,
   ImagePlay,
   Layers,
@@ -22,10 +26,12 @@ import {
   Palette,
   Pilcrow,
   Quote,
+  RotateCcw,
   Shield,
   Sigma,
   Sparkles,
   Table,
+  Target,
   Type,
   List as UnorderedList,
   Video,
@@ -204,6 +210,51 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
         position: "bg",
         opacity: "",
       }),
+      // eLearning block defaults
+      ...(blockType === "learning-objective" && {
+        objectives: ["Learners will be able to…"],
+      }),
+      ...(blockType === "quiz" && {
+        title: "",
+        passThreshold: 80,
+        maxAttempts: 0,
+        questions: [
+          {
+            id: `q${Date.now()}`,
+            type: "mcq",
+            prompt: "",
+            options: ["", "", "", ""],
+            correctIndex: 0,
+            feedbackCorrect: "",
+            feedbackIncorrect: "",
+            points: 1,
+          },
+        ],
+      }),
+      ...(blockType === "knowledge-check" && {
+        prompt: "",
+        options: ["", "", ""],
+        correctIndex: 0,
+      }),
+      ...(blockType === "flashcard" && {
+        front: "",
+        back: "",
+      }),
+      ...(blockType === "progress-marker" && {
+        label: "Progress checkpoint",
+      }),
+      ...(blockType === "course-nav" && {
+        prevLabel: "← Previous",
+        nextLabel: "Next →",
+        locked: false,
+      }),
+      ...(blockType === "branching" && {
+        prompt: "",
+        choices: [
+          { id: "c1", label: "" },
+          { id: "c2", label: "" },
+        ],
+      }),
     };
 
 
@@ -260,6 +311,15 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
       { title: "Skill Icons", key: "skill-icons", icon: Sparkles },
       { title: "Typing SVG", key: "typing-svg", icon: Type },
       { title: "GitHub Profile Cards", key: "github-profile-cards", icon: CreditCard },
+    ],
+    "elearning": [
+      { title: "Learning Objectives", key: "learning-objective", icon: Target },
+      { title: "Quiz", key: "quiz", icon: CheckCircle2 },
+      { title: "Knowledge Check", key: "knowledge-check", icon: HelpCircle },
+      { title: "Flashcard", key: "flashcard", icon: RotateCcw },
+      { title: "Progress Marker", key: "progress-marker", icon: Flag },
+      { title: "Course Navigation", key: "course-nav", icon: Layers },
+      { title: "Branching Scenario", key: "branching", icon: GitBranch },
     ],
   };
 

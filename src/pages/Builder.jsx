@@ -11,6 +11,7 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import {
   AlertCircle,
+  CheckCircle2,
   CheckSquare,
   Code,
   Eye,
@@ -18,14 +19,18 @@ import {
   FileDown,
   FileUp,
   Film,
+  Flag,
+  GitBranch,
   Heading1,
   Heading2,
   Heading3,
   Heading4,
   Heading5,
   Heading6,
+  HelpCircle,
   Image,
   Info,
+  Layers,
   Link,
   List,
   ListOrdered,
@@ -43,6 +48,7 @@ import {
   Sparkles,
   Sun,
   Table,
+  Target,
   Type,
   Video,
 } from "lucide-react";
@@ -190,6 +196,14 @@ export default function Builder() {
       table: Table,
       "shield-badge": Shield,
       "skill-icons": Sparkles,
+      // eLearning blocks
+      "learning-objective": Target,
+      quiz: CheckCircle2,
+      "knowledge-check": HelpCircle,
+      flashcard: RotateCcw,
+      "progress-marker": Flag,
+      "course-nav": Layers,
+      branching: GitBranch,
     };
     return icons[blockType] || Type;
   };
@@ -216,6 +230,14 @@ export default function Builder() {
       table: "Table",
       "shield-badge": "Shield Badge",
       "skill-icons": "Skill Icons",
+      // eLearning blocks
+      "learning-objective": "Learning Objectives",
+      quiz: "Quiz",
+      "knowledge-check": "Knowledge Check",
+      flashcard: "Flashcard",
+      "progress-marker": "Progress Marker",
+      "course-nav": "Course Navigation",
+      branching: "Branching Scenario",
     };
     return labels[blockType] || blockType;
   };
@@ -636,6 +658,46 @@ export default function Builder() {
           }),
           ...(blockType === "alert" && {
             alertType: "note",
+          }),
+          // eLearning block defaults
+          ...(blockType === "learning-objective" && {
+            objectives: ["Learners will be able to…"],
+          }),
+          ...(blockType === "quiz" && {
+            title: "",
+            passThreshold: 80,
+            maxAttempts: 0,
+            questions: [
+              {
+                id: `q${Date.now()}`,
+                type: "mcq",
+                prompt: "",
+                options: ["", "", "", ""],
+                correctIndex: 0,
+                feedbackCorrect: "",
+                feedbackIncorrect: "",
+                points: 1,
+              },
+            ],
+          }),
+          ...(blockType === "knowledge-check" && {
+            prompt: "",
+            options: ["", "", ""],
+            correctIndex: 0,
+          }),
+          ...(blockType === "flashcard" && { front: "", back: "" }),
+          ...(blockType === "progress-marker" && { label: "Progress checkpoint" }),
+          ...(blockType === "course-nav" && {
+            prevLabel: "← Previous",
+            nextLabel: "Next →",
+            locked: false,
+          }),
+          ...(blockType === "branching" && {
+            prompt: "",
+            choices: [
+              { id: "c1", label: "" },
+              { id: "c2", label: "" },
+            ],
           }),
         };
 

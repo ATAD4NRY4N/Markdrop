@@ -9,6 +9,13 @@ import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
 import mermaid from "mermaid";
 import { useTheme } from "@/components/ThemeProvider";
+import BranchingBlock from "@/components/blocks/BuilderPage/blocks/BranchingBlock";
+import CourseNavBlock from "@/components/blocks/BuilderPage/blocks/CourseNavBlock";
+import FlashcardBlock from "@/components/blocks/BuilderPage/blocks/FlashcardBlock";
+import KnowledgeCheckBlock from "@/components/blocks/BuilderPage/blocks/KnowledgeCheckBlock";
+import LearningObjectiveBlock from "@/components/blocks/BuilderPage/blocks/LearningObjectiveBlock";
+import ProgressMarkerBlock from "@/components/blocks/BuilderPage/blocks/ProgressMarkerBlock";
+import QuizBlock from "@/components/blocks/BuilderPage/blocks/QuizBlock";
 
 function MermaidDiagram({ chart }) {
   const ref = useRef(null);
@@ -463,6 +470,15 @@ const blocksToMarkdown = (blocks) => {
 
           return cardMarkdown;
         }
+        // eLearning blocks are rendered as React components — return empty string as fallback
+        case "learning-objective":
+        case "quiz":
+        case "knowledge-check":
+        case "flashcard":
+        case "progress-marker":
+        case "course-nav":
+        case "branching":
+          return "";
         default:
           return block.content;
       }
@@ -495,10 +511,54 @@ const MOTION_VARIANTS = {
   },
 };
 
+// eLearning block types that render as interactive React components in preview
+const ELEARNING_TYPES = new Set([
+  "learning-objective",
+  "quiz",
+  "knowledge-check",
+  "flashcard",
+  "progress-marker",
+  "course-nav",
+  "branching",
+]);
+
+const ELEARNING_COMPONENTS = {
+  "learning-objective": LearningObjectiveBlock,
+  quiz: QuizBlock,
+  "knowledge-check": KnowledgeCheckBlock,
+  flashcard: FlashcardBlock,
+  "progress-marker": ProgressMarkerBlock,
+  "course-nav": CourseNavBlock,
+  branching: BranchingBlock,
+};
+
 // Render a single block's markdown within an optionally animated wrapper
 function AnimatedBlockPreview({ block, mdComponents }) {
   const anim = block.animation || { type: "none" };
   const variant = MOTION_VARIANTS[anim.type] || MOTION_VARIANTS.none;
+
+  // eLearning blocks render their own interactive React components
+  if (ELEARNING_TYPES.has(block.type)) {
+    const BlockComponent = ELEARNING_COMPONENTS[block.type];
+    const content = (
+      <div className="my-2">
+        {/* no-op onUpdate — preview is read-only */}
+        <BlockComponent block={block} onUpdate={() => {}} />
+      </div>
+    );
+    if (anim.type === "none" || !variant.initial) return <div>{content}</div>;
+    return (
+      <motion.div
+        initial={variant.initial}
+        whileInView={variant.animate}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: anim.duration ?? 0.5, delay: anim.delay ?? 0, ease: "easeOut" }}
+      >
+        {content}
+      </motion.div>
+    );
+  }
+
   const blockMd = blocksToMarkdown([block]);
 
   const content = (

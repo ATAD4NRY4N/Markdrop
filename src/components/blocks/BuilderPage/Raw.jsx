@@ -432,6 +432,56 @@ const blocksToMarkdown = (blocks) => {
 
           return cardMarkdown;
         }
+        case "learning-objective": {
+          const items = block.objectives || [];
+          if (items.length === 0) return "<!-- Learning Objectives (empty) -->";
+          return `<!-- Learning Objectives -->\n${items.map((o, i) => `${i + 1}. ${o}`).join("\n")}`;
+        }
+        case "quiz": {
+          const qs = block.questions || [];
+          const lines = [`<!-- Quiz: ${block.title || "Untitled"} -->`];
+          qs.forEach((q, i) => {
+            lines.push(`\n**Q${i + 1}.** ${q.prompt || "(no prompt)"}`);
+            if (q.type === "mcq" || !q.type) {
+              (q.options || []).forEach((opt, j) => {
+                const marker = j === (q.correctIndex ?? 0) ? "✓" : " ";
+                lines.push(`  [${marker}] ${opt || `Option ${j + 1}`}`);
+              });
+            } else if (q.type === "tf") {
+              lines.push(`  Correct: ${q.correctTF ?? "True"}`);
+            } else if (q.type === "fitb") {
+              lines.push(`  Accepted: ${(q.acceptedAnswers || []).join(", ")}`);
+            }
+          });
+          return lines.join("\n");
+        }
+        case "knowledge-check": {
+          const opts = block.options || [];
+          const lines = [
+            `<!-- Knowledge Check -->`,
+            `**Q:** ${block.prompt || "(no prompt)"}`,
+          ];
+          opts.forEach((opt, i) => {
+            const marker = i === (block.correctIndex ?? 0) ? "✓" : " ";
+            lines.push(`  [${marker}] ${opt || `Option ${i + 1}`}`);
+          });
+          return lines.join("\n");
+        }
+        case "flashcard":
+          return `<!-- Flashcard -->\n**Front:** ${block.front || "(empty)"}\n**Back:** ${block.back || "(empty)"}`;
+        case "progress-marker":
+          return `<!-- Progress Marker: ${block.label || "Checkpoint"} -->`;
+        case "course-nav":
+          return `<!-- Course Navigation -->\n← ${block.prevLabel || "Previous"}  |  ${block.nextLabel || "Next"} →`;
+        case "branching": {
+          const choices = block.choices || [];
+          const lines = [
+            `<!-- Branching Scenario -->`,
+            `**Prompt:** ${block.prompt || "(no prompt)"}`,
+            ...choices.map((c, i) => `  ${i + 1}. ${c.label || `Choice ${i + 1}`}`),
+          ];
+          return lines.join("\n");
+        }
         default:
           return block.content;
       }

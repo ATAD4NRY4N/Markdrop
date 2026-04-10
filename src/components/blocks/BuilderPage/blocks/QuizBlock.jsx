@@ -416,7 +416,7 @@ function QuestionPreview({ question, index }) {
 export default function QuizBlock({ block, onUpdate }) {
   const [isPreview, setIsPreview] = useState(false);
   const questions = block.questions || [
-    { id: "q1", type: "mcq", prompt: "", options: ["", "", "", ""], correctIndex: 0, feedbackCorrect: "", feedbackIncorrect: "", points: 1 },
+    { id: `q${Date.now()}`, type: "mcq", prompt: "", options: ["", "", "", ""], correctIndex: 0, feedbackCorrect: "", feedbackIncorrect: "", points: 1 },
   ];
 
   const updateQuestion = (index, updated) => {

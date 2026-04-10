@@ -1,4 +1,4 @@
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,7 +80,7 @@ export default function KnowledgeCheckBlock({ block, onUpdate }) {
                 onClick={() => removeOption(i)}
                 disabled={options.length <= 2}
               >
-                ×
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
           ))}

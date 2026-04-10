@@ -13,6 +13,12 @@ import { marked } from "marked";
 // Block → HTML conversion (reused from exportUtils patterns)
 // ---------------------------------------------------------------------------
 
+let _htmlIdCounter = 0;
+function nextHtmlId(prefix) {
+  _htmlIdCounter += 1;
+  return `${prefix}_${_htmlIdCounter}`;
+}
+
 function blockToHtml(block) {
   switch (block.type) {
     case "h1": return `<h1>${escHtml(block.content)}</h1>`;
@@ -83,7 +89,7 @@ function escHtml(str) {
 }
 
 function buildFlashcardHtml(block) {
-  const id = `fc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const id = nextHtmlId("fc");
   return `<div class="flashcard" id="${id}" onclick="flipCard('${id}')">
   <div class="flashcard-inner">
     <div class="flashcard-front"><p>${escHtml(block.front || "(Front)")}</p></div>
@@ -105,7 +111,7 @@ function buildBranchingHtml(block) {
 }
 
 function buildKnowledgeCheckHtml(block) {
-  const qid = `kc_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const qid = nextHtmlId("kc");
   const opts = (block.options || []).map((opt, i) => `
     <button class="mc-option" onclick="kcAnswer('${qid}',${i},${block.correctIndex ?? 0})" data-idx="${i}">
       ${escHtml(opt || `Option ${i + 1}`)}
@@ -118,7 +124,7 @@ function buildKnowledgeCheckHtml(block) {
 }
 
 function buildQuizHtml(block) {
-  const qid = `quiz_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const qid = nextHtmlId("quiz");
   const questions = block.questions || [];
   const totalPts = questions.reduce((s, q) => s + (q.points ?? 1), 0);
 
@@ -223,18 +229,30 @@ function scormFinish(status) {
   }
 }
 var _startTime = Date.now();
-function getSessionTime() {
+var _idCounter = 0;
+function getSessionTime(version) {
   var secs = Math.round((Date.now() - _startTime) / 1000);
   var h = Math.floor(secs / 3600);
   var m = Math.floor((secs % 3600) / 60);
   var s = secs % 60;
-  // PT##H##M##S (SCORM 2004) / HH:MM:SS (SCORM 1.2) — use ISO 8601 duration, LMS handles both
+  if (version === "1.2") {
+    // SCORM 1.2 requires CMITimespan: HH:MM:SS.SS
+    return pad2(h) + ":" + pad2(m) + ":" + pad2(s) + ".00";
+  }
+  // SCORM 2004: ISO 8601 duration PT##H##M##SS
   return "PT" + (h ? h + "H" : "") + (m ? m + "M" : "") + s + "S";
 }
+function pad2(n) { return n < 10 ? "0" + n : "" + n; }
 window.addEventListener("load", function() { initSCORM(); });
 window.addEventListener("beforeunload", function() {
   if (_scorm) {
-    try { scormSet(_scorm.version === "1.2" ? "cmi.core.session_time" : "cmi.session_time", getSessionTime()); scormCommit(); } catch(e) {}
+    try {
+      scormSet(
+        _scorm.version === "1.2" ? "cmi.core.session_time" : "cmi.session_time",
+        getSessionTime(_scorm.version)
+      );
+      scormCommit();
+    } catch(e) {}
   }
 });
 `;
@@ -541,7 +559,8 @@ async function _buildAndDownload(course, modules, version) {
 
   const blob = await zip.generateAsync({ type: "blob", mimeType: "application/zip" });
   const safeName = (course.title || "course").replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
-  const filename = `${safeName}_scorm${version.replace(".", "")}_${new Date().toISOString().slice(0, 10)}.zip`;
+  const shortId = (course.id || "").slice(0, 8);
+  const filename = `${safeName}${shortId ? `_${shortId}` : ""}_scorm${version.replace(".", "")}_${new Date().toISOString().slice(0, 10)}.zip`;
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

@@ -223,7 +223,7 @@ function CourseBuilderInner() {
 
   // DnD handlers
   const handleDragStart = (event) => setActiveId(event.active.id);
-  // biome-ignore lint/suspicious/noEmptyBlockStatements: responsiveness
+  // biome-ignore lint/suspicious/noEmptyBlockStatements: required by DndContext API; onDragOver is needed to enable drop targets
   const handleDragOver = () => {};
 
   const handleDragEnd = (event) => {

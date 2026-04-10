@@ -1,5 +1,10 @@
-import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
   BookOpen,
@@ -12,13 +17,27 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCourse } from "@/context/CourseContext";
 import { cn } from "@/lib/utils";
 
-function SortableModuleItem({ module, isActive, onClick, onRename, onDelete, sections, onAssignSection }) {
+function SortableModuleItem({
+  module,
+  isActive,
+  onClick,
+  onRename,
+  onDelete,
+  sections,
+  onAssignSection,
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: module.id,
   });
@@ -41,7 +60,11 @@ function SortableModuleItem({ module, isActive, onClick, onRename, onDelete, sec
   };
 
   const blocks = (() => {
-    try { return JSON.parse(module.blocks_json || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(module.blocks_json || "[]");
+    } catch {
+      return [];
+    }
   })();
 
   const currentSection = sections.find((s) => s.moduleIds.includes(module.id));
@@ -75,7 +98,10 @@ function SortableModuleItem({ module, isActive, onClick, onRename, onDelete, sec
           onBlur={commitRename}
           onKeyDown={(e) => {
             if (e.key === "Enter") commitRename();
-            if (e.key === "Escape") { setEditing(false); setEditTitle(module.title); }
+            if (e.key === "Escape") {
+              setEditing(false);
+              setEditTitle(module.title);
+            }
           }}
           className="h-6 text-xs px-1 bg-transparent border-0 border-b border-primary focus-visible:ring-0 rounded-none"
           autoFocus
@@ -83,17 +109,23 @@ function SortableModuleItem({ module, isActive, onClick, onRename, onDelete, sec
         />
       ) : (
         <>
-          <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform", isActive && "text-primary rotate-90")} />
+          <ChevronRight
+            className={cn(
+              "h-3 w-3 shrink-0 transition-transform",
+              isActive && "text-primary rotate-90"
+            )}
+          />
           <span
             className="flex-1 text-sm truncate"
-            onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              setEditing(true);
+            }}
             title="Double-click to rename"
           >
             {module.title}
           </span>
-          <span className="text-[10px] text-muted-foreground/50 shrink-0">
-            {blocks.length}
-          </span>
+          <span className="text-[10px] text-muted-foreground/50 shrink-0">{blocks.length}</span>
         </>
       )}
 
@@ -109,21 +141,34 @@ function SortableModuleItem({ module, isActive, onClick, onRename, onDelete, sec
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
-          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditing(true); }}>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditing(true);
+            }}
+          >
             Rename
           </DropdownMenuItem>
           {sections.length > 0 && (
             <>
               <DropdownMenuSeparator />
               {currentSection ? (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onAssignSection(module.id, null); }}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAssignSection(module.id, null);
+                  }}
+                >
                   Remove from section
                 </DropdownMenuItem>
               ) : null}
               {sections.map((sec) => (
                 <DropdownMenuItem
                   key={sec.id}
-                  onClick={(e) => { e.stopPropagation(); onAssignSection(module.id, sec.id); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAssignSection(module.id, sec.id);
+                  }}
                   disabled={sec.id === currentSection?.id}
                 >
                   Move to: {sec.title}
@@ -134,7 +179,10 @@ function SortableModuleItem({ module, isActive, onClick, onRename, onDelete, sec
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
-            onClick={(e) => { e.stopPropagation(); onDelete(module.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(module.id);
+            }}
           >
             Delete
           </DropdownMenuItem>
@@ -167,7 +215,12 @@ function SectionHeader({ section, onRename, onDelete, moduleCount, defaultCollap
           className="flex items-center gap-1 flex-1 min-w-0 text-left"
           onClick={() => !editing && setCollapsed((v) => !v)}
         >
-          <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform text-muted-foreground", !collapsed && "rotate-90")} />
+          <ChevronRight
+            className={cn(
+              "h-3 w-3 shrink-0 transition-transform text-muted-foreground",
+              !collapsed && "rotate-90"
+            )}
+          />
           {editing ? (
             <Input
               value={editTitle}
@@ -175,7 +228,10 @@ function SectionHeader({ section, onRename, onDelete, moduleCount, defaultCollap
               onBlur={commitRename}
               onKeyDown={(e) => {
                 if (e.key === "Enter") commitRename();
-                if (e.key === "Escape") { setEditing(false); setEditTitle(section.title); }
+                if (e.key === "Escape") {
+                  setEditing(false);
+                  setEditTitle(section.title);
+                }
               }}
               className="h-5 text-xs px-1 bg-transparent border-0 border-b border-primary focus-visible:ring-0 rounded-none"
               autoFocus
@@ -184,21 +240,25 @@ function SectionHeader({ section, onRename, onDelete, moduleCount, defaultCollap
           ) : (
             <span
               className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate"
-              onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                setEditing(true);
+              }}
               title="Double-click to rename"
             >
               {section.title}
             </span>
           )}
-          <span className="text-[10px] text-muted-foreground/40 shrink-0 ml-1">
-            {moduleCount}
-          </span>
+          <span className="text-[10px] text-muted-foreground/40 shrink-0 ml-1">{moduleCount}</span>
         </button>
         <Button
           variant="ghost"
           size="icon"
           className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:text-destructive"
-          onClick={(e) => { e.stopPropagation(); onDelete(section.id); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(section.id);
+          }}
           title="Delete section"
         >
           <Trash2 className="h-3 w-3" />
@@ -210,14 +270,22 @@ function SectionHeader({ section, onRename, onDelete, moduleCount, defaultCollap
 
 export default function CourseStructurePanel({ className }) {
   const {
-    course, modules, activeModuleId, setActiveModuleId,
-    addModule, renameModule, removeModule, reorderModuleList,
-    sections, addSection, renameSection, removeSection, assignModuleToSection,
+    course,
+    modules,
+    activeModuleId,
+    setActiveModuleId,
+    addModule,
+    renameModule,
+    removeModule,
+    reorderModuleList,
+    sections,
+    addSection,
+    renameSection,
+    removeSection,
+    assignModuleToSection,
   } = useCourse();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   const handleDragEnd = ({ active, over }) => {
     if (!over || active.id === over.id) return;
@@ -237,9 +305,7 @@ export default function CourseStructurePanel({ className }) {
     <div className={cn("flex flex-col h-full border-r bg-card", className)}>
       <div className="flex items-center gap-2 px-3 py-3 border-b shrink-0">
         <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
-        <span className="text-sm font-medium truncate flex-1">
-          {course?.title || "Course"}
-        </span>
+        <span className="text-sm font-medium truncate flex-1">{course?.title || "Course"}</span>
         <span className="text-xs text-muted-foreground shrink-0">
           {modules.length} mod{modules.length !== 1 ? "s" : ""}
         </span>
@@ -247,8 +313,15 @@ export default function CourseStructurePanel({ className }) {
 
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={modules.map((m) => m.id)}
+              strategy={verticalListSortingStrategy}
+            >
               {/* Unsectioned modules */}
               {unsectionedModules.map((mod) => (
                 <SortableModuleItem
@@ -289,9 +362,7 @@ export default function CourseStructurePanel({ className }) {
           </DndContext>
 
           {modules.length === 0 && sections.length === 0 && (
-            <p className="text-xs text-muted-foreground/60 px-2 py-3 text-center">
-              No modules yet
-            </p>
+            <p className="text-xs text-muted-foreground/60 px-2 py-3 text-center">No modules yet</p>
           )}
         </div>
       </ScrollArea>
@@ -320,7 +391,18 @@ export default function CourseStructurePanel({ className }) {
   );
 }
 
-function CollapsibleSection({ section, modules, activeModuleId, onModuleClick, onModuleRename, onModuleDelete, onSectionRename, onSectionDelete, allSections, onAssignSection }) {
+function CollapsibleSection({
+  section,
+  modules,
+  activeModuleId,
+  onModuleClick,
+  onModuleRename,
+  onModuleDelete,
+  onSectionRename,
+  onSectionDelete,
+  allSections,
+  onAssignSection,
+}) {
   const [collapsed, setCollapsed] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState(section.title);
@@ -343,7 +425,12 @@ function CollapsibleSection({ section, modules, activeModuleId, onModuleClick, o
           className="flex items-center gap-1 flex-1 min-w-0 text-left"
           onClick={() => !editingTitle && setCollapsed((v) => !v)}
         >
-          <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform text-muted-foreground", !collapsed && "rotate-90")} />
+          <ChevronRight
+            className={cn(
+              "h-3 w-3 shrink-0 transition-transform text-muted-foreground",
+              !collapsed && "rotate-90"
+            )}
+          />
           {editingTitle ? (
             <Input
               value={editTitle}
@@ -351,7 +438,10 @@ function CollapsibleSection({ section, modules, activeModuleId, onModuleClick, o
               onBlur={commitRename}
               onKeyDown={(e) => {
                 if (e.key === "Enter") commitRename();
-                if (e.key === "Escape") { setEditingTitle(false); setEditTitle(section.title); }
+                if (e.key === "Escape") {
+                  setEditingTitle(false);
+                  setEditTitle(section.title);
+                }
               }}
               className="h-5 text-xs px-1 bg-transparent border-0 border-b border-primary focus-visible:ring-0 rounded-none flex-1"
               autoFocus
@@ -360,19 +450,27 @@ function CollapsibleSection({ section, modules, activeModuleId, onModuleClick, o
           ) : (
             <span
               className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate"
-              onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(true); }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                setEditingTitle(true);
+              }}
               title="Double-click to rename section"
             >
               {section.title}
             </span>
           )}
-          <span className="text-[10px] text-muted-foreground/40 shrink-0 ml-1">{modules.length}</span>
+          <span className="text-[10px] text-muted-foreground/40 shrink-0 ml-1">
+            {modules.length}
+          </span>
         </button>
         <Button
           variant="ghost"
           size="icon"
           className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:text-destructive"
-          onClick={(e) => { e.stopPropagation(); onSectionDelete(section.id); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSectionDelete(section.id);
+          }}
           title="Delete section"
         >
           <Trash2 className="h-3 w-3" />
@@ -383,7 +481,9 @@ function CollapsibleSection({ section, modules, activeModuleId, onModuleClick, o
       {!collapsed && (
         <div className="pl-4">
           {modules.length === 0 ? (
-            <p className="text-[10px] text-muted-foreground/40 px-2 py-1">No modules in this section</p>
+            <p className="text-[10px] text-muted-foreground/40 px-2 py-1">
+              No modules in this section
+            </p>
           ) : (
             modules.map((mod) => (
               <SortableModuleItem

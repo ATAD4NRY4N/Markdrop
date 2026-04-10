@@ -1,11 +1,17 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Clapperboard, GripVertical, Trash2 } from "lucide-react";
+import { Clapperboard, Copy, GripVertical, Trash2 } from "lucide-react";
 import { memo, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import AlertBlock from "./blocks/AlertBlock";
 import BlockquoteBlock from "./blocks/BlockquoteBlock";
@@ -82,7 +88,11 @@ function AnimationPopover({ block, onUpdate }) {
           <Clapperboard className="h-4 w-4 md:h-3.5 md:w-3.5" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent side="right" className="w-60 p-3 space-y-3" onClick={(e) => e.stopPropagation()}>
+      <PopoverContent
+        side="right"
+        className="w-60 p-3 space-y-3"
+        onClick={(e) => e.stopPropagation()}
+      >
         <p className="text-xs font-semibold">Block Animation</p>
 
         <div className="space-y-1">
@@ -106,7 +116,9 @@ function AnimationPopover({ block, onUpdate }) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-xs text-muted-foreground">Duration</Label>
-                <span className="text-xs text-muted-foreground">{(anim.duration ?? 0.5).toFixed(1)}s</span>
+                <span className="text-xs text-muted-foreground">
+                  {(anim.duration ?? 0.5).toFixed(1)}s
+                </span>
               </div>
               <Slider
                 min={0.3}
@@ -120,7 +132,9 @@ function AnimationPopover({ block, onUpdate }) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-xs text-muted-foreground">Delay</Label>
-                <span className="text-xs text-muted-foreground">{(anim.delay ?? 0).toFixed(1)}s</span>
+                <span className="text-xs text-muted-foreground">
+                  {(anim.delay ?? 0).toFixed(1)}s
+                </span>
               </div>
               <Slider
                 min={0}
@@ -142,6 +156,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
   onUpdate,
   onDelete,
   onBlockAdd,
+  onCopy,
   slideNumber,
   totalSlides,
 }) {
@@ -152,6 +167,10 @@ const MarkdownBlock = memo(function MarkdownBlock({
   const handleDelete = useCallback(() => {
     onDelete(block.id);
   }, [onDelete, block.id]);
+
+  const handleCopy = useCallback(() => {
+    if (typeof onCopy === "function") onCopy(block.id);
+  }, [onCopy, block.id]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -290,6 +309,17 @@ const MarkdownBlock = memo(function MarkdownBlock({
         <div className="absolute -right-8 top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-1">
           {!NO_ANIMATION_TYPES.has(block.type) && (
             <AnimationPopover block={block} onUpdate={onUpdate} />
+          )}
+          {typeof onCopy === "function" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 md:h-7 md:w-7 touch-manipulation"
+              onClick={handleCopy}
+              title="Copy block (Ctrl+C)"
+            >
+              <Copy className="h-4 w-4 md:h-3.5 md:w-3.5" />
+            </Button>
           )}
           <Button
             variant="ghost"

@@ -21,26 +21,46 @@ function nextHtmlId(prefix) {
 
 function blockToHtml(block) {
   switch (block.type) {
-    case "h1": return `<h1>${escHtml(block.content)}</h1>`;
-    case "h2": return `<h2>${escHtml(block.content)}</h2>`;
-    case "h3": return `<h3>${escHtml(block.content)}</h3>`;
-    case "h4": return `<h4>${escHtml(block.content)}</h4>`;
-    case "h5": return `<h5>${escHtml(block.content)}</h5>`;
-    case "h6": return `<h6>${escHtml(block.content)}</h6>`;
-    case "paragraph": return `<p>${marked.parseInline(block.content || "")}</p>`;
-    case "blockquote": return `<blockquote><p>${marked.parseInline(block.content || "")}</p></blockquote>`;
+    case "h1":
+      return `<h1>${escHtml(block.content)}</h1>`;
+    case "h2":
+      return `<h2>${escHtml(block.content)}</h2>`;
+    case "h3":
+      return `<h3>${escHtml(block.content)}</h3>`;
+    case "h4":
+      return `<h4>${escHtml(block.content)}</h4>`;
+    case "h5":
+      return `<h5>${escHtml(block.content)}</h5>`;
+    case "h6":
+      return `<h6>${escHtml(block.content)}</h6>`;
+    case "paragraph":
+      return `<p>${marked.parseInline(block.content || "")}</p>`;
+    case "blockquote":
+      return `<blockquote><p>${marked.parseInline(block.content || "")}</p></blockquote>`;
     case "alert": {
       const alertType = (block.alertType || "note").toUpperCase();
-      const colorMap = { NOTE: "#3b82f6", TIP: "#22c55e", IMPORTANT: "#a855f7", WARNING: "#f59e0b", CAUTION: "#ef4444" };
+      const colorMap = {
+        NOTE: "#3b82f6",
+        TIP: "#22c55e",
+        IMPORTANT: "#a855f7",
+        WARNING: "#f59e0b",
+        CAUTION: "#ef4444",
+      };
       const color = colorMap[alertType] || "#6b7280";
       return `<div style="border-left:4px solid ${color};padding:0.75rem 1rem;background:${color}18;border-radius:0 0.375rem 0.375rem 0;margin:1rem 0"><strong style="color:${color}">${alertType}</strong><p style="margin:0.5rem 0 0">${marked.parseInline(block.content || "")}</p></div>`;
     }
-    case "code": return marked.parse(block.content || "");
-    case "html": return block.content || "";
-    case "ul": return marked.parse(block.content || "");
-    case "ol": return marked.parse(block.content || "");
-    case "task-list": return marked.parse(block.content || "");
-    case "separator": return "<hr/>";
+    case "code":
+      return marked.parse(block.content || "");
+    case "html":
+      return block.content || "";
+    case "ul":
+      return marked.parse(block.content || "");
+    case "ol":
+      return marked.parse(block.content || "");
+    case "task-list":
+      return marked.parse(block.content || "");
+    case "separator":
+      return "<hr/>";
     case "image": {
       const attrs = [`src="${escHtml(block.content)}" alt="${escHtml(block.alt || "")}"`];
       if (block.width) attrs.push(`width="${escHtml(block.width)}"`);
@@ -50,10 +70,14 @@ function blockToHtml(block) {
       if (block.align === "right") return `<p style="text-align:right">${img}</p>`;
       return `<p>${img}</p>`;
     }
-    case "link": return `<p><a href="${escHtml(block.url || "#")}">${escHtml(block.content)}</a></p>`;
-    case "table": return marked.parse(block.content || "");
-    case "math": return marked.parse(block.content || "");
-    case "diagram": return marked.parse(block.content || "");
+    case "link":
+      return `<p><a href="${escHtml(block.url || "#")}">${escHtml(block.content)}</a></p>`;
+    case "table":
+      return marked.parse(block.content || "");
+    case "math":
+      return marked.parse(block.content || "");
+    case "diagram":
+      return marked.parse(block.content || "");
 
     // eLearning blocks
     case "learning-objective": {
@@ -116,10 +140,14 @@ function buildBranchingHtml(block) {
 
 function buildKnowledgeCheckHtml(block) {
   const qid = nextHtmlId("kc");
-  const opts = (block.options || []).map((opt, i) => `
+  const opts = (block.options || [])
+    .map(
+      (opt, i) => `
     <button class="mc-option" onclick="kcAnswer('${qid}',${i},${block.correctIndex ?? 0})" data-idx="${i}">
       ${escHtml(opt || `Option ${i + 1}`)}
-    </button>`).join("");
+    </button>`
+    )
+    .join("");
   return `<div class="knowledge-check" id="${qid}">
   <p class="kc-prompt">${escHtml(block.prompt || "Knowledge Check")}</p>
   <div class="mc-options">${opts}</div>
@@ -132,46 +160,56 @@ function buildQuizHtml(block) {
   const questions = block.questions || [];
   const totalPts = questions.reduce((s, q) => s + (q.points ?? 1), 0);
 
-  const questionsHtml = questions.map((q, qi) => {
-    const qqid = `${qid}_q${qi}`;
-    const type = q.type || "mcq";
+  const questionsHtml = questions
+    .map((q, qi) => {
+      const qqid = `${qid}_q${qi}`;
+      const type = q.type || "mcq";
 
-    let inputsHtml = "";
-    if (type === "mcq") {
-      inputsHtml = (q.options || []).map((opt, oi) => `
+      let inputsHtml = "";
+      if (type === "mcq") {
+        inputsHtml = (q.options || [])
+          .map(
+            (opt, oi) => `
         <label class="mc-label">
           <input type="radio" name="${qqid}" value="${oi}" />
           ${escHtml(opt || `Option ${oi + 1}`)}
-        </label>`).join("");
-    } else if (type === "tf") {
-      inputsHtml = `
+        </label>`
+          )
+          .join("");
+      } else if (type === "tf") {
+        inputsHtml = `
         <label class="mc-label"><input type="radio" name="${qqid}" value="True" /> True</label>
         <label class="mc-label"><input type="radio" name="${qqid}" value="False" /> False</label>`;
-    } else if (type === "fitb") {
-      inputsHtml = `<input type="text" id="${qqid}_text" class="fitb-input" placeholder="Your answer…" />`;
-    }
+      } else if (type === "fitb") {
+        inputsHtml = `<input type="text" id="${qqid}_text" class="fitb-input" placeholder="Your answer…" />`;
+      }
 
-    return `<div class="quiz-question" id="${qqid}">
+      return `<div class="quiz-question" id="${qqid}">
   <p class="q-prompt"><strong>Q${qi + 1}.</strong> ${escHtml(q.prompt || "")}</p>
   <div class="q-inputs">${inputsHtml}</div>
   <div class="q-feedback" id="${qqid}_fb" style="display:none"></div>
 </div>`;
-  }).join("\n");
+    })
+    .join("\n");
 
   const correctAnswers = JSON.stringify(
     questions.map((q) => {
       if ((q.type || "mcq") === "mcq") return { type: "mcq", correct: q.correctIndex ?? 0 };
       if (q.type === "tf") return { type: "tf", correct: q.correctTF ?? "True" };
-      if (q.type === "fitb") return {
-        type: "fitb",
-        accepted: (q.acceptedAnswers || []).map((a) => a.toLowerCase().trim()),
-      };
+      if (q.type === "fitb")
+        return {
+          type: "fitb",
+          accepted: (q.acceptedAnswers || []).map((a) => a.toLowerCase().trim()),
+        };
       return { type: "mcq", correct: 0 };
     })
   );
 
   const feedbacks = JSON.stringify(
-    questions.map((q) => ({ correct: q.feedbackCorrect || "Correct!", incorrect: q.feedbackIncorrect || "Incorrect." }))
+    questions.map((q) => ({
+      correct: q.feedbackCorrect || "Correct!",
+      incorrect: q.feedbackIncorrect || "Incorrect.",
+    }))
   );
 
   const points = JSON.stringify(questions.map((q) => q.points ?? 1));
@@ -193,10 +231,14 @@ function buildTimeRequirementsHtml(block) {
   <div class="tr-header">⏱ Time Requirement</div>
   <div class="tr-body" id="${tid}_body">
     <p class="tr-message">Please spend at least <strong>${escHtml(String(block.requiredMinutes ?? 2))} minute(s)</strong> on this section before continuing.</p>
-    ${showProgress ? `<div class="tr-progress-wrap" id="${tid}_wrap">
+    ${
+      showProgress
+        ? `<div class="tr-progress-wrap" id="${tid}_wrap">
       <div class="tr-progress-labels"><span id="${tid}_elapsed">0:00 elapsed</span><span id="${tid}_remaining">${Math.floor(requiredSeconds / 60)}:00 remaining</span></div>
       <div class="tr-progress-bar"><div class="tr-progress-fill" id="${tid}_fill" style="width:0%"></div></div>
-    </div>` : ""}
+    </div>`
+        : ""
+    }
   </div>
   <div class="tr-complete" id="${tid}_complete" style="display:none">⏱ Time requirement met — you may continue.</div>
   <script>
@@ -207,7 +249,9 @@ function buildTimeRequirementsHtml(block) {
     var hideOnComplete = ${hideOnCompleted};
     var iv = setInterval(function(){
       elapsed++;
-      ${showProgress ? `
+      ${
+        showProgress
+          ? `
       var pct = Math.min(100, Math.round(elapsed/required*100));
       var fill = document.getElementById('${tid}_fill');
       if(fill) fill.style.width = pct+'%';
@@ -216,7 +260,9 @@ function buildTimeRequirementsHtml(block) {
       var rem = Math.max(0, required - elapsed);
       if(em) em.textContent = Math.floor(elapsed/60)+':'+(elapsed%60<10?'0':'')+(elapsed%60)+' elapsed';
       if(rm) rm.textContent = Math.floor(rem/60)+':'+(rem%60<10?'0':'')+(rem%60)+' remaining';
-      ` : ""}
+      `
+          : ""
+      }
       if(elapsed >= required){
         clearInterval(iv);
         var body = document.getElementById('${tid}_body');
@@ -237,18 +283,23 @@ function buildCategorizationHtml(block) {
   const mode = block.mode || "checklist";
   const prompt = block.prompt || "Sort the following items into the correct categories:";
 
-  const correctMap = JSON.stringify(
-    Object.fromEntries(items.map((it) => [it.id, it.categoryId]))
-  );
+  const correctMap = JSON.stringify(Object.fromEntries(items.map((it) => [it.id, it.categoryId])));
 
   if (mode === "checklist") {
-    const headerCols = categories.map((c) => `<th class="cat-col-header">${escHtml(c.label)}</th>`).join("");
-    const itemRows = items.map((it) => {
-      const radioInputs = categories.map((c) =>
-        `<td class="cat-radio-cell"><input type="radio" name="${cid}_${escHtml(it.id)}" value="${escHtml(c.id)}" /></td>`
-      ).join("");
-      return `<tr id="${cid}_row_${escHtml(it.id)}"><td class="cat-item-cell">${escHtml(it.content || "(empty)")}</td>${radioInputs}</tr>`;
-    }).join("\n");
+    const headerCols = categories
+      .map((c) => `<th class="cat-col-header">${escHtml(c.label)}</th>`)
+      .join("");
+    const itemRows = items
+      .map((it) => {
+        const radioInputs = categories
+          .map(
+            (c) =>
+              `<td class="cat-radio-cell"><input type="radio" name="${cid}_${escHtml(it.id)}" value="${escHtml(c.id)}" /></td>`
+          )
+          .join("");
+        return `<tr id="${cid}_row_${escHtml(it.id)}"><td class="cat-item-cell">${escHtml(it.content || "(empty)")}</td>${radioInputs}</tr>`;
+      })
+      .join("\n");
 
     return `<div class="categorization" id="${cid}">
   <p class="cat-prompt">${escHtml(prompt)}</p>
@@ -262,15 +313,21 @@ function buildCategorizationHtml(block) {
   }
 
   // drag-drop mode: simplified for SCORM (no native DnD, use click-to-assign)
-  const categoryZones = categories.map((c, idx) =>
-    `<div class="cat-zone" id="${cid}_zone_${escHtml(c.id)}" data-cat="${escHtml(c.id)}" onclick="catZoneClick('${cid}','${escHtml(c.id)}')">
-  <p class="cat-zone-title" style="color:${["#3b82f6","#22c55e","#a855f7","#f59e0b"][idx % 4]}">${escHtml(c.label)}</p>
+  const categoryZones = categories
+    .map(
+      (c, idx) =>
+        `<div class="cat-zone" id="${cid}_zone_${escHtml(c.id)}" data-cat="${escHtml(c.id)}" onclick="catZoneClick('${cid}','${escHtml(c.id)}')">
+  <p class="cat-zone-title" style="color:${["#3b82f6", "#22c55e", "#a855f7", "#f59e0b"][idx % 4]}">${escHtml(c.label)}</p>
 </div>`
-  ).join("\n");
+    )
+    .join("\n");
 
-  const itemPills = items.map((it) =>
-    `<button class="cat-pill" id="${cid}_pill_${escHtml(it.id)}" data-item="${escHtml(it.id)}" onclick="catPillClick('${cid}','${escHtml(it.id)}')">${escHtml(it.content || "(empty)")}</button>`
-  ).join("\n");
+  const itemPills = items
+    .map(
+      (it) =>
+        `<button class="cat-pill" id="${cid}_pill_${escHtml(it.id)}" data-item="${escHtml(it.id)}" onclick="catPillClick('${cid}','${escHtml(it.id)}')">${escHtml(it.content || "(empty)")}</button>`
+    )
+    .join("\n");
 
   return `<div class="categorization" id="${cid}">
   <p class="cat-prompt">${escHtml(prompt)}</p>
@@ -601,7 +658,11 @@ function buildNavBarHtml(moduleIndex, totalModules, position) {
 
 function buildScoHtml(module, courseTitle, cssOverride = "", navBarOptions = null) {
   const blocks = (() => {
-    try { return JSON.parse(module.blocks_json || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(module.blocks_json || "[]");
+    } catch {
+      return [];
+    }
   })();
 
   const bodyHtml = blocks.map((b) => blockToHtml(b)).join("\n");
@@ -646,20 +707,24 @@ function generateManifest12(course, modules) {
   const identifier = `MARKDROP_${(course.id || "course").replace(/-/g, "").slice(0, 16)}`;
   const orgId = `${identifier}_ORG`;
 
-  const items = modules.map((m, i) => {
-    const resId = `res_${i + 1}`;
-    return `      <item identifier="item_${i + 1}" identifierref="${resId}">
+  const items = modules
+    .map((m, i) => {
+      const resId = `res_${i + 1}`;
+      return `      <item identifier="item_${i + 1}" identifierref="${resId}">
         <title>${escHtml(m.title || `Module ${i + 1}`)}</title>
       </item>`;
-  }).join("\n");
+    })
+    .join("\n");
 
-  const resources = modules.map((m, i) => {
-    const resId = `res_${i + 1}`;
-    const href = `module_${i + 1}/index.html`;
-    return `    <resource identifier="${resId}" type="webcontent" adlcp:scormtype="sco" href="${href}">
+  const resources = modules
+    .map((m, i) => {
+      const resId = `res_${i + 1}`;
+      const href = `module_${i + 1}/index.html`;
+      return `    <resource identifier="${resId}" type="webcontent" adlcp:scormtype="sco" href="${href}">
       <file href="${href}"/>
     </resource>`;
-  }).join("\n");
+    })
+    .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="${identifier}"
@@ -692,23 +757,27 @@ function generateManifest2004(course, modules) {
   const identifier = `MARKDROP_${(course.id || "course").replace(/-/g, "").slice(0, 16)}`;
   const orgId = `${identifier}_ORG`;
 
-  const items = modules.map((m, i) => {
-    const resId = `res_${i + 1}`;
-    return `      <item identifier="item_${i + 1}" identifierref="${resId}">
+  const items = modules
+    .map((m, i) => {
+      const resId = `res_${i + 1}`;
+      return `      <item identifier="item_${i + 1}" identifierref="${resId}">
         <title>${escHtml(m.title || `Module ${i + 1}`)}</title>
         <imsss:sequencing>
           <imsss:deliveryControls completionSetByContent="true" objectiveSetByContent="true"/>
         </imsss:sequencing>
       </item>`;
-  }).join("\n");
+    })
+    .join("\n");
 
-  const resources = modules.map((m, i) => {
-    const resId = `res_${i + 1}`;
-    const href = `module_${i + 1}/index.html`;
-    return `    <resource identifier="${resId}" type="webcontent" adlcp:scormType="sco" href="${href}">
+  const resources = modules
+    .map((m, i) => {
+      const resId = `res_${i + 1}`;
+      const href = `module_${i + 1}/index.html`;
+      return `    <resource identifier="${resId}" type="webcontent" adlcp:scormType="sco" href="${href}">
       <file href="${href}"/>
     </resource>`;
-  }).join("\n");
+    })
+    .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="${identifier}" version="1"
@@ -765,17 +834,17 @@ async function _buildAndDownload(course, modules, version, options = {}) {
   const navBarPosition = options.navBar?.position || "none";
 
   const zip = new JSZip();
-  const manifestXml = version === "1.2"
-    ? generateManifest12(course, modules)
-    : generateManifest2004(course, modules);
+  const manifestXml =
+    version === "1.2" ? generateManifest12(course, modules) : generateManifest2004(course, modules);
 
   zip.file("imsmanifest.xml", manifestXml);
 
   for (let i = 0; i < modules.length; i++) {
     const mod = modules[i];
-    const navBarOptions = navBarPosition !== "none"
-      ? { position: navBarPosition, moduleIndex: i, totalModules: modules.length }
-      : null;
+    const navBarOptions =
+      navBarPosition !== "none"
+        ? { position: navBarPosition, moduleIndex: i, totalModules: modules.length }
+        : null;
     const html = buildScoHtml(mod, course.title || "Course", "", navBarOptions);
     zip.file(`module_${i + 1}/index.html`, html);
   }

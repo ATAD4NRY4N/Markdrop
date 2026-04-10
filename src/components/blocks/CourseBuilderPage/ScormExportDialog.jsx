@@ -12,7 +12,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { exportToScorm12, exportToScorm2004 } from "@/lib/scormUtils";
 
@@ -55,7 +61,12 @@ export default function ScormExportDialog({ open, onOpenChange, course, modules 
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!isExporting) onOpenChange(v); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!isExporting) onOpenChange(v);
+      }}
+    >
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -128,7 +139,9 @@ export default function ScormExportDialog({ open, onOpenChange, course, modules 
           <div className="rounded-md bg-muted/30 px-3 py-2.5 text-xs text-muted-foreground space-y-1">
             <div className="flex justify-between">
               <span>Course title</span>
-              <span className="font-medium text-foreground truncate ml-4">{course?.title || "Untitled"}</span>
+              <span className="font-medium text-foreground truncate ml-4">
+                {course?.title || "Untitled"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Modules</span>
@@ -150,17 +163,11 @@ export default function ScormExportDialog({ open, onOpenChange, course, modules 
             </div>
           )}
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isExporting}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isExporting}>
             Cancel
           </Button>
           <Button

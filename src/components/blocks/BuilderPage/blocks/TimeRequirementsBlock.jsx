@@ -108,7 +108,9 @@ export default function TimeRequirementsBlock({ block, onUpdate }) {
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
                 Please spend at least{" "}
-                <strong className="text-foreground">{requiredMinutes} minute{requiredMinutes !== 1 ? "s" : ""}</strong>{" "}
+                <strong className="text-foreground">
+                  {requiredMinutes} minute{requiredMinutes !== 1 ? "s" : ""}
+                </strong>{" "}
                 on this section before continuing.
               </p>
               {showProgress && (

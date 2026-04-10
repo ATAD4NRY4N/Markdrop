@@ -3,7 +3,13 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { memo, useMemo } from "react";
 import MarkdownBlock from "./MarkdownBlock";
 
-const Editor = memo(function Editor({ blocks = [], onBlockUpdate, onBlockDelete, onBlockAdd }) {
+const Editor = memo(function Editor({
+  blocks = [],
+  onBlockUpdate,
+  onBlockDelete,
+  onBlockAdd,
+  onBlockCopy,
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: "editor-dropzone" });
 
   // Memoize block IDs for SortableContext
@@ -48,6 +54,7 @@ const Editor = memo(function Editor({ blocks = [], onBlockUpdate, onBlockDelete,
                     onUpdate={onBlockUpdate}
                     onDelete={onBlockDelete}
                     onBlockAdd={onBlockAdd}
+                    onCopy={onBlockCopy}
                     slideNumber={slideMetadata[block.id]?.slideNumber}
                     totalSlides={slideMetadata[block.id]?.totalSlides}
                   />

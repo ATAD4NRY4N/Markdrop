@@ -43,22 +43,19 @@ export function CourseProvider({ children }) {
   }, []);
 
   // Initialize a brand-new course for a user
-  const initNewCourse = useCallback(
-    async (userId, title = "Untitled Course") => {
-      setIsSaving(true);
-      try {
-        const newCourse = await createCourse(userId, title);
-        const firstModule = await createModule(newCourse.id, "Module 1", 0, "[]");
-        setCourse(newCourse);
-        setModules([firstModule]);
-        setActiveModuleId(firstModule.id);
-        return newCourse;
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    []
-  );
+  const initNewCourse = useCallback(async (userId, title = "Untitled Course") => {
+    setIsSaving(true);
+    try {
+      const newCourse = await createCourse(userId, title);
+      const firstModule = await createModule(newCourse.id, "Module 1", 0, "[]");
+      setCourse(newCourse);
+      setModules([firstModule]);
+      setActiveModuleId(firstModule.id);
+      return newCourse;
+    } finally {
+      setIsSaving(false);
+    }
+  }, []);
 
   // Save course metadata
   const saveCourse = useCallback(
@@ -125,13 +122,10 @@ export function CourseProvider({ children }) {
   );
 
   // Reorder modules after drag-and-drop
-  const reorderModuleList = useCallback(
-    async (newModules) => {
-      setModules(newModules);
-      await reorderModules(newModules.map((m) => m.id));
-    },
-    []
-  );
+  const reorderModuleList = useCallback(async (newModules) => {
+    setModules(newModules);
+    await reorderModules(newModules.map((m) => m.id));
+  }, []);
 
   // Get the blocks for the active module (parsed JSON)
   const getActiveModuleBlocks = useCallback(() => {
@@ -156,63 +150,73 @@ export function CourseProvider({ children }) {
     [activeModuleId]
   );
 
-  const destroyCourse = useCallback(
-    async () => {
-      if (!course?.id) return;
-      await deleteCourse(course.id);
-      setCourse(null);
-      setModules([]);
-      setActiveModuleId(null);
-      setSections([]);
+  const destroyCourse = useCallback(async () => {
+    if (!course?.id) return;
+    await deleteCourse(course.id);
+    setCourse(null);
+    setModules([]);
+    setActiveModuleId(null);
+    setSections([]);
+  }, [course]);
+
+  // Section management helpers — sections are persisted in courses.sections_json
+  const persistSections = useCallback(
+    async (newSections) => {
+      setSections(newSections);
+      if (course?.id) {
+        try {
+          await updateCourse(course.id, { sections_json: JSON.stringify(newSections) });
+        } catch {
+          // Non-critical — persist best-effort
+        }
+      }
     },
     [course]
   );
 
-  // Section management helpers — sections are persisted in courses.sections_json
-  const persistSections = useCallback(async (newSections) => {
-    setSections(newSections);
-    if (course?.id) {
-      try {
-        await updateCourse(course.id, { sections_json: JSON.stringify(newSections) });
-      } catch {
-        // Non-critical — persist best-effort
+  const addSection = useCallback(
+    async (title = "New Section") => {
+      const newSection = { id: `sec-${Date.now()}`, title, moduleIds: [] };
+      await persistSections([...sections, newSection]);
+      return newSection;
+    },
+    [sections, persistSections]
+  );
+
+  const renameSection = useCallback(
+    async (sectionId, title) => {
+      await persistSections(sections.map((s) => (s.id === sectionId ? { ...s, title } : s)));
+    },
+    [sections, persistSections]
+  );
+
+  const removeSection = useCallback(
+    async (sectionId) => {
+      await persistSections(sections.filter((s) => s.id !== sectionId));
+    },
+    [sections, persistSections]
+  );
+
+  const assignModuleToSection = useCallback(
+    async (moduleId, sectionId) => {
+      // Remove from all sections first
+      const cleaned = sections.map((s) => ({
+        ...s,
+        moduleIds: s.moduleIds.filter((id) => id !== moduleId),
+      }));
+      if (sectionId === null) {
+        // Unassign — module is now "unsectioned"
+        await persistSections(cleaned);
+      } else {
+        await persistSections(
+          cleaned.map((s) =>
+            s.id === sectionId ? { ...s, moduleIds: [...s.moduleIds, moduleId] } : s
+          )
+        );
       }
-    }
-  }, [course]);
-
-  const addSection = useCallback(async (title = "New Section") => {
-    const newSection = { id: `sec-${Date.now()}`, title, moduleIds: [] };
-    await persistSections([...sections, newSection]);
-    return newSection;
-  }, [sections, persistSections]);
-
-  const renameSection = useCallback(async (sectionId, title) => {
-    await persistSections(sections.map((s) => (s.id === sectionId ? { ...s, title } : s)));
-  }, [sections, persistSections]);
-
-  const removeSection = useCallback(async (sectionId) => {
-    await persistSections(sections.filter((s) => s.id !== sectionId));
-  }, [sections, persistSections]);
-
-  const assignModuleToSection = useCallback(async (moduleId, sectionId) => {
-    // Remove from all sections first
-    const cleaned = sections.map((s) => ({
-      ...s,
-      moduleIds: s.moduleIds.filter((id) => id !== moduleId),
-    }));
-    if (sectionId === null) {
-      // Unassign — module is now "unsectioned"
-      await persistSections(cleaned);
-    } else {
-      await persistSections(
-        cleaned.map((s) =>
-          s.id === sectionId
-            ? { ...s, moduleIds: [...s.moduleIds, moduleId] }
-            : s
-        )
-      );
-    }
-  }, [sections, persistSections]);
+    },
+    [sections, persistSections]
+  );
 
   return (
     <CourseContext.Provider

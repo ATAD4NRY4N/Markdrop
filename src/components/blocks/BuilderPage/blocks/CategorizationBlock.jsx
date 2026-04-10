@@ -4,14 +4,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 const COLORS = [
-  { label: "Blue", value: "blue", bg: "bg-blue-100 dark:bg-blue-900/30", border: "border-blue-400", text: "text-blue-700 dark:text-blue-300" },
-  { label: "Green", value: "green", bg: "bg-green-100 dark:bg-green-900/30", border: "border-green-400", text: "text-green-700 dark:text-green-300" },
-  { label: "Purple", value: "purple", bg: "bg-purple-100 dark:bg-purple-900/30", border: "border-purple-400", text: "text-purple-700 dark:text-purple-300" },
-  { label: "Orange", value: "orange", bg: "bg-orange-100 dark:bg-orange-900/30", border: "border-orange-400", text: "text-orange-700 dark:text-orange-300" },
+  {
+    label: "Blue",
+    value: "blue",
+    bg: "bg-blue-100 dark:bg-blue-900/30",
+    border: "border-blue-400",
+    text: "text-blue-700 dark:text-blue-300",
+  },
+  {
+    label: "Green",
+    value: "green",
+    bg: "bg-green-100 dark:bg-green-900/30",
+    border: "border-green-400",
+    text: "text-green-700 dark:text-green-300",
+  },
+  {
+    label: "Purple",
+    value: "purple",
+    bg: "bg-purple-100 dark:bg-purple-900/30",
+    border: "border-purple-400",
+    text: "text-purple-700 dark:text-purple-300",
+  },
+  {
+    label: "Orange",
+    value: "orange",
+    bg: "bg-orange-100 dark:bg-orange-900/30",
+    border: "border-orange-400",
+    text: "text-orange-700 dark:text-orange-300",
+  },
 ];
 
 function getColor(index) {
@@ -150,7 +180,14 @@ export default function CategorizationBlock({ block, onUpdate }) {
               const color = getColor(idx);
               return (
                 <div key={cat.id} className="flex items-center gap-2">
-                  <div className={cn("h-3 w-3 rounded-full shrink-0", color.bg, color.border, "border")} />
+                  <div
+                    className={cn(
+                      "h-3 w-3 rounded-full shrink-0",
+                      color.bg,
+                      color.border,
+                      "border"
+                    )}
+                  />
                   <Input
                     value={cat.label}
                     onChange={(e) => updateCategory(cat.id, e.target.value)}
@@ -176,12 +213,7 @@ export default function CategorizationBlock({ block, onUpdate }) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-xs text-muted-foreground">Items</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs"
-                onClick={addItem}
-              >
+              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={addItem}>
                 <Plus className="h-3 w-3 mr-1" />
                 Add Item
               </Button>
@@ -252,7 +284,10 @@ export default function CategorizationBlock({ block, onUpdate }) {
             <tbody>
               {items.map((item) => {
                 const isCorrect = submitted && learnerAnswers[item.id] === item.categoryId;
-                const isWrong = submitted && learnerAnswers[item.id] && learnerAnswers[item.id] !== item.categoryId;
+                const isWrong =
+                  submitted &&
+                  learnerAnswers[item.id] &&
+                  learnerAnswers[item.id] !== item.categoryId;
                 return (
                   <tr
                     key={item.id}
@@ -300,7 +335,11 @@ export default function CategorizationBlock({ block, onUpdate }) {
                       onClick={() => {
                         if (learnerAnswers[it.id]) {
                           // deselect
-                          setLearnerAnswers((prev) => { const n = { ...prev }; delete n[it.id]; return n; });
+                          setLearnerAnswers((prev) => {
+                            const n = { ...prev };
+                            delete n[it.id];
+                            return n;
+                          });
                         }
                       }}
                       className="text-xs bg-background rounded-full px-2.5 py-1 border border-border/60 shadow-sm hover:bg-muted/30 cursor-pointer"
@@ -311,7 +350,10 @@ export default function CategorizationBlock({ block, onUpdate }) {
               </div>
             )}
             {/* Category drop zones */}
-            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}>
+            <div
+              className="grid gap-2"
+              style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}
+            >
               {categories.map((cat, idx) => {
                 const color = getColor(idx);
                 const assignedItems = submitted
@@ -345,7 +387,11 @@ export default function CategorizationBlock({ block, onUpdate }) {
                           onClick={(e) => {
                             if (!submitted) {
                               e.stopPropagation();
-                              setLearnerAnswers((prev) => { const n = { ...prev }; delete n[it.id]; return n; });
+                              setLearnerAnswers((prev) => {
+                                const n = { ...prev };
+                                delete n[it.id];
+                                return n;
+                              });
                             }
                           }}
                         >
@@ -396,7 +442,9 @@ export default function CategorizationBlock({ block, onUpdate }) {
               )}
             >
               {correctCount}/{items.length} correct
-              {correctCount === items.length ? " — Well done! 🎉" : " — Review the highlighted items."}
+              {correctCount === items.length
+                ? " — Well done! 🎉"
+                : " — Review the highlighted items."}
             </div>
             <Button variant="outline" size="sm" onClick={resetAttempt}>
               Try Again

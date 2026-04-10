@@ -49,21 +49,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { CourseProvider, useCourse } from "@/context/CourseContext";
 
@@ -101,7 +92,6 @@ function CourseBuilderInner() {
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
   const [clipboardBlock, setClipboardBlock] = useState(null);
-  const [selectedBlockId, setSelectedBlockId] = useState(null);
 
   // Sync local blocks from active module whenever activeModuleId changes
   useEffect(() => {
@@ -109,7 +99,7 @@ function CourseBuilderInner() {
     setBlocks(loaded);
     setHistory([loaded]);
     setHistoryIndex(0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeModuleId]);
 
   // Sync course title/description to local state
@@ -143,7 +133,7 @@ function CourseBuilderInner() {
       }
     };
     init();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, id]);
 
   const sensors = useSensors(
@@ -190,7 +180,10 @@ function CourseBuilderInner() {
   );
 
   const handleSave = useCallback(async () => {
-    if (!user) { toast.error("Please log in to save"); return; }
+    if (!user) {
+      toast.error("Please log in to save");
+      return;
+    }
     try {
       await saveActiveModuleBlocks(blocks);
       toast.success("Module saved");
@@ -202,7 +195,10 @@ function CourseBuilderInner() {
 
   const handleSaveSettings = async () => {
     try {
-      await saveCourse({ title: courseTitle.trim() || "Untitled Course", description: courseDescription });
+      await saveCourse({
+        title: courseTitle.trim() || "Untitled Course",
+        description: courseDescription,
+      });
       setShowSettingsDialog(false);
       toast.success("Course settings saved");
     } catch {
@@ -211,48 +207,50 @@ function CourseBuilderInner() {
   };
 
   // Copy/paste helpers
-  const handleCopyBlock = useCallback((blockId) => {
-    const block = blocks.find((b) => b.id === blockId);
-    if (block) {
-      setClipboardBlock(block);
-      toast.success("Block copied");
-    }
-  }, [blocks]);
+  const handleCopyBlock = useCallback(
+    (blockId) => {
+      const block = blocks.find((b) => b.id === blockId);
+      if (block) {
+        setClipboardBlock(block);
+        toast.success("Block copied");
+      }
+    },
+    [blocks]
+  );
 
   const handlePasteBlock = useCallback(() => {
     if (!clipboardBlock) return;
     const newBlock = { ...clipboardBlock, id: `${Date.now()}_paste` };
-    let newBlocks;
-    if (selectedBlockId) {
-      const idx = blocks.findIndex((b) => b.id === selectedBlockId);
-      newBlocks = idx !== -1
-        ? [...blocks.slice(0, idx + 1), newBlock, ...blocks.slice(idx + 1)]
-        : [...blocks, newBlock];
-    } else {
-      newBlocks = [...blocks, newBlock];
-    }
-    applyBlocks(newBlocks);
+    applyBlocks([...blocks, newBlock]);
     toast.success("Block pasted");
-  }, [clipboardBlock, selectedBlockId, blocks, applyBlocks]);
+  }, [clipboardBlock, blocks, applyBlocks]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) { e.preventDefault(); handleUndo(); }
-      else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) { e.preventDefault(); handleRedo(); }
-      else if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); handleSave(); }
-      else if ((e.ctrlKey || e.metaKey) && e.key === "c" && selectedBlockId) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
-        handleCopyBlock(selectedBlockId);
-      }
-      else if ((e.ctrlKey || e.metaKey) && e.key === "v" && clipboardBlock) {
+        handleUndo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        handleSave();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "v" && clipboardBlock) {
         e.preventDefault();
         handlePasteBlock();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [handleUndo, handleRedo, handleSave, handleCopyBlock, handlePasteBlock, selectedBlockId, clipboardBlock]);
+  }, [
+    handleUndo,
+    handleRedo,
+    handleSave,
+    handlePasteBlock,
+    clipboardBlock,
+  ]);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
@@ -312,9 +310,10 @@ function CourseBuilderInner() {
     let newBlocks;
     if (afterBlockId) {
       const afterIndex = blocks.findIndex((b) => b.id === afterBlockId);
-      newBlocks = afterIndex !== -1
-        ? [...blocks.slice(0, afterIndex + 1), newBlock, ...blocks.slice(afterIndex + 1)]
-        : [...blocks, newBlock];
+      newBlocks =
+        afterIndex !== -1
+          ? [...blocks.slice(0, afterIndex + 1), newBlock, ...blocks.slice(afterIndex + 1)]
+          : [...blocks, newBlock];
     } else {
       newBlocks = [...blocks, newBlock];
     }
@@ -325,12 +324,19 @@ function CourseBuilderInner() {
 
   const getBlockLabel = (blockType) => {
     const labels = {
-      h1: "Heading 1", h2: "Heading 2", h3: "Heading 3",
-      paragraph: "Paragraph", "learning-objective": "Learning Objectives",
-      quiz: "Quiz", "knowledge-check": "Knowledge Check",
-      flashcard: "Flashcard", "progress-marker": "Progress Marker",
-      "course-nav": "Course Navigation", branching: "Branching Scenario",
-      "time-requirements": "Time Requirement", categorization: "Categorization",
+      h1: "Heading 1",
+      h2: "Heading 2",
+      h3: "Heading 3",
+      paragraph: "Paragraph",
+      "learning-objective": "Learning Objectives",
+      quiz: "Quiz",
+      "knowledge-check": "Knowledge Check",
+      flashcard: "Flashcard",
+      "progress-marker": "Progress Marker",
+      "course-nav": "Course Navigation",
+      branching: "Branching Scenario",
+      "time-requirements": "Time Requirement",
+      categorization: "Categorization",
     };
     return labels[blockType] || blockType;
   };
@@ -455,7 +461,11 @@ function CourseBuilderInner() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="sm" className="px-2" onClick={toggleTheme}>
-                      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                      {theme === "dark" ? (
+                        <Sun className="h-4 w-4" />
+                      ) : (
+                        <Moon className="h-4 w-4" />
+                      )}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Toggle theme</TooltipContent>
@@ -486,7 +496,9 @@ function CourseBuilderInner() {
                     <div className="h-full flex items-center justify-center">
                       <div className="text-center space-y-2">
                         <BookOpen className="h-10 w-10 mx-auto text-muted-foreground/40" />
-                        <p className="text-muted-foreground text-sm">Select or add a module to start editing</p>
+                        <p className="text-muted-foreground text-sm">
+                          Select or add a module to start editing
+                        </p>
                       </div>
                     </div>
                   ) : (
@@ -497,11 +509,10 @@ function CourseBuilderInner() {
                           onBlockUpdate={handleBlockUpdate}
                           onBlockDelete={handleBlockDelete}
                           onBlockAdd={handleBlockAdd}
+                          onBlockCopy={handleCopyBlock}
                         />
                       )}
-                      {activeTab === "preview" && (
-                        <Preview blocks={blocks} />
-                      )}
+                      {activeTab === "preview" && <Preview blocks={blocks} />}
                     </div>
                   )}
                 </div>
@@ -543,9 +554,7 @@ function CourseBuilderInner() {
               <GraduationCap className="h-5 w-5 text-violet-500" />
               Course Settings
             </DialogTitle>
-            <DialogDescription>
-              Update your course title and description.
-            </DialogDescription>
+            <DialogDescription>Update your course title and description.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
@@ -567,7 +576,9 @@ function CourseBuilderInner() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleSaveSettings}>Save</Button>
           </DialogFooter>
         </DialogContent>
@@ -586,14 +597,33 @@ function buildDefaultBlock(blockType) {
     paragraph: { content: "" },
     "learning-objective": { objectives: ["Learners will be able to…"] },
     quiz: {
-      title: "", passThreshold: 80, maxAttempts: 0,
-      questions: [{ id: `q${Date.now()}`, type: "mcq", prompt: "", options: ["", "", "", ""], correctIndex: 0, feedbackCorrect: "", feedbackIncorrect: "", points: 1 }],
+      title: "",
+      passThreshold: 80,
+      maxAttempts: 0,
+      questions: [
+        {
+          id: `q${Date.now()}`,
+          type: "mcq",
+          prompt: "",
+          options: ["", "", "", ""],
+          correctIndex: 0,
+          feedbackCorrect: "",
+          feedbackIncorrect: "",
+          points: 1,
+        },
+      ],
     },
     "knowledge-check": { prompt: "", options: ["", "", ""], correctIndex: 0 },
     flashcard: { front: "", back: "" },
     "progress-marker": { label: "Progress checkpoint" },
     "course-nav": { prevLabel: "← Previous", nextLabel: "Next →", locked: false },
-    branching: { prompt: "", choices: [{ id: "c1", label: "" }, { id: "c2", label: "" }] },
+    branching: {
+      prompt: "",
+      choices: [
+        { id: "c1", label: "" },
+        { id: "c2", label: "" },
+      ],
+    },
   };
   return { ...base, ...(extras[blockType] || {}) };
 }

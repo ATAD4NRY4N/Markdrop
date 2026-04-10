@@ -95,7 +95,7 @@ export const CourseProvider = ({ children }) => {
       console.error("updateCourse error:", err);
       return null;
     }
-  }, []);
+  }, [currentCourse]);
 
   const deleteCourse = useCallback(async (id) => {
     const supabase = await getSupabase();

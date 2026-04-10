@@ -13,8 +13,10 @@ export default function BranchingBlock({ block, onUpdate }) {
   const addBranch = () =>
     update({ branches: [...branches, { id: Date.now().toString(), label: "", url: "" }] });
 
-  const removeBranch = (id) =>
+  const removeBranch = (id) => {
+    if (branches.length <= 1) return;
     update({ branches: branches.filter((b) => b.id !== id) });
+  };
 
   return (
     <div className="rounded-md border border-orange-500/50 bg-orange-50/20 dark:bg-orange-950/10">

@@ -22,8 +22,10 @@ export default function QuizBlock({ block, onUpdate }) {
   const addOption = () =>
     update({ options: [...options, { id: Date.now().toString(), text: "", correct: false }] });
 
-  const removeOption = (id) =>
+  const removeOption = (id) => {
+    if (options.length <= 1) return;
     update({ options: options.filter((o) => o.id !== id) });
+  };
 
   return (
     <div className="rounded-md border border-violet-500/50 bg-violet-50/20 dark:bg-violet-950/10">

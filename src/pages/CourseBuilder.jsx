@@ -188,7 +188,7 @@ function CourseEditor({ courseId }) {
         modules: modules.map((m, i) => ({
           id: m.id,
           title: m.title,
-          content: typeof m.content === "string" ? m.content : JSON.stringify(m.content || ""),
+          content: typeof m.content === "string" ? m.content : JSON.stringify(m.content || []),
           order: m.order_index ?? i,
         })),
       };
@@ -320,7 +320,7 @@ function CourseEditor({ courseId }) {
                   value={
                     typeof activeModule.content === "string"
                       ? activeModule.content
-                      : JSON.stringify(activeModule.content || "", null, 2)
+                      : JSON.stringify(activeModule.content || [], null, 2)
                   }
                   onChange={(e) => handleModuleContentChange(e.target.value)}
                   placeholder="Write your module content in Markdown..."

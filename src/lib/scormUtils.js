@@ -111,7 +111,7 @@ const moduleHtml = (course, mod) => `<!DOCTYPE html>
 <body>
   <h1>${escapeXml(mod.title)}</h1>
   <div id="content">
-    <p>${escapeXml(typeof mod.content === "string" ? mod.content : JSON.stringify(mod.content || ""))}</p>
+    <p>${escapeXml(typeof mod.content === "string" ? mod.content : JSON.stringify(mod.content || []))}</p>
   </div>
   <div class="nav">
     <span>${mod._prevId ? `<a href="${mod._prevId}.html">← Previous</a>` : ""}</span>
@@ -182,7 +182,7 @@ export async function downloadScormPackage(course) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${(course.title || "course").replace(/\s+/g, "_")}_scorm.zip`;
+  a.download = `${(course.title || "course").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_")}_scorm.zip`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

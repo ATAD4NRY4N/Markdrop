@@ -23,7 +23,7 @@ export default function QuizBlock({ block, onUpdate }) {
     update({ options: [...options, { id: Date.now().toString(), text: "", correct: false }] });
 
   const removeOption = (id) => {
-    if (options.length <= 1) return;
+    if (options.length <= 2) return;
     update({ options: options.filter((o) => o.id !== id) });
   };
 

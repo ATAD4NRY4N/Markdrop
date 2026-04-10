@@ -169,8 +169,12 @@ function CourseEditor({ courseId }) {
 
   const handleDeleteModule = async (id) => {
     if (!window.confirm("Delete this module?")) return;
-    await deleteModule(id);
-    if (activeModuleId === id) setActiveModuleId(modules.find((m) => m.id !== id)?.id || null);
+    const ok = await deleteModule(id);
+    if (!ok) { toast.error("Failed to delete module"); return; }
+    if (activeModuleId === id) {
+      const remaining = modules.filter((m) => m.id !== id);
+      setActiveModuleId(remaining[0]?.id || null);
+    }
     toast.success("Module deleted");
   };
 

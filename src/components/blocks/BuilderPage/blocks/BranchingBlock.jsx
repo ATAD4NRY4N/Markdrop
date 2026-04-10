@@ -14,7 +14,7 @@ export default function BranchingBlock({ block, onUpdate }) {
     update({ branches: [...branches, { id: Date.now().toString(), label: "", url: "" }] });
 
   const removeBranch = (id) => {
-    if (branches.length <= 1) return;
+    if (branches.length <= 2) return;
     update({ branches: branches.filter((b) => b.id !== id) });
   };
 

@@ -580,3 +580,13 @@ async function _buildAndDownload(course, modules, version) {
 export function buildPreviewHtml(module, courseTitle) {
   return buildScoHtml(module, courseTitle || "Preview");
 }
+
+// ---------------------------------------------------------------------------
+// Test-only exports (prefixed with _ to signal internal use)
+// ---------------------------------------------------------------------------
+export {
+  escHtml as _escHtml,
+  blockToHtml as _blockToHtml,
+  generateManifest12 as _generateManifest12,
+  generateManifest2004 as _generateManifest2004,
+};

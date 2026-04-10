@@ -9,11 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import AlertBlock from "./blocks/AlertBlock";
 import BlockquoteBlock from "./blocks/BlockquoteBlock";
+import BranchingBlock from "./blocks/BranchingBlock";
 import CodeBlock from "./blocks/CodeBlock";
+import CourseNavBlock from "./blocks/CourseNavBlock";
 import DiagramBlock from "./blocks/DiagramBlock";
+import FlashcardBlock from "./blocks/FlashcardBlock";
 import GithubProfileCardsBlock from "./blocks/GithubProfileCardsBlock";
 import HeadingBlock from "./blocks/HeadingBlock";
 import ImageBlock from "./blocks/ImageBlock";
+import KnowledgeCheckBlock from "./blocks/KnowledgeCheckBlock";
+import LearningObjectiveBlock from "./blocks/LearningObjectiveBlock";
 import LinkBlock from "./blocks/LinkBlock";
 import ListBlock from "./blocks/ListBlock";
 import MarpBgImageBlock from "./blocks/MarpBgImageBlock";
@@ -22,6 +27,8 @@ import MarpSlideDirectiveBlock from "./blocks/MarpSlideDirectiveBlock";
 import MarpStyleBlock from "./blocks/MarpStyleBlock";
 import MathBlock from "./blocks/MathBlock";
 import ParagraphBlock from "./blocks/ParagraphBlock";
+import ProgressMarkerBlock from "./blocks/ProgressMarkerBlock";
+import QuizBlock from "./blocks/QuizBlock";
 import SeparatorBlock from "./blocks/SeparatorBlock";
 import ShieldBadgeBlock from "./blocks/ShieldBadgeBlock";
 import SkillIconsBlock from "./blocks/SkillIconsBlock";
@@ -197,6 +204,20 @@ const MarkdownBlock = memo(function MarkdownBlock({
         return <MarpBgImageBlock block={block} onUpdate={onUpdate} />;
       case "marp-style":
         return <MarpStyleBlock block={block} onUpdate={onUpdate} />;
+      case "learning-objective":
+        return <LearningObjectiveBlock block={block} onUpdate={onUpdate} />;
+      case "quiz":
+        return <QuizBlock block={block} onUpdate={onUpdate} />;
+      case "knowledge-check":
+        return <KnowledgeCheckBlock block={block} onUpdate={onUpdate} />;
+      case "flashcard":
+        return <FlashcardBlock block={block} onUpdate={onUpdate} />;
+      case "progress-marker":
+        return <ProgressMarkerBlock block={block} onUpdate={onUpdate} />;
+      case "course-nav":
+        return <CourseNavBlock block={block} onUpdate={onUpdate} />;
+      case "branching":
+        return <BranchingBlock block={block} onUpdate={onUpdate} />;
       default:
         if (listTypes.includes(block.type)) {
           return <ListBlock block={block} onUpdate={onUpdate} />;

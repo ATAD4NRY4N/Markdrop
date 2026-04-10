@@ -1,15 +1,19 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import {
   AlertCircle,
+  CheckSquare,
   Code2,
   CreditCard,
   FileSliders,
+  Flag,
+  GitBranch,
   Heading1,
   Heading2,
   Heading3,
   Heading4,
   Heading5,
   Heading6,
+  HelpCircle,
   Image,
   ImagePlay,
   Layers,
@@ -17,6 +21,7 @@ import {
   ListChecks,
   MessageSquareCode,
   Minus,
+  Navigation,
   Network,
   ListOrdered as OrderedList,
   Palette,
@@ -26,6 +31,7 @@ import {
   Sigma,
   Sparkles,
   Table,
+  Target,
   Type,
   List as UnorderedList,
   Video,
@@ -133,6 +139,14 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
       "marp-slide-directive": "",
       "marp-bg-image": "",
       "marp-style": "",
+      // eLearning blocks
+      "learning-objective": "",
+      quiz: "",
+      "knowledge-check": "",
+      flashcard: "",
+      "progress-marker": "",
+      "course-nav": "",
+      branching: "",
     };
 
     const newBlock = {
@@ -204,6 +218,42 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
         position: "bg",
         opacity: "",
       }),
+      ...(blockType === "learning-objective" && {
+        content: "Students will be able to...",
+      }),
+      ...(blockType === "quiz" && {
+        question: "",
+        options: [
+          { id: "1", text: "", correct: false },
+          { id: "2", text: "", correct: false },
+          { id: "3", text: "", correct: false },
+          { id: "4", text: "", correct: false },
+        ],
+        explanation: "",
+      }),
+      ...(blockType === "knowledge-check" && {
+        question: "",
+        answer: "",
+        hint: "",
+      }),
+      ...(blockType === "flashcard" && {
+        front: "",
+        back: "",
+      }),
+      ...(blockType === "progress-marker" && {
+        label: "",
+        percent: 0,
+      }),
+      ...(blockType === "course-nav" && {
+        prevLabel: "← Previous",
+        nextLabel: "Next →",
+        prevUrl: "",
+        nextUrl: "",
+      }),
+      ...(blockType === "branching" && {
+        prompt: "",
+        branches: [{ id: "1", label: "", url: "" }],
+      }),
     };
 
 
@@ -260,6 +310,15 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
       { title: "Skill Icons", key: "skill-icons", icon: Sparkles },
       { title: "Typing SVG", key: "typing-svg", icon: Type },
       { title: "GitHub Profile Cards", key: "github-profile-cards", icon: CreditCard },
+    ],
+    elearning: [
+      { title: "Learning Objective", key: "learning-objective", icon: Target },
+      { title: "Quiz", key: "quiz", icon: HelpCircle },
+      { title: "Knowledge Check", key: "knowledge-check", icon: CheckSquare },
+      { title: "Flashcard", key: "flashcard", icon: Layers },
+      { title: "Progress Marker", key: "progress-marker", icon: Flag },
+      { title: "Course Navigation", key: "course-nav", icon: Navigation },
+      { title: "Branching", key: "branching", icon: GitBranch },
     ],
   };
 

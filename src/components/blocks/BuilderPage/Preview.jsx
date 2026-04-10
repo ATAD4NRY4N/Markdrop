@@ -463,6 +463,31 @@ const blocksToMarkdown = (blocks) => {
 
           return cardMarkdown;
         }
+        case "learning-objective":
+          return `> **📚 Learning Objective**\n>\n> ${block.content || ""}`;
+        case "quiz": {
+          const opts = (block.options || [])
+            .map((o) => `- [${o.correct ? "x" : " "}] ${o.text}`)
+            .join("\n");
+          return `**❓ Quiz: ${block.question || ""}**\n\n${opts}${block.explanation ? `\n\n*Explanation: ${block.explanation}*` : ""}`;
+        }
+        case "knowledge-check":
+          return `**✅ Knowledge Check: ${block.question || ""}**\n\n**Answer:** ${block.answer || ""}${block.hint ? `\n\n*Hint: ${block.hint}*` : ""}`;
+        case "flashcard":
+          return `**🃏 Flashcard**\n\n**Front:** ${block.front || ""}\n\n**Back:** ${block.back || ""}`;
+        case "progress-marker":
+          return `**🚩 ${block.label || "Progress Marker"}** — ${block.percent ?? 0}%`;
+        case "course-nav": {
+          const prev = block.prevLabel && block.prevUrl ? `[${block.prevLabel}](${block.prevUrl})` : (block.prevLabel || "");
+          const next = block.nextLabel && block.nextUrl ? `[${block.nextLabel}](${block.nextUrl})` : (block.nextLabel || "");
+          return `---\n${prev}${prev && next ? " | " : ""}${next}\n---`;
+        }
+        case "branching": {
+          const brs = (block.branches || [])
+            .map((b) => (b.url ? `- [${b.label}](${b.url})` : `- ${b.label}`))
+            .join("\n");
+          return `**🔀 ${block.prompt || "Choose your path"}**\n\n${brs}`;
+        }
         default:
           return block.content;
       }

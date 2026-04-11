@@ -40,7 +40,7 @@ export default function GridBlock({ block, onUpdate }) {
     return (
       <div 
         className="grid gap-4 my-6" 
-        style={{ gridTemplateColumns: \`repeat(\${colsCount}, minmax(0, 1fr))\` }}
+        style={{ gridTemplateColumns: `repeat(${colsCount}, minmax(0, 1fr))` }}
       >
         {columns.map((col, index) => (
           <div key={index} className="flex flex-col gap-2">
@@ -54,7 +54,7 @@ export default function GridBlock({ block, onUpdate }) {
             ) : col.content ? (
               <img 
                 src={col.content} 
-                alt={\`Column \${index + 1}\`} 
+                alt={`Column ${index + 1}`} 
                 className="w-full h-auto rounded-lg shadow-sm"
               />
             ) : null}
@@ -87,7 +87,7 @@ export default function GridBlock({ block, onUpdate }) {
         </div>
       </div>
 
-      <div className={`grid gap-4`} style={{ gridTemplateColumns: \`repeat(\${colsCount}, 1fr)\` }}>
+      <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${colsCount}, 1fr)` }}>
         {columns.map((col, index) => (
           <div key={index} className="border border-neutral-100 dark:border-neutral-800 rounded-md p-3 relative group/col">
             <div className="flex justify-between items-center mb-2">
@@ -96,7 +96,7 @@ export default function GridBlock({ block, onUpdate }) {
                 <Button 
                   size="icon" 
                   variant="ghost" 
-                  className={\`h-6 w-6 \${col.type === "text" ? "bg-violet-100 text-violet-600 dark:bg-violet-900/30" : "text-neutral-400"}\`}
+                  className={`h-6 w-6 ${col.type === "text" ? "bg-violet-100 text-violet-600 dark:bg-violet-900/30" : "text-neutral-400"}`}
                   onClick={() => handleColTypeChange(index, "text")}
                 >
                   <Type className="h-3 w-3" />
@@ -104,7 +104,7 @@ export default function GridBlock({ block, onUpdate }) {
                 <Button 
                   size="icon" 
                   variant="ghost" 
-                  className={\`h-6 w-6 \${col.type === "image" ? "bg-violet-100 text-violet-600 dark:bg-violet-900/30" : "text-neutral-400"}\`}
+                  className={`h-6 w-6 ${col.type === "image" ? "bg-violet-100 text-violet-600 dark:bg-violet-900/30" : "text-neutral-400"}`}
                   onClick={() => handleColTypeChange(index, "image")}
                 >
                   <ImageIcon className="h-3 w-3" />

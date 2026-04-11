@@ -9,7 +9,7 @@ Combine MarkDrop's sleek markdown editor with ScormStack's advanced eLearning ca
 
 ### Phase 1: Core Editor Engine & Course Management
 1. **Fix "Add Module" Bug [COMPLETED]:** Resolved initialization issues blocking course creation.
-2. **Course Dashboard:** Build a comprehensive dashboard to view all courses, filter by draft/published, and duplicate/delete courses.
+2. **Course Dashboard [COMPLETED]:** Built a comprehensive dashboard to view all courses, filter by draft/published, search by title/description, duplicate courses, toggle publish status, show module counts, and delete courses. Added `status` column via migration 002.
 3. **Advanced Drag & Drop:** Ensure seamless drag-and-drop of modules within the Sidebar structure (nested sections/modules).
 4. **Copy & Paste Architecture:** Implement cross-slide and cross-course block copying and pasting (as seen in ScormStack).
 

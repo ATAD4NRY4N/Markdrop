@@ -261,3 +261,37 @@ export const reorderModules = async (moduleIds) => {
   );
   await Promise.all(updates);
 };
+
+// Duplicate a course (with all its modules) for a given user
+export const duplicateCourse = async (courseId, userId) => {
+  // 1. Fetch original course and its modules in parallel
+  const [original, modules] = await Promise.all([
+    getCourseById(courseId),
+    getCourseModules(courseId),
+  ]);
+
+  // 2. Create the new course (always starts as draft)
+  const newCourse = await createCourse(
+    userId,
+    `${original.title} (Copy)`,
+    original.description,
+    original.scorm_version,
+    original.pass_threshold,
+    original.max_attempts,
+  );
+
+  // 3. Duplicate modules if any exist
+  if (modules.length > 0) {
+    const { error } = await supabase.from("course_modules").insert(
+      modules.map((m) => ({
+        course_id: newCourse.id,
+        title: m.title,
+        order: m.order,
+        blocks_json: m.blocks_json,
+      })),
+    );
+    if (error) throw error;
+  }
+
+  return newCourse;
+};

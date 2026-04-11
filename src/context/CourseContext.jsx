@@ -245,6 +245,7 @@ export function CourseProvider({ children }) {
         renameSection,
         removeSection,
         assignModuleToSection,
+        persistSections,
       }}
     >
       {children}

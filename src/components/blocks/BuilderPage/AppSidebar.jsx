@@ -1,12 +1,14 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import {
   AlertCircle,
+  ArrowLeftRight,
   CheckCircle2,
   CheckSquare,
   Clock,
   Code2,
   Columns2,
   CreditCard,
+  Crosshair,
   FileSliders,
   FileText,
   Flag,
@@ -29,6 +31,7 @@ import {
   Network,
   ListOrdered as OrderedList,
   Palette,
+  PenLine,
   Pilcrow,
   Quote,
   RotateCcw,
@@ -385,6 +388,26 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
         height: "500px",
         showDownload: true,
       }),
+      ...(blockType === "fill-in-the-blank" && {
+        sentence: "The ___ is the powerhouse of the cell.",
+        answers: ["mitochondria"],
+        caseSensitive: false,
+        feedbackCorrect: "\u2713 Correct! Well done.",
+        feedbackIncorrect: "\u2717 Not quite \u2014 review and try again.",
+      }),
+      ...(blockType === "matching" && {
+        prompt: "Match each term to its correct definition:",
+        pairs: [
+          { id: "p1", term: "Term 1", definition: "Definition A" },
+          { id: "p2", term: "Term 2", definition: "Definition B" },
+          { id: "p3", term: "Term 3", definition: "Definition C" },
+        ],
+      }),
+      ...(blockType === "hotspot" && {
+        imageUrl: "",
+        alt: "",
+        hotspots: [],
+      }),
     };
 
 
@@ -452,6 +475,9 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
       { title: "Quiz", key: "quiz", icon: CheckCircle2 },
       { title: "Knowledge Check", key: "knowledge-check", icon: HelpCircle },
       { title: "Flashcard", key: "flashcard", icon: RotateCcw },
+      { title: "Fill in the Blank", key: "fill-in-the-blank", icon: PenLine },
+      { title: "Matching Activity", key: "matching", icon: ArrowLeftRight },
+      { title: "Hotspot Image", key: "hotspot", icon: Crosshair },
       { title: "Categorization", key: "categorization", icon: CheckSquare },
       { title: "Time Requirement", key: "time-requirements", icon: Clock },
       { title: "Progress Marker", key: "progress-marker", icon: Flag },

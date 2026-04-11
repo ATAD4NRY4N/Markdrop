@@ -526,6 +526,29 @@ const blocksToMarkdown = (blocks) => {
           });
           return [header, ...colSections].join("\n\n");
         }
+        case "fill-in-the-blank": {
+          const sentence = block.sentence || "";
+          const answers = block.answers || [];
+          let i = 0;
+          const filled = sentence.replace(/___/g, () => `[${answers[i++] || "___"}]`);
+          return `<!-- Fill in the Blank -->\n${filled}`;
+        }
+        case "matching": {
+          const pairs = block.pairs || [];
+          const lines = [`<!-- Matching: ${block.prompt || ""} -->`];
+          pairs.forEach((p, idx) => {
+            lines.push(`${idx + 1}. **${p.term}** → ${p.definition}`);
+          });
+          return lines.join("\n");
+        }
+        case "hotspot": {
+          const spots = block.hotspots || [];
+          const lines = [`<!-- Hotspot Image: ${block.imageUrl || "(no image)"} -->`];
+          spots.forEach((hs, idx) => {
+            lines.push(`${idx + 1}. **${hs.label || `Spot ${idx + 1}`}** (${hs.x}%, ${hs.y}%): ${hs.content || ""}`);
+          });
+          return lines.join("\n");
+        }
         default:
           return block.content;
       }

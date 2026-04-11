@@ -13,10 +13,13 @@ import BranchingBlock from "@/components/blocks/BuilderPage/blocks/BranchingBloc
 import CarouselBlock from "@/components/blocks/BuilderPage/blocks/CarouselBlock";
 import CategorizationBlock from "@/components/blocks/BuilderPage/blocks/CategorizationBlock";
 import CourseNavBlock from "@/components/blocks/BuilderPage/blocks/CourseNavBlock";
+import FillInTheBlankBlock from "@/components/blocks/BuilderPage/blocks/FillInTheBlankBlock";
 import FlashcardBlock from "@/components/blocks/BuilderPage/blocks/FlashcardBlock";
 import GridBlock from "@/components/blocks/BuilderPage/blocks/GridBlock";
+import HotspotBlock from "@/components/blocks/BuilderPage/blocks/HotspotBlock";
 import KnowledgeCheckBlock from "@/components/blocks/BuilderPage/blocks/KnowledgeCheckBlock";
 import LearningObjectiveBlock from "@/components/blocks/BuilderPage/blocks/LearningObjectiveBlock";
+import MatchingBlock from "@/components/blocks/BuilderPage/blocks/MatchingBlock";
 import PdfBlock from "@/components/blocks/BuilderPage/blocks/PdfBlock";
 import ProgressMarkerBlock from "@/components/blocks/BuilderPage/blocks/ProgressMarkerBlock";
 import QuizBlock from "@/components/blocks/BuilderPage/blocks/QuizBlock";
@@ -488,6 +491,9 @@ const blocksToMarkdown = (blocks) => {
         case "grid":
         case "carousel":
         case "pdf":
+        case "fill-in-the-blank":
+        case "matching":
+        case "hotspot":
           return "";
         default:
           return block.content;
@@ -535,6 +541,9 @@ const ELEARNING_TYPES = new Set([
   "categorization",
   "carousel",
   "pdf",
+  "fill-in-the-blank",
+  "matching",
+  "hotspot",
 ]);
 
 const ELEARNING_COMPONENTS = {
@@ -550,6 +559,9 @@ const ELEARNING_COMPONENTS = {
   categorization: CategorizationBlock,
   carousel: CarouselBlock,
   pdf: PdfBlock,
+  "fill-in-the-blank": FillInTheBlankBlock,
+  matching: MatchingBlock,
+  hotspot: HotspotBlock,
 };
 
 // Render a single block's markdown within an optionally animated wrapper

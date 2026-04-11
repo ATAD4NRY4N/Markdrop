@@ -12,6 +12,8 @@ export default function KnowledgeCheckBlock({ block, onUpdate }) {
 
   const options = block.options || ["", "", ""];
   const correctIndex = block.correctIndex ?? 0;
+  const feedbackCorrect = block.feedbackCorrect || "✓ Correct! Well done.";
+  const feedbackIncorrect = block.feedbackIncorrect || "✗ Not quite — review the material and try again.";
 
   const updateOption = (i, val) => {
     const updated = options.map((o, idx) => (idx === i ? val : o));
@@ -95,6 +97,26 @@ export default function KnowledgeCheckBlock({ block, onUpdate }) {
           </Button>
         </div>
 
+        {/* Feedback text */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Correct feedback</Label>
+            <Input
+              value={feedbackCorrect}
+              onChange={(e) => onUpdate(block.id, { ...block, feedbackCorrect: e.target.value })}
+              className="h-7 text-xs bg-muted/20 border-0 focus-visible:ring-1"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Incorrect feedback</Label>
+            <Input
+              value={feedbackIncorrect}
+              onChange={(e) => onUpdate(block.id, { ...block, feedbackIncorrect: e.target.value })}
+              className="h-7 text-xs bg-muted/20 border-0 focus-visible:ring-1"
+            />
+          </div>
+        </div>
+
         {/* Inline mini-preview */}
         {block.prompt && (
           <div className="rounded border border-border/40 bg-background/60 p-2 space-y-2">
@@ -125,17 +147,27 @@ export default function KnowledgeCheckBlock({ block, onUpdate }) {
               ))}
             </div>
             {previewSubmitted && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 text-xs"
-                onClick={() => {
-                  setPreviewSelected(null);
-                  setPreviewSubmitted(false);
-                }}
-              >
-                Reset preview
-              </Button>
+              <div className="space-y-1">
+                <p className={cn(
+                  "text-xs font-semibold",
+                  previewSelected === correctIndex
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-red-600 dark:text-red-400"
+                )}>
+                  {previewSelected === correctIndex ? feedbackCorrect : feedbackIncorrect}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 text-xs"
+                  onClick={() => {
+                    setPreviewSelected(null);
+                    setPreviewSubmitted(false);
+                  }}
+                >
+                  Reset preview
+                </Button>
+              </div>
             )}
           </div>
         )}

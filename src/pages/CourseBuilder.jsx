@@ -59,6 +59,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { CourseProvider, useCourse } from "@/context/CourseContext";
+import { copyBlocksToClipboard, pasteBlocksFromClipboard } from "@/lib/clipboard";
 
 // ---------------------------------------------------------------------------
 // Inner component (needs CourseProvider above it)
@@ -93,7 +94,6 @@ function CourseBuilderInner() {
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
-  const [clipboardBlock, setClipboardBlock] = useState(null);
 
   // Sync local blocks from active module whenever activeModuleId changes
   useEffect(() => {
@@ -210,26 +210,34 @@ function CourseBuilderInner() {
 
   // Copy/paste helpers
   const handleCopyBlock = useCallback(
-    (blockId) => {
+    async (blockId) => {
       const block = blocks.find((b) => b.id === blockId);
       if (block) {
-        setClipboardBlock(block);
-        toast.success("Block copied");
+        const success = await copyBlocksToClipboard([block]);
+        if (success) {
+          toast.success("Block copied to clipboard");
+        } else {
+          toast.error("Failed to copy block");
+        }
       }
     },
     [blocks]
   );
 
-  const handlePasteBlock = useCallback(() => {
-    if (!clipboardBlock) return;
-    const newBlock = { ...clipboardBlock, id: `${Date.now()}_paste` };
-    applyBlocks([...blocks, newBlock]);
-    toast.success("Block pasted");
-  }, [clipboardBlock, blocks, applyBlocks]);
+  const handlePasteBlock = useCallback(async () => {
+    const pastedBlocks = await pasteBlocksFromClipboard();
+    if (pastedBlocks && pastedBlocks.length > 0) {
+      applyBlocks([...blocks, ...pastedBlocks]);
+      toast.success("Block(s) pasted");
+    }
+  }, [blocks, applyBlocks]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
+      // Don't trigger if user is intensely typing in input/textarea
+      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+      
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
         handleUndo();
@@ -239,20 +247,14 @@ function CourseBuilderInner() {
       } else if ((e.ctrlKey || e.metaKey) && e.key === "s") {
         e.preventDefault();
         handleSave();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "v" && clipboardBlock) {
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "v") {
         e.preventDefault();
         handlePasteBlock();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [
-    handleUndo,
-    handleRedo,
-    handleSave,
-    handlePasteBlock,
-    clipboardBlock,
-  ]);
+  }, [handleUndo, handleRedo, handleSave, handlePasteBlock]);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 

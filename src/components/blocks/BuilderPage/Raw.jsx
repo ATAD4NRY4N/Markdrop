@@ -515,6 +515,11 @@ const blocksToMarkdown = (blocks) => {
               if (b.type === "separator") return "---";
               if (b.type === "image") return `![${b.alt || ""}](${b.content || ""})`;
               if (b.type === "alert") return `> [!${(b.alertType || "note").toUpperCase()}]\n> ${b.content || ""}`;
+              if (b.type === "blockquote") return (b.content || "").split("\n").map((l) => `> ${l}`).join("\n");
+              if (b.type === "link") return `[${b.content || "Link"}](${b.url || ""})`;
+              if (b.type === "video") return `<video src="${b.content || ""}" />`;
+              // code, ul, ol, task-list — content is already valid markdown
+              if (["code", "ul", "ol", "task-list"].includes(b.type)) return b.content || "";
               return (PREFIX[b.type] || "") + (b.content || "");
             }).join("\n\n");
             return `<!-- column ${ci + 1} (${weight}) -->\n${colMd}`;

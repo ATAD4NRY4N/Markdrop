@@ -3,15 +3,24 @@ import {
   AlignLeft,
   ChevronDown,
   ChevronUp,
+  Code2,
   Heading1,
   Heading2,
   Heading3,
   Heading4,
+  Heading5,
+  Heading6,
   Image as ImageIcon,
   LayoutGrid,
+  Link as LinkIcon,
+  List,
+  ListChecks,
+  ListOrdered,
   Minus,
   Plus,
+  Quote,
   Trash2,
+  Video,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -41,11 +50,20 @@ const ALERT_TYPES = ["note", "tip", "important", "warning", "caution", "success"
 
 // Block types available inside grid columns
 const COLUMN_BLOCK_TYPES = [
+  { type: "h1", label: "Heading 1", icon: Heading1 },
   { type: "h2", label: "Heading 2", icon: Heading2 },
   { type: "h3", label: "Heading 3", icon: Heading3 },
   { type: "h4", label: "Heading 4", icon: Heading4 },
-  { type: "h1", label: "Heading 1", icon: Heading1 },
+  { type: "h5", label: "Heading 5", icon: Heading5 },
+  { type: "h6", label: "Heading 6", icon: Heading6 },
   { type: "paragraph", label: "Paragraph", icon: AlignLeft },
+  { type: "blockquote", label: "Blockquote", icon: Quote },
+  { type: "ul", label: "Bullet List", icon: List },
+  { type: "ol", label: "Numbered List", icon: ListOrdered },
+  { type: "task-list", label: "Task List", icon: ListChecks },
+  { type: "code", label: "Code Block", icon: Code2 },
+  { type: "link", label: "Link", icon: LinkIcon },
+  { type: "video", label: "Video", icon: Video },
   { type: "image", label: "Image", icon: ImageIcon },
   { type: "alert", label: "Alert", icon: AlertCircle },
   { type: "separator", label: "Divider", icon: Minus },
@@ -54,7 +72,8 @@ const COLUMN_BLOCK_TYPES = [
 const HEADING_PREFIX = { h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### " };
 const TYPE_BADGE = {
   h1: "H1", h2: "H2", h3: "H3", h4: "H4", h5: "H5", h6: "H6",
-  paragraph: "P", image: "IMG", alert: "!", separator: "—",
+  paragraph: "P", blockquote: "❝", ul: "•", ol: "1.", "task-list": "☑",
+  code: "</>", link: "🔗", video: "▶", image: "IMG", alert: "!", separator: "—",
 };
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -72,6 +91,12 @@ function makeNestedBlock(type) {
   const b = { id: makeNestedId(), type, content: "" };
   if (type === "alert") return { ...b, alertType: "note" };
   if (type === "image") return { ...b, alt: "" };
+  if (type === "link") return { ...b, content: "Link text", url: "" };
+  if (type === "ul") return { ...b, content: "- Item 1\n- Item 2" };
+  if (type === "ol") return { ...b, content: "1. First item\n2. Second item" };
+  if (type === "task-list") return { ...b, content: "- [ ] Task 1\n- [ ] Task 2" };
+  if (type === "code") return { ...b, content: "```plaintext\n\n```" };
+  if (type === "video") return { ...b, title: "", align: "left" };
   return b;
 }
 
@@ -117,6 +142,37 @@ function NestedBlockPreview({ block: b }) {
         </div>
       </div>
     );
+  }
+
+  if (b.type === "blockquote") {
+    const bqMd = (b.content || "").split("\n").map((l) => `> ${l}`).join("\n");
+    return (
+      <div className="prose prose-sm dark:prose-invert max-w-none break-words">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{bqMd}</ReactMarkdown>
+      </div>
+    );
+  }
+
+  if (b.type === "link") {
+    const linkMd = `[${b.content || "Link"}](${b.url || ""})`;
+    return (
+      <div className="prose prose-sm dark:prose-invert max-w-none break-words">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{linkMd}</ReactMarkdown>
+      </div>
+    );
+  }
+
+  if (b.type === "video") {
+    if (!b.content) return <div className="text-muted-foreground text-xs italic py-2">No video URL</div>;
+    const isYt = /youtu\.?be/.test(b.content);
+    const isVimeo = /vimeo\.com/.test(b.content);
+    if (isYt || isVimeo) {
+      const src = isYt
+        ? `https://www.youtube.com/embed/${b.content.match(/(?:v=|youtu\.be\/)([\w-]+)/)?.[1] || ""}`
+        : `https://player.vimeo.com/video/${b.content.match(/vimeo\.com\/(\d+)/)?.[1] || ""}`;
+      return <div className="aspect-video w-full rounded overflow-hidden"><iframe src={src} className="w-full h-full" allowFullScreen /></div>;
+    }
+    return <video src={b.content} controls className="w-full rounded" />;
   }
 
   const md = (HEADING_PREFIX[b.type] || "") + (b.content || "");
@@ -185,6 +241,36 @@ function NestedBlockEditor({ block: b, onUpdate, onDelete, onMoveUp, onMoveDown,
             onChange={(e) => onUpdate({ ...b, content: e.target.value })}
             placeholder={`${b.type.toUpperCase()} text…`}
             className="h-7 text-xs font-semibold bg-muted/20 border-0 focus-visible:ring-1"
+          />
+        ) : b.type === "link" ? (
+          <div className="space-y-1">
+            <Input
+              value={b.content || ""}
+              onChange={(e) => onUpdate({ ...b, content: e.target.value })}
+              placeholder="Link text"
+              className="h-6 text-xs bg-muted/20 border-0 focus-visible:ring-1"
+            />
+            <Input
+              value={b.url || ""}
+              onChange={(e) => onUpdate({ ...b, url: e.target.value })}
+              placeholder="URL (https://…)"
+              className="h-6 text-xs bg-muted/20 border-0 focus-visible:ring-1"
+            />
+          </div>
+        ) : b.type === "video" ? (
+          <Input
+            value={b.content || ""}
+            onChange={(e) => onUpdate({ ...b, content: e.target.value })}
+            placeholder="Video URL (YouTube, Vimeo, or direct .mp4)"
+            className="h-6 text-xs bg-muted/20 border-0 focus-visible:ring-1"
+          />
+        ) : b.type === "code" ? (
+          <Textarea
+            value={b.content || ""}
+            onChange={(e) => onUpdate({ ...b, content: e.target.value })}
+            placeholder="```language\ncode here\n```"
+            rows={3}
+            className="text-xs font-mono bg-muted/20 border-0 focus-visible:ring-1 resize-none"
           />
         ) : (
           <Textarea

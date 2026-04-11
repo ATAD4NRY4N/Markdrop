@@ -78,6 +78,16 @@
   animation: marquee-vertical var(--duration, 20s) linear infinite;
 }
 
+/* Search & replace block highlight */
+@keyframes search-pulse {
+  0%   { outline: 2px solid #7c3aed; outline-offset: 3px; border-radius: 6px; }
+  65%  { outline: 2px solid #7c3aed; outline-offset: 3px; border-radius: 6px; }
+  100% { outline: 2px solid transparent; outline-offset: 3px; border-radius: 6px; }
+}
+.search-highlight-pulse {
+  animation: search-pulse 2s ease-out forwards;
+}
+
 .goog-te-banner-frame,
 .goog-te-menu-frame {
   display: none !important;

@@ -26,6 +26,7 @@ import {
   FileText,
   RotateCcw,
   Save,
+  Search,
   Sparkles,
   Sun,
   Target,
@@ -45,6 +46,7 @@ import CollaboratorsDialog from "@/components/blocks/CourseBuilderPage/Collabora
 import CoursePreview from "@/components/blocks/CourseBuilderPage/CoursePreview";
 import CourseStructurePanel from "@/components/blocks/CourseBuilderPage/CourseStructurePanel";
 import ScormExportDialog from "@/components/blocks/CourseBuilderPage/ScormExportDialog";
+import SearchReplaceDialog from "@/components/blocks/CourseBuilderPage/SearchReplaceDialog";
 import XliffDialog from "@/components/blocks/CourseBuilderPage/XliffDialog";
 import ReviewPanel from "@/components/review/ReviewPanel";
 import { useTheme } from "@/components/ThemeProvider";
@@ -74,6 +76,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { CourseProvider, useCourse } from "@/context/CourseContext";
+import { updateModule } from "@/lib/storage";
+import {
+  replaceAllInModules,
+  replaceInBlocks,
+  replaceSingleMatch,
+} from "@/lib/searchUtils";
 import {
   copyBlocksToClipboard,
   getClipboardCount,
@@ -93,7 +101,9 @@ function CourseBuilderInner() {
   const {
     course,
     modules,
+    setModules,
     activeModuleId,
+    setActiveModuleId,
     isSaving,
     loadCourse,
     initNewCourse,
@@ -115,6 +125,8 @@ function CourseBuilderInner() {
   const [showCollaboratorsDialog, setShowCollaboratorsDialog] = useState(false);
   const [showReviewPanel, setShowReviewPanel] = useState(false);
   const [showAdaptivePanel, setShowAdaptivePanel] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [focusBlockId, setFocusBlockId] = useState(null);
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
@@ -324,6 +336,12 @@ function CourseBuilderInner() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
+      // Search & replace — fires regardless of focus
+      if ((e.ctrlKey || e.metaKey) && e.key === "h") {
+        e.preventDefault();
+        setShowSearchDialog(true);
+        return;
+      }
       // Don't trigger if user is intensely typing in input/textarea
       if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
       
@@ -414,6 +432,79 @@ function CourseBuilderInner() {
   };
 
   const activeModule = modules.find((m) => m.id === activeModuleId);
+
+  // ── Search & replace handlers ────────────────────────────────────────────
+
+  const handleSearchNavigate = useCallback(
+    (moduleId, blockId) => {
+      if (moduleId !== activeModuleId) {
+        setActiveModuleId(moduleId);
+      }
+      // Use a tiny delay when switching modules so the editor has time to render
+      const delay = moduleId !== activeModuleId ? 200 : 0;
+      setTimeout(() => {
+        setFocusBlockId(null); // reset first so the effect fires even for same block
+        setTimeout(() => setFocusBlockId(blockId), 20);
+      }, delay);
+    },
+    [activeModuleId, setActiveModuleId]
+  );
+
+  const handleSearchReplace = useCallback(
+    async (match, replacement, caseSensitive) => {
+      const mod = modules.find((m) => m.id === match.moduleId);
+      if (!mod) return;
+      let srcBlocks;
+      try { srcBlocks = JSON.parse(mod.blocks_json || "[]"); } catch { srcBlocks = []; }
+      const newBlocks = replaceSingleMatch(srcBlocks, match, replacement);
+      if (match.moduleId === activeModuleId) {
+        applyBlocks(newBlocks);
+      } else {
+        try {
+          const updated = await updateModule(match.moduleId, {
+            blocks_json: JSON.stringify(newBlocks),
+          });
+          setModules((prev) => prev.map((m) => (m.id === match.moduleId ? updated : m)));
+        } catch {
+          // Non-critical — local state still reflects replacement
+          setModules((prev) =>
+            prev.map((m) =>
+              m.id === match.moduleId ? { ...m, blocks_json: JSON.stringify(newBlocks) } : m
+            )
+          );
+        }
+      }
+    },
+    [modules, activeModuleId, applyBlocks, setModules]
+  );
+
+  const handleSearchReplaceAll = useCallback(
+    async (query, replacement, caseSensitive) => {
+      const { updatedModules, count } = replaceAllInModules(modules, query, replacement, caseSensitive);
+      if (!count) return;
+      for (const { moduleId, blocks: newBlocks } of updatedModules) {
+        if (moduleId === activeModuleId) {
+          applyBlocks(newBlocks);
+        } else {
+          try {
+            const updated = await updateModule(moduleId, {
+              blocks_json: JSON.stringify(newBlocks),
+            });
+            setModules((prev) => prev.map((m) => (m.id === moduleId ? updated : m)));
+          } catch {
+            setModules((prev) =>
+              prev.map((m) =>
+                m.id === moduleId ? { ...m, blocks_json: JSON.stringify(newBlocks) } : m
+              )
+            );
+          }
+        }
+      }
+      const { toast: _toast } = await import("sonner");
+      _toast.success(`Replaced ${count} occurrence${count !== 1 ? "s" : ""}`);
+    },
+    [modules, activeModuleId, applyBlocks, setModules]
+  );
 
   const getBlockLabel = (blockType) => {
     const labels = {
@@ -545,6 +636,21 @@ function CourseBuilderInner() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Save module (Ctrl+S)</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="px-2 hidden md:flex"
+                      onClick={() => setShowSearchDialog(true)}
+                      disabled={!modules.length}
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Find &amp; replace (Ctrl+H)</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -697,6 +803,7 @@ function CourseBuilderInner() {
                           onPasteAfter={
                             clipboardCount > 0 ? handlePasteAfterBlock : undefined
                           }
+                          focusBlockId={focusBlockId}
                         />
                       )}
                       {activeTab === "raw" && (
@@ -760,6 +867,15 @@ function CourseBuilderInner() {
         course={course}
         modules={modules}
         theme={courseTheme}
+      />
+
+      <SearchReplaceDialog
+        open={showSearchDialog}
+        onOpenChange={setShowSearchDialog}
+        modules={modules}
+        onNavigate={handleSearchNavigate}
+        onReplace={handleSearchReplace}
+        onReplaceAll={handleSearchReplaceAll}
       />
 
       {/* Course Settings Dialog */}

@@ -22,6 +22,7 @@ import CourseNavBlock from "./blocks/CourseNavBlock";
 import DiagramBlock from "./blocks/DiagramBlock";
 import FlashcardBlock from "./blocks/FlashcardBlock";
 import GithubProfileCardsBlock from "./blocks/GithubProfileCardsBlock";
+import GridBlock from "./blocks/GridBlock";
 import HeadingBlock from "./blocks/HeadingBlock";
 import ImageBlock from "./blocks/ImageBlock";
 import KnowledgeCheckBlock from "./blocks/KnowledgeCheckBlock";
@@ -225,6 +226,8 @@ const MarkdownBlock = memo(function MarkdownBlock({
         return <KnowledgeCheckBlock block={block} onUpdate={onUpdate} />;
       case "flashcard":
         return <FlashcardBlock block={block} onUpdate={onUpdate} />;
+      case "grid":
+        return <GridBlock block={block} onUpdate={onUpdate} />;
       case "progress-marker":
         return <ProgressMarkerBlock block={block} onUpdate={onUpdate} />;
       case "course-nav":

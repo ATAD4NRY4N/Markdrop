@@ -26,6 +26,12 @@ const blockToMarkdown = (block) => {
       return `###### ${block.content}`;
     case "paragraph":
       return block.content;
+    case "grid": {
+      // Very basic fallback into markdown pseudo-columns or a table
+      const columns = block.columns || [];
+      const row = columns.map(c => c.type === "image" ? \`![](\${c.content})\` : (c.content || "")).map(v => v.replace(/\\n/g, "<br>"));
+      return \`|<div style="width: 50%;">\${row[0] || ""}</div>|<div style="width: 50%;">\${row[1] || ""}</div>|\\n|---|---|\\n\`;
+    }
     case "blockquote":
       return `> ${block.content}`;
     case "alert": {

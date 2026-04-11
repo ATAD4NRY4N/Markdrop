@@ -101,6 +101,8 @@ function blockToHtml(block) {
       return buildTimeRequirementsHtml(block);
     case "categorization":
       return buildCategorizationHtml(block);
+    case "grid":
+      return buildGridHtml(block);
 
     default:
       return `<p>${marked.parseInline(block.content || "")}</p>`;
@@ -125,6 +127,18 @@ function buildFlashcardHtml(block) {
   </div>
   <p class="flashcard-hint">Click to flip</p>
 </div>`;
+}
+
+function buildGridHtml(block) {
+  const columns = block.columns || [];
+  const colHtml = columns.map(c => {
+    if (c.type === "image" && c.content) {
+      return `<div class="grid-col"><img src="${escHtml(c.content)}" alt="Grid Image" style="width:100%; border-radius:8px;"/></div>`;
+    }
+    return `<div class="grid-col">${marked.parse(c.content || "")}</div>`;
+  }).join("");
+
+  return `<div class="scorm-grid scorm-grid-cols-${columns.length || 2}">${colHtml}</div>`;
 }
 
 function buildBranchingHtml(block) {
@@ -580,6 +594,13 @@ th { background: #f3f4f6; font-weight: 600; }
 img { max-width: 100%; height: auto; border-radius: 4px; }
 hr { border: none; border-top: 2px solid #e5e7eb; margin: 2rem 0; }
 /* eLearning elements */
+.scorm-grid { display: grid; gap: 1.5rem; margin: 1.5rem 0; width: 100%; }
+.scorm-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.scorm-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.scorm-grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media(max-width: 640px) { .scorm-grid { grid-template-columns: 1fr; } }
+.grid-col { display: flex; flex-direction: column; gap: 0.5rem; }
+
 .learning-objectives { background: #ecfdf5; border-left: 4px solid #22c55e; padding: 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
 .learning-objectives ul { margin: 0.5rem 0 0; padding-left: 1.5rem; }
 .progress-marker { display: flex; align-items: center; justify-content: center; margin: 1.5rem 0; }

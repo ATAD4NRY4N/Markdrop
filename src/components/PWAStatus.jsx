@@ -59,7 +59,7 @@ export function PWAStatus() {
           className="hidden sm:flex fixed bottom-4 right-4 shadow-lg z-50 gap-2"
         >
           <Download01Icon size={16} />
-          Install Markdrop
+          Install CourseForge
         </Button>
 
         <Button
@@ -67,7 +67,7 @@ export function PWAStatus() {
           size="icon"
           variant="default"
           className="flex sm:hidden fixed bottom-4 left-4 shadow-lg z-50"
-          title="Install Markdrop"
+          title="Install CourseForge"
         >
           <Download01Icon size={20} />
         </Button>

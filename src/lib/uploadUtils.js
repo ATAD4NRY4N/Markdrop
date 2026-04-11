@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-const DEFAULT_BUCKET = "markdrop-files";
+const DEFAULT_BUCKET = "courseforge-files";
 
 export const initializeBucket = async () => {
   try {

@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     sitemap({
-      hostname: "https://markdrop.vercel.app",
+      hostname: "https://courseforge.app",
       dynamicRoutes: [
         "/",
         "/templates",
@@ -26,12 +26,12 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["markdrop_site_icon.svg", "robots.txt", "og-image.png"],
+      includeAssets: ["courseforge_site_icon.svg", "robots.txt", "og-image.png"],
       manifest: {
-        name: "Markdrop - Visual Markdown Editor & Builder",
-        short_name: "Markdrop",
+        name: "CourseForge - Visual eLearning Authoring Studio",
+        short_name: "CourseForge",
         description:
-          "Create beautiful README files, documentation, and markdown content with Markdrop's intuitive drag-and-drop interface.",
+          "Build and export professional SCORM courses with CourseForge's intuitive block-based authoring studio.",
         theme_color: "#ffffff",
         background_color: "#ffffff",
         display: "standalone",

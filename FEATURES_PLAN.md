@@ -1,7 +1,7 @@
-# Development Plan: Blending MarkDrop & ScormStack
+# Development Plan: CourseForge
 
 **Goals**
-Combine MarkDrop's sleek markdown editor with ScormStack's advanced eLearning capabilities to build a modern, intuitive SCORM authoring tool with powerful layout options and interactive assessments.
+Build a modern, full-featured eLearning authoring studio with a visual block editor, interactive assessments, SCORM 1.2/2004 export, adaptive learning paths, collaboration, and custom theming.
 
 ---
 

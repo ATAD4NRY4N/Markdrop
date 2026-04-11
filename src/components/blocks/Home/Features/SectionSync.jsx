@@ -161,7 +161,7 @@ export default function SectionSync() {
             <div>
               <h2 className="text-lg font-semibold text-foreground">Omar Rakhe</h2>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs text-muted-foreground">dev.markdrop@proton.me</span>
+                <span className="text-xs text-muted-foreground">hello@courseforge.dev</span>
                 <span className="px-1.5 py-0.5 rounded bg-muted/50 border border-border text-muted-foreground text-[10px] font-medium">
                   Free Plan
                 </span>

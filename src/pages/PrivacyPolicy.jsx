@@ -25,8 +25,8 @@ function Content() {
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Introduction</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Markdrop is a free, client-side markdown editor that helps you create beautiful GitHub
-              profile READMEs and markdown documents. We are committed to protecting your privacy.
+                CourseForge is a visual eLearning authoring studio that helps you create, collaborate
+                on, and export professional SCORM courses. We are committed to protecting your privacy.
               This policy explains how we handle your data.
             </p>
           </motion.section>
@@ -34,9 +34,8 @@ function Content() {
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Data Storage</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Markdrop stores your markdown documents and preferences locally in your browser using
-              localStorage. Your content never leaves your device unless you explicitly choose to
-              save it to your account or export it.
+                CourseForge stores your course content and preferences in your account using Supabase.
+                Your content never leaves our secure storage unless you explicitly choose to export it.
             </p>
             <ul className="list-disc list-inside space-y-2 text-base text-[#6b7280] dark:text-[#9ca3af] ml-4">
               <li>Documents are stored locally in your browser</li>
@@ -66,7 +65,7 @@ function Content() {
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Third-Party Services</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Markdrop may use third-party services for:
+                CourseForge may use third-party services for:
             </p>
             <ul className="list-disc list-inside space-y-2 text-base text-[#6b7280] dark:text-[#9ca3af] ml-4">
               <li>Authentication (if you create an account)</li>
@@ -81,7 +80,7 @@ function Content() {
               <li>Access and export your saved documents at any time</li>
               <li>Delete your account and all associated data</li>
               <li>Clear local storage at any time through your browser</li>
-              <li>Use Markdrop without creating an account</li>
+                <li>Use CourseForge without creating an account</li>
             </ul>
           </motion.section>
 
@@ -100,7 +99,7 @@ function Content() {
             </h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
               We may update this Privacy Policy occasionally. Any changes will be posted on this
-              page. Continued use of Markdrop after changes means you accept the updated policy.
+               page. Continued use of CourseForge after changes means you accept the updated policy.
             </p>
           </motion.section>
 
@@ -110,7 +109,7 @@ function Content() {
               If you have any questions about this Privacy Policy or our data practices, please
               contact us at:
               <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">
-                dev.markdrop@proton.me
+                 dev.courseforge@proton.me
               </code>
             </p>
           </motion.section>

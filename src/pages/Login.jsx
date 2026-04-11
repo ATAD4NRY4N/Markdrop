@@ -90,7 +90,7 @@ export default function Login() {
             <RouterLink to="/" aria-label="go home">
               <Logo />
             </RouterLink>
-            <h1 className="mb-1 mt-4 text-xl font-semibold">Sign In to Markdrop</h1>
+            <h1 className="mb-1 mt-4 text-xl font-semibold">Sign In to CourseForge</h1>
             <p className="text-sm">Welcome back! Sign in to continue</p>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">

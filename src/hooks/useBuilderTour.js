@@ -2,7 +2,7 @@ import { driver } from "driver.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "driver.js/dist/driver.css";
 
-const TOUR_COMPLETED_KEY = "markdrop-builder-tour-completed";
+const TOUR_COMPLETED_KEY = "courseforge-builder-tour-completed";
 
 export function useBuilderTour() {
   const [tourCompleted, setTourCompleted] = useState(() => {
@@ -20,9 +20,9 @@ export function useBuilderTour() {
     const steps = [
       {
         popover: {
-          title: "Welcome to Markdrop Builder! 🎉",
-          description:
-            "Let's take a quick tour of the builder interface. This will help you get started creating beautiful markdown documents.",
+            title: "Welcome to CourseForge! 🎉",
+            description:
+              "Let's take a quick tour of the builder interface. This will help you get started creating professional eLearning courses.",
           side: "over",
         },
       },
@@ -80,7 +80,7 @@ export function useBuilderTour() {
         popover: {
           title: "Import Existing Files",
           description:
-            "Import markdown (.md) or text (.txt) files to continue editing them in Markdrop.",
+              "Import markdown (.md) or text (.txt) files to continue editing them in CourseForge.",
           side: "bottom",
           align: "center",
         },

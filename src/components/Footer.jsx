@@ -1,8 +1,7 @@
 import { GithubIcon, Mail01Icon, NewTwitterIcon } from "hugeicons-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import markdropIconDark from "@/assets/markdrop_icon_dark.svg";
-import markdropIconLight from "@/assets/markdrop_icon_light.svg";
+import { Icon } from "@/components/Logo";
 import { useTheme } from "@/components/ThemeProvider";
 
 export default function Footer() {
@@ -13,7 +12,7 @@ export default function Footer() {
     const fetchLastCommit = async () => {
       try {
         const response = await fetch(
-          "https://api.github.com/repos/rakheOmar/Markdrop/commits/main"
+          "https://api.github.com/repos/rakheOmar/CourseForge/commits/main"
         );
         const data = await response.json();
 
@@ -26,11 +25,11 @@ export default function Footer() {
           });
           setLastCommitDate(formattedDate);
         } else {
-          setLastCommitDate("November 07, 2025");
+          setLastCommitDate("April 11, 2026");
         }
       } catch (error) {
         console.error("Failed to fetch last commit date:", error);
-        setLastCommitDate("November 07, 2025");
+        setLastCommitDate("April 11, 2026");
       }
     };
 
@@ -54,11 +53,7 @@ export default function Footer() {
 
       <footer className="border-t border-[#cecece] dark:border-[#16181d] flex items-center justify-between px-2 sm:px-4 md:px-8 py-2 col-span-3 lg:col-span-1 overflow-hidden relative">
         <div className="flex items-center gap-2">
-          <img
-            src={theme === "dark" ? markdropIconDark : markdropIconLight}
-            alt="Markdrop Logo"
-            className="h-4 sm:h-5 md:h-6 w-auto shrink-0"
-          />
+          <Icon className="h-4 sm:h-5 md:h-6 w-auto shrink-0" />
         </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 text-[8px] sm:text-[10px] md:text-xs text-[#6b7280] dark:text-[#9ca3af] font-mono whitespace-nowrap">
@@ -79,7 +74,7 @@ export default function Footer() {
 
         <div className="flex items-center gap-2 shrink-0">
           <a
-            href="https://github.com/rakheOmar/Markdrop"
+            href="https://github.com/rakheOmar/CourseForge"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#6b7280] dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors"
@@ -97,7 +92,7 @@ export default function Footer() {
             <NewTwitterIcon size={14} className="sm:w-4 sm:h-4" />
           </a>
           <a
-            href="mailto:dev.markdrop@proton.me"
+            href="mailto:hello@courseforge.dev"
             className="text-[#6b7280] dark:text-[#9ca3af] hover:text-black dark:hover:text-white transition-colors"
             aria-label="Email"
           >

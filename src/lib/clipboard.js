@@ -28,7 +28,7 @@ const freshIds = (blocks) =>
 export const copyBlocksToClipboard = async (blocks) => {
   setInAppClipboard(blocks);
   try {
-    const data = JSON.stringify({ type: "markdrop-blocks", blocks });
+    const data = JSON.stringify({ type: "courseforge-blocks", blocks });
     await navigator.clipboard.writeText(data);
   } catch {
     // System clipboard unavailable — in-app clipboard still works for same session
@@ -47,7 +47,7 @@ export const pasteBlocksFromClipboard = async () => {
   try {
     const text = await navigator.clipboard.readText();
     const data = JSON.parse(text);
-    if (data.type === "markdrop-blocks" && Array.isArray(data.blocks) && data.blocks.length > 0) {
+    if (data.type === "courseforge-blocks" && Array.isArray(data.blocks) && data.blocks.length > 0) {
       return freshIds(data.blocks);
     }
   } catch {

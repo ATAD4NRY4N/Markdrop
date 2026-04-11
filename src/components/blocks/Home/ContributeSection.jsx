@@ -50,12 +50,12 @@ export default function ContributeSection() {
               Join the Community
             </h2>
             <p className="text-sm sm:text-base md:text-lg text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Help make Markdrop better for everyone. Contribute code, report bugs, or suggest new
+              Help make CourseForge better for everyone. Contribute code, report bugs, or suggest new
               features on GitHub.
             </p>
           </motion.div>
           <motion.a
-            href="https://github.com/rakheOmar/Markdrop"
+            href="https://github.com/rakheOmar/CourseForge"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 sm:px-7 md:px-8 py-3 sm:py-3.5 md:py-4 bg-black dark:bg-white text-white dark:text-black font-medium text-sm sm:text-base rounded-md hover:opacity-90 transition-all duration-200 hover:scale-105"

@@ -44,7 +44,7 @@ export default function VideoExportDialog({ open, onOpenChange, marpRef }) {
         fps,
         width: selectedRes.width,
         height: selectedRes.height,
-        filename: `markdrop-presentation-${timestamp}.webm`,
+        filename: `courseforge-presentation-${timestamp}.webm`,
       });
       onOpenChange(false);
     } catch (err) {

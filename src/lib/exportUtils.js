@@ -261,7 +261,7 @@ const buildMarpSlidesHTML = (blocks) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Markdrop Presentation</title>
+  <title>CourseForge Presentation</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111; display: flex; flex-direction: column; align-items: center;
@@ -372,7 +372,7 @@ const ATTRIBUTION_FOOTER = `
 ---
 
 <div align="center">
-  <sub>Created with <a href="https://markdrop.vercel.app">Markdrop</a> | <a href="https://github.com/rakheOmar/Markdrop">⭐ Star on GitHub</a></sub>
+  <sub>Created with <a href="https://courseforge.app">CourseForge</a> | <a href="https://github.com/rakheOmar/CourseForge">⭐ Star on GitHub</a></sub>
 </div>`;
 
 export const blocksToMarkdown = (blocks, includeAttribution = true) => {
@@ -615,7 +615,7 @@ export const blocksToHTML = (blocks, includeAttribution = true, includeAnimation
 
     const attribution = includeAttribution
       ? marked.parse(
-          `\n\n---\n\n<div align="center"><sub>Created with <a href="https://markdrop.vercel.app">Markdrop</a> | <a href="https://github.com/rakheOmar/Markdrop">⭐ Star on GitHub</a></sub></div>`,
+          `\n\n---\n\n<div align="center"><sub>Created with <a href="https://courseforge.app">CourseForge</a> | <a href="https://github.com/rakheOmar/CourseForge">⭐ Star on GitHub</a></sub></div>`,
           { breaks: true, gfm: true }
         )
       : "";
@@ -640,8 +640,8 @@ const getHTMLTemplate = (content, includeAttribution = true, animExtras = { css:
     ? `
     <hr style="margin: 3rem 0 2rem; border: none; border-top: 1px solid #e5e7eb;">
     <div style="text-align: center; font-size: 0.875rem; color: #6b7280; margin-top: 2rem;">
-        <p>Created with <a href="https://markdrop.vercel.app" style="color: #0366d6; text-decoration: none;">Markdrop</a> | 
-        <a href="https://github.com/rakheOmar/Markdrop" style="color: #0366d6; text-decoration: none;">⭐ Star on GitHub</a></p>
+        <p>Created with <a href="https://courseforge.app" style="color: #0366d6; text-decoration: none;">CourseForge</a> | 
+        <a href="https://github.com/rakheOmar/CourseForge" style="color: #0366d6; text-decoration: none;">⭐ Star on GitHub</a></p>
     </div>`
     : "";
 
@@ -650,7 +650,7 @@ const getHTMLTemplate = (content, includeAttribution = true, animExtras = { css:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdrop Document</title>
+    <title>CourseForge Document</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {

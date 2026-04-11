@@ -991,7 +991,7 @@ ${QUIZ_ENGINE_JS}
 // ---------------------------------------------------------------------------
 
 function generateManifest12(course, modules) {
-  const identifier = `MARKDROP_${(course.id || "course").replace(/-/g, "").slice(0, 16)}`;
+  const identifier = `COURSEFORGE_${(course.id || "course").replace(/-/g, "").slice(0, 16)}`;
   const orgId = `${identifier}_ORG`;
 
   const items = modules
@@ -1041,7 +1041,7 @@ ${resources}
 // ---------------------------------------------------------------------------
 
 function generateManifest2004(course, modules) {
-  const identifier = `MARKDROP_${(course.id || "course").replace(/-/g, "").slice(0, 16)}`;
+  const identifier = `COURSEFORGE_${(course.id || "course").replace(/-/g, "").slice(0, 16)}`;
   const orgId = `${identifier}_ORG`;
 
   const items = modules

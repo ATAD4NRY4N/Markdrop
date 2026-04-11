@@ -375,7 +375,7 @@ describe("_generateManifest12", () => {
 
   it("course id is used in the manifest identifier", () => {
     // id = 'abc12345-0000-0000-0000-000000000001' → stripped → 'abc123450000000000000000'
-    expect(manifest).toContain("MARKDROP_abc12345000000");
+    expect(manifest).toContain("COURSEFORGE_abc12345000000");
   });
 
   it("escapes course title in XML", () => {

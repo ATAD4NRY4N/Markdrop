@@ -38,7 +38,7 @@ export default function NotFoundPage() {
 
                 <Button asChild variant="outline">
                   <a
-                    href="https://github.com/rakheOmar/Markdrop/issues"
+                    href="https://github.com/rakheOmar/CourseForge/issues"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

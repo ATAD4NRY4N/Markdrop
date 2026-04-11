@@ -24,24 +24,25 @@ function Content() {
         <div className="max-w-4xl mx-auto space-y-8">
           <motion.section className="space-y-4" {...staggerItem}>
             <h1 className="text-4xl md:text-5xl font-bold text-black dark:text-white">
-              About Markdrop
+              About CourseForge
             </h1>
             <p className="text-lg text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Markdrop is a modern, intuitive markdown editor designed to make creating beautiful
-              GitHub profile READMEs and markdown documents effortless. Built with simplicity and
-              functionality in mind, we empower developers and creators to focus on their content,
-              not the tools.
+              CourseForge is a modern, visual eLearning authoring studio built for instructional
+              designers, trainers, and developers who want to create professional, standards-compliant
+              courses — without the enterprise price tag. From first draft to final SCORM export,
+              everything you need is in one place.
             </p>
           </motion.section>
 
           <motion.section className="space-y-4" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Our Mission</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              We believe that creating markdown content should be fast, visual, and enjoyable.
-              Markdrop bridges the gap between raw markdown syntax and beautiful rendered output,
-              giving you instant feedback as you build your documents. Whether you're crafting your
-              GitHub profile, documenting a project, or writing technical content, Markdrop is here
-              to streamline your workflow.
+              We believe that building great eLearning should be fast, visual, and accessible to
+              everyone — not just teams with expensive enterprise software. CourseForge bridges the
+              gap between creative authoring and LMS-ready output, giving you a real-time preview as
+              you build and a polished SCORM package at the end. Whether you're crafting a compliance
+              module, an onboarding course, or a full training curriculum, CourseForge is here to
+              make it efficient and enjoyable.
             </p>
           </motion.section>
 
@@ -52,77 +53,79 @@ function Content() {
             <ul className="space-y-4 text-base text-[#6b7280] dark:text-[#9ca3af]">
               <li className="flex gap-3">
                 <span className="text-black dark:text-white font-semibold shrink-0">
-                  🎯 Block-Based Editing:
+                  🎯 Block-Based Authoring:
                 </span>
                 <span>
-                  Drag and drop markdown blocks to build your document visually, making complex
-                  layouts simple.
+                  Drag and drop rich content blocks — quizzes, flashcards, hotspots, branching
+                  scenarios, and more — to build engaging modules without writing a line of code.
                 </span>
               </li>
               <li className="flex gap-3">
                 <span className="text-black dark:text-white font-semibold shrink-0">
-                  ⚡ Real-Time Preview:
-                </span>
-                <span>See your changes instantly with live preview rendering as you type.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-black dark:text-white font-semibold shrink-0">
-                  🎨 Template Library:
+                  ⚡ One-Click SCORM Export:
                 </span>
                 <span>
-                  Jump-start your projects with professionally designed templates for profiles,
-                  projects, and more.
+                  Generate SCORM 1.2 and 2004 4th Edition packages instantly, ready for Moodle,
+                  Cornerstone, TalentLMS, Docebo, or any standards-compliant LMS.
                 </span>
               </li>
               <li className="flex gap-3">
                 <span className="text-black dark:text-white font-semibold shrink-0">
-                  🔒 Privacy First:
+                  🧠 Adaptive Learning Paths:
                 </span>
                 <span>
-                  Your content is stored locally in your browser by default, giving you complete
-                  control over your data.
+                  Set score-based checkpoint rules that automatically route learners through required
+                  or optional variant paths — all tracked in SCORM suspend_data.
                 </span>
               </li>
               <li className="flex gap-3">
                 <span className="text-black dark:text-white font-semibold shrink-0">
-                  📤 Export Anywhere:
+                  👥 Built-In Collaboration:
                 </span>
                 <span>
-                  Export to markdown, HTML, or PDF with a single click, ready for GitHub or any
-                  platform.
+                  Invite editors and reviewers, share review links, and manage threaded comments
+                  with priority and status tracking — all without leaving the tool.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-black dark:text-white font-semibold shrink-0">
+                  🎨 Custom Themes &amp; Branding:
+                </span>
+                <span>
+                  Apply per-course fonts, colors, and layouts to match your organization's brand.
+                  Preview changes live before exporting.
                 </span>
               </li>
             </ul>
           </motion.section>
 
           <motion.section className="space-y-4" {...staggerItem}>
-            <h2 className="text-3xl font-bold text-black dark:text-white">Built for Creators</h2>
+            <h2 className="text-3xl font-bold text-black dark:text-white">Built for eLearning Creators</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Markdrop is built by developers, for developers. We understand the frustration of
-              context-switching between writing markdown and previewing it. We've experienced the
-              pain of building GitHub profile READMEs from scratch. That's why we created Markdrop –
-              to solve these problems and make markdown creation a delightful experience.
+              CourseForge is built by developers who've experienced the friction of traditional
+              authoring tools — slow exports, clunky UIs, and per-seat pricing that puts advanced
+              features out of reach. We set out to create an authoring experience that's genuinely
+              delightful: fast, opinionated where it helps, and flexible where it matters.
             </p>
           </motion.section>
 
           <motion.section className="space-y-4" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">
-              Open Source & Community
+              Open Source &amp; Community
             </h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Markdrop is proudly open source. We believe in transparency, collaboration, and giving
-              back to the developer community. Contributions, feedback, and ideas are always
-              welcome. Together, we're building the best markdown editor for modern creators.
+              CourseForge is proudly open source. We believe in transparency, collaboration, and
+              giving back to the community. Contributions, bug reports, and feature ideas are always
+              welcome. Together, we're building the best eLearning authoring tool for modern teams.
             </p>
           </motion.section>
 
           <motion.section className="space-y-4" {...staggerItem}>
-            <h2 className="text-3xl font-bold text-black dark:text-white">The Journey Ahead</h2>
+            <h2 className="text-3xl font-bold text-black dark:text-white">The Road Ahead</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              We're constantly evolving Markdrop with new features, templates, and improvements
-              based on user feedback. Our roadmap includes collaborative editing, custom themes,
-              AI-powered content suggestions, and much more. We're excited to have you join us on
-              this journey.
+              We're constantly improving CourseForge based on real user feedback. Our roadmap includes
+              an analytics dashboard for hosted courses, AI-assisted content suggestions, a richer
+              block library, and deeper LMS integrations. We're excited to have you on this journey.
             </p>
           </motion.section>
 
@@ -135,18 +138,18 @@ function Content() {
               <p className="text-base text-[#6b7280] dark:text-[#9ca3af]">
                 <span className="text-black dark:text-white font-semibold">Email:</span>{" "}
                 <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">
-                  dev.markdrop@proton.me
+                  hello@courseforge.dev
                 </code>
               </p>
               <p className="text-base text-[#6b7280] dark:text-[#9ca3af]">
                 <span className="text-black dark:text-white font-semibold">GitHub:</span>{" "}
                 <a
-                  href="https://github.com/rakheOmar/Markdrop"
+                  href="https://github.com/rakheOmar/CourseForge"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 dark:text-blue-400 hover:underline"
                 >
-                  github.com/rakheOmar/Markdrop
+                  github.com/rakheOmar/CourseForge
                 </a>
               </p>
             </div>

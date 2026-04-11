@@ -25,18 +25,18 @@ function Content() {
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Introduction</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              These Terms of Service govern your use of Markdrop, a free markdown editor for
-              creating beautiful GitHub profile READMEs and markdown documents. By using Markdrop,
+                These Terms of Service govern your use of CourseForge, a visual eLearning authoring
+                studio for creating and exporting professional SCORM courses. By using CourseForge,
               you agree to these Terms.
             </p>
           </motion.section>
 
           <motion.section className="space-y-6" {...staggerItem}>
-            <h2 className="text-3xl font-bold text-black dark:text-white">Using Markdrop</h2>
-            <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Markdrop is a client-side markdown editor that stores your documents locally in your
-              browser. You can use Markdrop without creating an account. If you choose to create an
-              account, you agree to:
+              <h2 className="text-3xl font-bold text-black dark:text-white">Using CourseForge</h2>
+              <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
+                CourseForge is an eLearning authoring platform that stores your course content
+                securely in your account. You can explore CourseForge without creating an account. If
+                you choose to create an account, you agree to:
             </p>
             <ul className="list-disc list-inside space-y-2 text-base text-[#6b7280] dark:text-[#9ca3af] ml-4">
               <li>Provide accurate information</li>
@@ -48,16 +48,16 @@ function Content() {
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Your Content</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              You own all content you create using Markdrop. We don't claim any ownership rights to
-              your documents. When you save documents to your account, we store them only to provide
-              the service to you.
+                You own all content you create using CourseForge. We don't claim any ownership rights
+                to your courses or documents. When you save content to your account, we store it only
+                to provide the service to you.
             </p>
           </motion.section>
 
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Acceptable Use</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Please use Markdrop responsibly. Don't use it to:
+                Please use CourseForge responsibly. Don't use it to:
             </p>
             <ul className="list-disc list-inside space-y-2 text-base text-[#6b7280] dark:text-[#9ca3af] ml-4">
               <li>Violate any laws or regulations</li>
@@ -70,7 +70,7 @@ function Content() {
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Service Availability</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              We strive to keep Markdrop available and running smoothly, but we can't guarantee
+                We strive to keep CourseForge available and running smoothly, but we can't guarantee
               uninterrupted access. The service is provided "as is" without warranties. We may need
               to temporarily suspend service for maintenance or updates.
             </p>
@@ -81,16 +81,16 @@ function Content() {
               Limitation of Liability
             </h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              Markdrop is provided free of charge. We are not liable for any damages arising from
-              your use of the service, including data loss. Always keep backups of important
-              documents.
+                CourseForge is provided free of charge. We are not liable for any damages arising
+                from your use of the service, including data loss. Always keep backups of important
+                courses.
             </p>
           </motion.section>
 
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Termination</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              You can stop using Markdrop and delete your account at any time. We may suspend or
+                You can stop using CourseForge and delete your account at any time. We may suspend or
               terminate accounts that violate these Terms.
             </p>
           </motion.section>
@@ -98,8 +98,8 @@ function Content() {
           <motion.section className="space-y-6" {...staggerItem}>
             <h2 className="text-3xl font-bold text-black dark:text-white">Changes to Terms</h2>
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
-              We may update these Terms occasionally. Continued use of Markdrop after changes means
-              you accept the updated Terms.
+               We may update these Terms occasionally. Continued use of CourseForge after changes
+               means you accept the updated Terms.
             </p>
           </motion.section>
 
@@ -108,7 +108,7 @@ function Content() {
             <p className="text-base text-[#6b7280] dark:text-[#9ca3af] leading-relaxed">
               If you have any questions about these Terms of Service, please contact us at:{" "}
               <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">
-                dev.markdrop@proton.me
+                 dev.courseforge@proton.me
               </code>
             </p>
           </motion.section>

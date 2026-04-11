@@ -45,10 +45,7 @@ import {
   Video,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import markdropIconDark from "@/assets/markdrop_icon_dark.svg";
-import markdropIconLight from "@/assets/markdrop_icon_light.svg";
-import markdropLogoDark from "@/assets/markdrop_logo_dark.svg";
-import markdropLogoLight from "@/assets/markdrop_logo_light.svg";
+import { Logo, Icon } from "@/components/Logo";
 import { useTheme } from "@/components/ThemeProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -501,17 +498,9 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
           title="Go to Home"
         >
           {showFullContent ? (
-            <img
-              src={isDarkMode ? markdropLogoDark : markdropLogoLight}
-              alt="Markdrop"
-              className="h-8 w-auto"
-            />
+            <Logo />
           ) : (
-            <img
-              src={isDarkMode ? markdropIconDark : markdropIconLight}
-              alt="Markdrop"
-              className="h-6 w-6"
-            />
+            <Icon className="h-6 w-6" />
           )}
         </a>
       </SidebarHeader>

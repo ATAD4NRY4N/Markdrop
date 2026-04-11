@@ -114,7 +114,7 @@ export default function SignUp() {
             <RouterLink to="/" aria-label="go home">
               <LogoIcon />
             </RouterLink>
-            <h1 className="mb-1 mt-4 text-xl font-semibold">Create a Markdrop Account</h1>
+            <h1 className="mb-1 mt-4 text-xl font-semibold">Create a CourseForge Account</h1>
             <p className="text-sm">Welcome! Create an account to get started</p>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">

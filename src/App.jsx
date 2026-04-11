@@ -18,6 +18,8 @@ import SignUp from "@/pages/SignUp";
 import Templates from "@/pages/Templates";
 import TermsOfServices from "@/pages/TermsOfServices";
 import UserProfile from "@/pages/UserProfile";
+import ReviewerView from "@/pages/ReviewerView";
+import AcceptInvitePage from "@/pages/AcceptInvitePage";
 
 const Layout = ({ children }) => {
   return (
@@ -51,6 +53,8 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           {/* PROTECTED */}
           <Route path="/user-profile" element={<UserProfile />} />
+          <Route path="/review/:courseId" element={<ReviewerView />} />
+          <Route path="/accept-invite/:token" element={<AcceptInvitePage />} />
         </Routes>
         <PWAStatus />
         <SWStatus />

@@ -19,6 +19,7 @@ import {
   Globe,
   GraduationCap,
   HelpCircle,
+  MessageSquare,
   Moon,
   Package,
   Pencil,
@@ -29,6 +30,7 @@ import {
   Sun,
   Target,
   Type,
+  Users,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -38,10 +40,12 @@ import AppSidebar from "@/components/blocks/BuilderPage/AppSidebar";
 import Editor from "@/components/blocks/BuilderPage/Editor";
 import Preview from "@/components/blocks/BuilderPage/Preview";
 import Raw from "@/components/blocks/BuilderPage/Raw";
+import CollaboratorsDialog from "@/components/blocks/CourseBuilderPage/CollaboratorsDialog";
 import CoursePreview from "@/components/blocks/CourseBuilderPage/CoursePreview";
 import CourseStructurePanel from "@/components/blocks/CourseBuilderPage/CourseStructurePanel";
 import ScormExportDialog from "@/components/blocks/CourseBuilderPage/ScormExportDialog";
 import XliffDialog from "@/components/blocks/CourseBuilderPage/XliffDialog";
+import ReviewPanel from "@/components/review/ReviewPanel";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -107,6 +111,8 @@ function CourseBuilderInner() {
   const [showXliffDialog, setShowXliffDialog] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [showCollaboratorsDialog, setShowCollaboratorsDialog] = useState(false);
+  const [showReviewPanel, setShowReviewPanel] = useState(false);
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
@@ -560,6 +566,38 @@ function CourseBuilderInner() {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="gap-1.5 hidden sm:flex"
+                      onClick={() => setShowReviewPanel(true)}
+                      disabled={!course?.id}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      <span className="hidden lg:inline">Review</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Open review comments</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 hidden sm:flex"
+                      onClick={() => setShowCollaboratorsDialog(true)}
+                      disabled={!course?.id}
+                    >
+                      <Users className="h-4 w-4" />
+                      <span className="hidden lg:inline">Team</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Manage team access</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="gap-1.5"
                       onClick={() => setShowXliffDialog(true)}
                       disabled={!modules.length}
@@ -680,6 +718,20 @@ function CourseBuilderInner() {
         onOpenChange={setShowXliffDialog}
         course={course}
         modules={modules}
+      />
+
+      <CollaboratorsDialog
+        open={showCollaboratorsDialog}
+        onOpenChange={setShowCollaboratorsDialog}
+        courseId={course?.id}
+      />
+
+      <ReviewPanel
+        open={showReviewPanel}
+        onOpenChange={setShowReviewPanel}
+        courseId={course?.id}
+        modules={modules}
+        isOwner={true}
       />
 
       <CoursePreview

@@ -496,6 +496,31 @@ const blocksToMarkdown = (blocks) => {
           ];
           return lines.join("\n");
         }
+        case "grid": {
+          const PREFIX = { h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### " };
+          const weights = block.weights || null;
+          const cols = (block.columns || []).map((col) => {
+            if (Array.isArray(col.blocks)) return col;
+            // Migrate old {type, content} format
+            const btype = col.type === "image" ? "image" : "paragraph";
+            return { blocks: [{ type: btype, content: col.content || "", alt: "" }] };
+          });
+          const ratioStr = weights?.length === cols.length
+            ? weights.map((w) => `${w}fr`).join(" ")
+            : cols.map(() => "1fr").join(" ");
+          const header = `<!-- grid: ${cols.length} columns [${ratioStr}] -->`;
+          const colSections = cols.map((col, ci) => {
+            const weight = weights?.[ci] ? `${weights[ci]}fr` : "1fr";
+            const colMd = (col.blocks || []).map((b) => {
+              if (b.type === "separator") return "---";
+              if (b.type === "image") return `![${b.alt || ""}](${b.content || ""})`;
+              if (b.type === "alert") return `> [!${(b.alertType || "note").toUpperCase()}]\n> ${b.content || ""}`;
+              return (PREFIX[b.type] || "") + (b.content || "");
+            }).join("\n\n");
+            return `<!-- column ${ci + 1} (${weight}) -->\n${colMd}`;
+          });
+          return [header, ...colSections].join("\n\n");
+        }
         default:
           return block.content;
       }

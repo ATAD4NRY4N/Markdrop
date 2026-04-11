@@ -485,6 +485,9 @@ const blocksToMarkdown = (blocks) => {
         case "branching":
         case "time-requirements":
         case "categorization":
+        case "grid":
+        case "carousel":
+        case "pdf":
           return "";
         default:
           return block.content;

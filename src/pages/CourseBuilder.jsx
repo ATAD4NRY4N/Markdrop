@@ -16,6 +16,7 @@ import {
   Eye,
   FileDown,
   GitBranch,
+  Globe,
   GraduationCap,
   HelpCircle,
   Moon,
@@ -40,6 +41,7 @@ import Raw from "@/components/blocks/BuilderPage/Raw";
 import CoursePreview from "@/components/blocks/CourseBuilderPage/CoursePreview";
 import CourseStructurePanel from "@/components/blocks/CourseBuilderPage/CourseStructurePanel";
 import ScormExportDialog from "@/components/blocks/CourseBuilderPage/ScormExportDialog";
+import XliffDialog from "@/components/blocks/CourseBuilderPage/XliffDialog";
 import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,6 +104,7 @@ function CourseBuilderInner() {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [activeId, setActiveId] = useState(null);
   const [showScormDialog, setShowScormDialog] = useState(false);
+  const [showXliffDialog, setShowXliffDialog] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [courseTitle, setCourseTitle] = useState("");
@@ -555,6 +558,22 @@ function CourseBuilderInner() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => setShowXliffDialog(true)}
+                      disabled={!modules.length}
+                    >
+                      <Globe className="h-4 w-4" />
+                      <span className="hidden lg:inline">Translate</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Export / import XLIFF for translation</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
                       size="sm"
                       className="gap-1.5"
                       onClick={() => setShowScormDialog(true)}
@@ -652,6 +671,13 @@ function CourseBuilderInner() {
       <ScormExportDialog
         open={showScormDialog}
         onOpenChange={setShowScormDialog}
+        course={course}
+        modules={modules}
+      />
+
+      <XliffDialog
+        open={showXliffDialog}
+        onOpenChange={setShowXliffDialog}
         course={course}
         modules={modules}
       />

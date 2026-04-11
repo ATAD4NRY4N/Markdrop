@@ -33,7 +33,7 @@ Combine MarkDrop's sleek markdown editor with ScormStack's advanced eLearning ca
 5. **Categorization Drag & Drop [COMPLETED]:** Previously built `CategorizationBlock` with category buckets and item assignment.
 
 ### Phase 5: Localization workflows
-1. **XLIFF Export/Import:** Features to export text nodes to XLIFF XML for professional translation agencies, and import them to clone translated courses.
+1. **XLIFF Export/Import [COMPLETED]:** `src/lib/xliffUtils.js` extracts all translatable text fields from every block type (headings, paragraphs, alerts, lists, tables, flashcards, quizzes, fill-in-the-blank, matching, hotspot, categorization, branching, knowledge-check, learning-objectives, course-nav, progress-marker, and nested grid blocks) into XLIFF 1.2 XML with one `<file>` per module. Each `<trans-unit>` carries a stable ID (`{blockId}__{dot.path}`), the source text, an empty `<target/>` for the translator, and a human-readable `<note>`. `parseXliff()` reads the completed file back, and `applyTranslationsToModules()` deep-sets translated values via dot-path notation. `XliffDialog.jsx` (Export tab + Import tab) is mounted in `CourseBuilder.jsx` behind a **Translate** toolbar button: the Export tab downloads the XLIFF; the Import tab parses an uploaded file, shows a per-module translation summary, then creates a new course clone titled `{original} [{targetLang}]` with all translations applied.
 
 ### Phase 6: Export & Analytics
 1. **SCORM 1.2 / 2004 Polish:** Ensure packaged ZIP exports meticulously track `cmi.score.raw`, `cmi.core.lesson_status`, and `session_time`.

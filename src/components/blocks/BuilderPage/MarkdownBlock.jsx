@@ -16,6 +16,7 @@ import { Slider } from "@/components/ui/slider";
 import AlertBlock from "./blocks/AlertBlock";
 import BlockquoteBlock from "./blocks/BlockquoteBlock";
 import BranchingBlock from "./blocks/BranchingBlock";
+import CarouselBlock from "./blocks/CarouselBlock";
 import CategorizationBlock from "./blocks/CategorizationBlock";
 import CodeBlock from "./blocks/CodeBlock";
 import CourseNavBlock from "./blocks/CourseNavBlock";
@@ -35,6 +36,7 @@ import MarpSlideDirectiveBlock from "./blocks/MarpSlideDirectiveBlock";
 import MarpStyleBlock from "./blocks/MarpStyleBlock";
 import MathBlock from "./blocks/MathBlock";
 import ParagraphBlock from "./blocks/ParagraphBlock";
+import PdfBlock from "./blocks/PdfBlock";
 import ProgressMarkerBlock from "./blocks/ProgressMarkerBlock";
 import QuizBlock from "./blocks/QuizBlock";
 import SeparatorBlock from "./blocks/SeparatorBlock";
@@ -210,6 +212,10 @@ const MarkdownBlock = memo(function MarkdownBlock({
         return <ImageBlock block={block} onUpdate={onUpdate} />;
       case "video":
         return <VideoBlock block={block} onUpdate={onUpdate} />;
+      case "carousel":
+        return <CarouselBlock block={block} onUpdate={onUpdate} />;
+      case "pdf":
+        return <PdfBlock block={block} onUpdate={onUpdate} />;
       case "link":
         return <LinkBlock block={block} onUpdate={onUpdate} />;
       case "table":

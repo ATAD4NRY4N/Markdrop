@@ -45,6 +45,7 @@ function blockToHtml(block) {
         IMPORTANT: "#a855f7",
         WARNING: "#f59e0b",
         CAUTION: "#ef4444",
+        SUCCESS: "#10b981",
       };
       const color = colorMap[alertType] || "#6b7280";
       return `<div style="border-left:4px solid ${color};padding:0.75rem 1rem;background:${color}18;border-radius:0 0.375rem 0.375rem 0;margin:1rem 0"><strong style="color:${color}">${alertType}</strong><p style="margin:0.5rem 0 0">${marked.parseInline(block.content || "")}</p></div>`;
@@ -103,6 +104,10 @@ function blockToHtml(block) {
       return buildCategorizationHtml(block);
     case "grid":
       return buildGridHtml(block);
+    case "carousel":
+      return buildCarouselHtml(block);
+    case "pdf":
+      return buildPdfHtml(block);
 
     default:
       return `<p>${marked.parseInline(block.content || "")}</p>`;
@@ -139,6 +144,57 @@ function buildGridHtml(block) {
   }).join("");
 
   return `<div class="scorm-grid scorm-grid-cols-${columns.length || 2}">${colHtml}</div>`;
+}
+
+function buildCarouselHtml(block) {
+  const images = (block.images || []).filter((img) => img.url);
+  if (!images.length) return `<p><em>(Carousel — no images added)</em></p>`;
+
+  const cid = nextHtmlId("carousel");
+  const slides = images
+    .map(
+      (img, i) => `<div class="carousel-slide${i === 0 ? " active" : ""}" data-index="${i}">
+    <img src="${escHtml(img.url)}" alt="${escHtml(img.alt || `Slide ${i + 1}`)}" style="width:100%;max-height:400px;object-fit:cover;display:block;border-radius:6px;" />
+    ${img.caption ? `<p class="carousel-caption">${escHtml(img.caption)}</p>` : ""}
+  </div>`
+    )
+    .join("\n");
+
+  const dots =
+    images.length > 1
+      ? `<div class="carousel-dots">${images
+          .map(
+            (_, i) =>
+              `<button class="carousel-dot${i === 0 ? " active" : ""}" onclick="carouselGo('${cid}',${i})" aria-label="Slide ${i + 1}"></button>`
+          )
+          .join("")}</div>`
+      : "";
+
+  const nav =
+    images.length > 1
+      ? `<button class="carousel-prev" onclick="carouselPrev('${cid}')" aria-label="Previous">&#8249;</button>
+  <button class="carousel-next" onclick="carouselNext('${cid}')" aria-label="Next">&#8250;</button>`
+      : "";
+
+  return `<div class="scorm-carousel" id="${cid}">
+  <div class="carousel-track">${slides}</div>
+  ${nav}
+  ${dots}
+</div>`;
+}
+
+function buildPdfHtml(block) {
+  if (!block.url) return `<p><em>(PDF Viewer — no URL set)</em></p>`;
+  const title = block.title ? `<p style="font-weight:600;margin:0 0 0.5rem">${escHtml(block.title)}</p>` : "";
+  const height = block.height || "500px";
+  const dl = block.showDownload !== false
+    ? `<p style="text-align:center;margin:0.5rem 0 0"><a href="${escHtml(block.url)}" target="_blank" download style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border:1px solid #ccc;border-radius:6px;text-decoration:none;font-size:0.85rem;color:inherit">&#8595; Download PDF</a></p>`
+    : "";
+  return `<div class="scorm-pdf-viewer">
+  ${title}
+  <iframe src="${escHtml(block.url)}" title="${escHtml(block.title || "PDF Document")}" style="width:100%;height:${escHtml(height)};border:1px solid #ddd;border-radius:6px;display:block" allowfullscreen></iframe>
+  ${dl}
+</div>`;
 }
 
 function buildBranchingHtml(block) {
@@ -374,6 +430,14 @@ function initSCORM() {
   else _scorm.api.Initialize("");
   return true;
 }
+function initCarousels() {
+  var carousels = document.querySelectorAll(".scorm-carousel");
+  carousels.forEach(function(c) {
+    var slides = c.querySelectorAll(".carousel-slide");
+    slides.forEach(function(s, i) { s.style.display = i === 0 ? "block" : "none"; });
+    c.dataset.current = "0";
+  });
+}
 function scormSet(key, value) {
   if (!_scorm) return;
   if (_scorm.version === "1.2") _scorm.api.LMSSetValue(key, value);
@@ -415,7 +479,7 @@ function getSessionTime(version) {
   return "PT" + (h ? h + "H" : "") + (m ? m + "M" : "") + s + "S";
 }
 function pad2(n) { return n < 10 ? "0" + n : "" + n; }
-window.addEventListener("load", function() { initSCORM(); });
+window.addEventListener("load", function() { initSCORM(); initCarousels(); });
 window.addEventListener("beforeunload", function() {
   if (_scorm) {
     try {
@@ -449,6 +513,29 @@ function kcAnswer(qid, chosen, correct) {
 function flipCard(id) {
   var el = document.getElementById(id);
   if (el) el.classList.toggle("flipped");
+}
+function carouselGo(id, index) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var slides = el.querySelectorAll(".carousel-slide");
+  var dots = el.querySelectorAll(".carousel-dot");
+  slides.forEach(function(s, i) { s.style.display = i === index ? "block" : "none"; });
+  dots.forEach(function(d, i) { d.classList.toggle("active", i === index); });
+  el.dataset.current = index;
+}
+function carouselPrev(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var slides = el.querySelectorAll(".carousel-slide");
+  var current = parseInt(el.dataset.current || "0");
+  carouselGo(id, (current - 1 + slides.length) % slides.length);
+}
+function carouselNext(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var slides = el.querySelectorAll(".carousel-slide");
+  var current = parseInt(el.dataset.current || "0");
+  carouselGo(id, (current + 1) % slides.length);
 }
 function branchChoice(targetLabel) {
   alert("Navigating to: " + (targetLabel || "next module"));
@@ -674,8 +761,22 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2rem 0; }
 .btn-submit-cat:hover { background: #6d28d9; }
 .btn-submit-cat:disabled { background: #a78bfa; cursor: default; }
 .cat-result { margin-top: 0.75rem; font-size: 0.9375rem; }
+/* Image Carousel */
+.scorm-carousel { position: relative; overflow: hidden; margin: 1.5rem 0; border-radius: 8px; }
+.carousel-track { display: flex; transition: transform 0.4s ease; }
+.carousel-slide { flex: 0 0 100%; min-width: 0; position: relative; }
+.carousel-caption { text-align: center; font-size: 0.8125rem; color: #6b7280; margin: 0.25rem 0 0; }
+.carousel-prev, .carousel-next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.45); color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.25rem; line-height: 1; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.carousel-prev { left: 8px; }
+.carousel-next { right: 8px; }
+.carousel-prev:hover, .carousel-next:hover { background: rgba(0,0,0,0.7); }
+.carousel-dots { display: flex; justify-content: center; gap: 6px; padding: 8px 0; }
+.carousel-dot { border: none; border-radius: 50%; width: 8px; height: 8px; background: #d1d5db; cursor: pointer; transition: background 0.2s, width 0.2s; padding: 0; }
+.carousel-dot.active { width: 16px; border-radius: 4px; background: #3b82f6; }
+/* PDF Viewer */
+.scorm-pdf-viewer { margin: 1.5rem 0; }
 /* Slide navigation bar */
-.slide-nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 1.5rem; background: #f8fafc; border-top: 1px solid #e5e7eb; }
+.slide-nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 1.5rem; background: #f8fafc; border-top: 1px solid #e5e7eb; overflow: hidden; }
 .slide-nav-bar.nav-top { border-top: none; border-bottom: 1px solid #e5e7eb; }
 .nav-bar-btn { background: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 0.375rem 0.875rem; cursor: pointer; font-size: 0.875rem; color: #374151; text-decoration: none; display: inline-block; }
 .nav-bar-btn:hover { background: #f3f4f6; }
@@ -685,16 +786,21 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2rem 0; }
 .sco-outer .sco-wrapper { flex: 1; }
 `;
 
-function buildNavBarHtml(moduleIndex, totalModules, position) {
+function buildNavBarHtml(moduleIndex, totalModules, position, showProgress = false) {
   const isFirst = moduleIndex === 0;
   const isLast = moduleIndex === totalModules - 1;
   const prevHref = isFirst ? "#" : `../module_${moduleIndex}/index.html`;
   const nextHref = isLast ? "#" : `../module_${moduleIndex + 2}/index.html`;
   const posClass = position === "top" ? "nav-top" : "";
-  return `<nav class="slide-nav-bar ${posClass}" aria-label="Course navigation">
+  const pct = totalModules > 1 ? Math.round(((moduleIndex) / (totalModules - 1)) * 100) : 100;
+  const progressBar = showProgress
+    ? `<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:#e5e7eb"><div style="height:100%;width:${pct}%;background:#3b82f6;transition:width 0.4s"></div></div>`
+    : "";
+  return `<nav class="slide-nav-bar ${posClass}" aria-label="Course navigation" style="position:relative">
   <a href="${prevHref}" class="nav-bar-btn"${isFirst ? ` aria-disabled="true"` : ""}>&larr; Previous</a>
   <span class="nav-bar-indicator">${moduleIndex + 1} / ${totalModules}</span>
   <a href="${nextHref}" class="nav-bar-btn"${isLast ? ` aria-disabled="true"` : ""}>Next &rarr;</a>
+  ${progressBar}
 </nav>`;
 }
 
@@ -711,8 +817,12 @@ function buildScoHtml(module, courseTitle, cssOverride = "", navBarOptions = nul
 
   const navEnabled = navBarOptions && navBarOptions.position && navBarOptions.position !== "none";
   const navHtml = navEnabled
-    ? buildNavBarHtml(navBarOptions.moduleIndex, navBarOptions.totalModules, navBarOptions.position)
+    ? buildNavBarHtml(navBarOptions.moduleIndex, navBarOptions.totalModules, navBarOptions.position, navBarOptions.showProgress)
     : "";
+  const navTop = navEnabled && (navBarOptions.position === "top" || navBarOptions.position === "both");
+  const navBottom = navEnabled && (navBarOptions.position === "bottom" || navBarOptions.position === "both");
+  const navTopHtml = navTop ? buildNavBarHtml(navBarOptions.moduleIndex, navBarOptions.totalModules, "top", navBarOptions.showProgress) : "";
+  const navBottomHtml = navBottom ? buildNavBarHtml(navBarOptions.moduleIndex, navBarOptions.totalModules, "bottom", navBarOptions.showProgress) : "";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -727,11 +837,11 @@ ${cssOverride}
 </head>
 <body>
 ${navEnabled ? '<div class="sco-outer">' : ""}
-${navEnabled && navBarOptions.position === "top" ? navHtml : ""}
+${navTopHtml}
 <div class="sco-wrapper">
 ${bodyHtml}
 </div>
-${navEnabled && navBarOptions.position === "bottom" ? navHtml : ""}
+${navBottomHtml}
 ${navEnabled ? "</div>" : ""}
 <script>
 ${SCORM_RUNTIME_SHIM}
@@ -885,7 +995,7 @@ async function _buildAndDownload(course, modules, version, options = {}) {
     const mod = modules[i];
     const navBarOptions =
       navBarPosition !== "none"
-        ? { position: navBarPosition, moduleIndex: i, totalModules: modules.length }
+        ? { position: navBarPosition, moduleIndex: i, totalModules: modules.length, showProgress: false }
         : null;
     const html = buildScoHtml(mod, course.title || "Course", "", navBarOptions);
     zip.file(`module_${i + 1}/index.html`, html);

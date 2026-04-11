@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  BadgeCheck,
   Bold,
   CheckCircle2,
   Code,
@@ -61,6 +62,13 @@ const alertTypes = {
     borderColor: "border-red-500",
     iconColor: "text-red-600 dark:text-red-400",
     bgColor: "bg-red-50/30 dark:bg-red-950/10",
+  },
+  success: {
+    icon: BadgeCheck,
+    label: "Success",
+    borderColor: "border-emerald-500",
+    iconColor: "text-emerald-600 dark:text-emerald-400",
+    bgColor: "bg-emerald-50/30 dark:bg-emerald-950/10",
   },
 };
 

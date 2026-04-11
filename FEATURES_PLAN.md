@@ -18,12 +18,12 @@ Combine MarkDrop's sleek markdown editor with ScormStack's advanced eLearning ca
 2. **Preconfigured Slide Templates [COMPLETED]:** Four preconfigured templates added to a new "Slide Templates" section at the bottom of AppSidebar: **Title Slide** (heading + learning objectives), **Two-Column** (H2 + 2:1 grid with text and image columns), **Quote Focus** (blockquote + knowledge check), **3-Step Timeline** (H2 + 1:1:1 grid). Clicking a template inserts all its blocks in sequence via `onBlockAdd`. Visible only in expanded sidebar state.
 3. **Custom Themes System [COMPLETED]:** Per-course theme (heading font, body font, primary colour, accent colour, background colour) stored as `theme_json JSONB` in the `courses` table (migration `003_add_course_theme.sql`). Course Settings dialog expanded to two tabs — General (title/description) and Appearance (font selectors + colour pickers with live swatch preview). Theme applied in the inline Preview pane via injected CSS custom properties and a Google Fonts `@import`. Also threaded through `CoursePreview` (learner preview) and `buildPreviewHtml`/`buildScoHtml` in `scormUtils.js` so the exported SCORM package respects the chosen fonts and colours.
 
-### Phase 3: Essential Interactive Blocks
-1. **Callout / Admonition Block:** Markdown-based callouts with distinct UI states (Info, Warning, Success, Error, Tip, Note).
-2. **Media Blocks:** 
-   - Carousel Image Block with auto-play and pagination.
-   - PDF Viewer Block with integrated accessibility and download options.
-3. **Course Navigation Block:** Top/bottom progress bars, pagination buttons, and conditional progression (e.g., "locked until video watched").
+### Phase 3: Essential Interactive Blocks [COMPLETED]
+1. **Callout / Admonition Block [COMPLETED]:** Added `success` type (emerald green with `BadgeCheck` icon) to the existing `AlertBlock`, which already covered Note, Tip, Important, Warning, and Caution. The new `success` type propagates through the Preview.jsx `div` mdComponent alert renderer and `scormUtils.js` colorMap (`SUCCESS: "#10b981"`).
+2. **Media Blocks [COMPLETED]:** 
+   - **Carousel Image Block [COMPLETED]:** `CarouselBlock.jsx` built with `embla-carousel-react`. Supports multiple slides with URL / alt text / caption per slide, autoPlay toggle + interval, show-dots toggle, prev/next arrow buttons, and dot-pill navigation. Registers in AppSidebar media palette, MarkdownBlock switch, and Preview ELEARNING_TYPES. SCORM export renders a full `buildCarouselHtml()` with JS functions `carouselGo/carouselPrev/carouselNext` and `initCarousels()` called on page load.
+   - **PDF Viewer Block [COMPLETED]:** `PdfBlock.jsx` with URL input, optional title, height selector (400px–800px), and show-download toggle. Preview renders an `<iframe>` embed with inline fallback and a download link. SCORM export via `buildPdfHtml()` renders an iframe with inline styles and optional download anchor.
+3. **Course Navigation Block [COMPLETED]:** Enhanced `CourseNavBlock.jsx` with `position` selector (Bottom / Top / Both) and `showProgress` toggle that renders a preview progress bar. `buildNavBarHtml` updated to accept `showProgress` param and render a thin 3px progress indicator on top of the nav bar. `buildScoHtml` updated to handle `position === "both"` (renders nav bar at both top and bottom of the module). `course-nav` default block in AppSidebar updated to include `position: "bottom"` and `showProgress: false`.
 
 ### Phase 4: Advanced Interactive Assessments
 1. **Refined MCQ / Knowledge Check:** Polish the existing Single/Multiple Choice blocks with inline feedback.

@@ -1,4 +1,4 @@
-import { AlertCircle, AlertTriangle, Info, Lightbulb, OctagonAlert } from "lucide-react";
+import { AlertCircle, AlertTriangle, BadgeCheck, Info, Lightbulb, OctagonAlert } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
@@ -10,12 +10,14 @@ import "katex/dist/katex.min.css";
 import mermaid from "mermaid";
 import { useTheme } from "@/components/ThemeProvider";
 import BranchingBlock from "@/components/blocks/BuilderPage/blocks/BranchingBlock";
+import CarouselBlock from "@/components/blocks/BuilderPage/blocks/CarouselBlock";
 import CategorizationBlock from "@/components/blocks/BuilderPage/blocks/CategorizationBlock";
 import CourseNavBlock from "@/components/blocks/BuilderPage/blocks/CourseNavBlock";
 import FlashcardBlock from "@/components/blocks/BuilderPage/blocks/FlashcardBlock";
 import GridBlock from "@/components/blocks/BuilderPage/blocks/GridBlock";
 import KnowledgeCheckBlock from "@/components/blocks/BuilderPage/blocks/KnowledgeCheckBlock";
 import LearningObjectiveBlock from "@/components/blocks/BuilderPage/blocks/LearningObjectiveBlock";
+import PdfBlock from "@/components/blocks/BuilderPage/blocks/PdfBlock";
 import ProgressMarkerBlock from "@/components/blocks/BuilderPage/blocks/ProgressMarkerBlock";
 import QuizBlock from "@/components/blocks/BuilderPage/blocks/QuizBlock";
 import TimeRequirementsBlock from "@/components/blocks/BuilderPage/blocks/TimeRequirementsBlock";
@@ -528,6 +530,8 @@ const ELEARNING_TYPES = new Set([
   "branching",
   "time-requirements",
   "categorization",
+  "carousel",
+  "pdf",
 ]);
 
 const ELEARNING_COMPONENTS = {
@@ -541,6 +545,8 @@ const ELEARNING_COMPONENTS = {
   branching: BranchingBlock,
   "time-requirements": TimeRequirementsBlock,
   categorization: CategorizationBlock,
+  carousel: CarouselBlock,
+  pdf: PdfBlock,
 };
 
 // Render a single block's markdown within an optionally animated wrapper
@@ -826,6 +832,11 @@ export default function Preview({ blocks = [], theme }) {
             icon: OctagonAlert,
             borderColor: "border-red-500",
             iconColor: "text-red-500",
+          },
+          success: {
+            icon: BadgeCheck,
+            borderColor: "border-emerald-500",
+            iconColor: "text-emerald-600 dark:text-emerald-400",
           },
         };
 

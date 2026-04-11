@@ -8,6 +8,7 @@ import {
   Columns2,
   CreditCard,
   FileSliders,
+  FileText,
   Flag,
   GitBranch,
   Heading1,
@@ -343,6 +344,8 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
         prevLabel: "← Previous",
         nextLabel: "Next →",
         locked: false,
+        position: "bottom",
+        showProgress: false,
       }),
       ...(blockType === "branching" && {
         prompt: "",
@@ -369,6 +372,18 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
           { id: "item-3", content: "", categoryId: "cat-1" },
           { id: "item-4", content: "", categoryId: "cat-2" },
         ],
+      }),
+      ...(blockType === "carousel" && {
+        images: [{ url: "", alt: "", caption: "" }],
+        autoPlay: false,
+        interval: 3000,
+        showDots: true,
+      }),
+      ...(blockType === "pdf" && {
+        url: "",
+        title: "",
+        height: "500px",
+        showDownload: true,
       }),
     };
 
@@ -422,6 +437,8 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
     media: [
       { title: "Image", key: "image", icon: Image },
       { title: "Video", key: "video", icon: Video },
+      { title: "Image Carousel", key: "carousel", icon: ImagePlay },
+      { title: "PDF Viewer", key: "pdf", icon: FileText },
     ],
     links: [{ title: "Link", key: "link", icon: Link2 }],
     "special blocks": [

@@ -1,0 +1,359 @@
+=== TEXT ===
+Content-ID: <!DOCTYPE html>=<=link rel="icon" href="https://app.scormstack.io/favicon.ico"><l=ink rel="preload" href="https://app.scormstack.io/_next/static/css/9b19D321b7bc838.css" as="style"><li=nk rel="stylesheet" crossorigin="" href="https://client.crisp.chat/st=atic/stylesheets/features/chat_default_9af39e7.css">Edit Course | ScormStack</pat=h>Export to SCORMTestInitializing export...=<h2=id="radix-_r_1qk_" class="text-sm font-semibold leading-none tracking-=tight sr-only">HTML PackageTestInitializing export...Upgrade to ProTest</div=>Search...</s=pan>âK</=button><svg=width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="ht=tp://www.w3.org/2000/svg" class="h-4 w-4"><=rect y="13.2" width="60" height="11.2" fill="#FFAF00"></=button></pat=h><b=utton data-slot="button" class="cursor-pointer inline-flex items-center=justify-center rounded-sm whitespace-nowrap font-semibold transition-all d=uration-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:po=inter-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&=;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-r=ing/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-=invalid:ring-destructive/40 aria-invalid:border-destructive bg-background-m=uted hover:bg-foreground/10 dark:bg-gray dark:hover:bg-foreground/15 h-8 ga=p-1 px-2 has-[>svg]:px-2 text-xs" data-state="closed">InvitePublishExport to SCORM<=/h2>TestInitiali=zing export...HTML PackageTestInitializing export...</div=>Search & ReplaceSlides</b=utton>ThemeAssets</button=>Slides<sv=g xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox=="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" s=troke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><di=v class="flex-1 flex items-center gap-1.5 truncate ml-1">Introduction</=rect>Introduction block</=span><sp=an class="truncate flex-1">Separator blockImage & Text blockFlashcard Stack block</pat=h></=div>Multiple Choice blockImage & Text blockNavi=gation Button blockTo pick up a draggable item, press the space bar.While dragging, use the arrow keys to move the item.Press space again to drop the item in its new position, or press escape=to cancel.</di=v><=div data-slot="skeleton" class="bg-background-muted animate-pulse round=ed-md aspect-square"><=div class="overflow-x-hidden"></p=ath><butto=n data-slot="button" class="cursor-pointer inline-flex items-center jus=tify-center rounded-sm whitespace-nowrap text-sm font-semibold disabled:poi=nter-events-none [&_svg]:pointer-events-none [&_svg:not([class*='=size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:b=order-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid=:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:bor=der-destructive h-9 gap-1.5 px-3 has-[>svg]:px-2.5 block-controls-button=peer transition-all duration-200 disabled:opacity-30 disabled:cursor-not-a=llowed" disabled="" aria-label="Already at top" data-state="closed"><=svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns=="http://www.w3.org/2000/svg" class="size-5"></=svg>Lesson 1 of 15 minutes=Welcome to Test!Learning Objectivesð=Learn the basics of ScormstackðSee how easy it =is to create awesome content=</p=ath><butto=n data-slot="button" class="cursor-pointer inline-flex items-center jus=tify-center rounded-sm whitespace-nowrap text-sm font-semibold disabled:poi=nter-events-none [&_svg]:pointer-events-none [&_svg:not([class*='=size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:b=order-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid=:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:bor=der-destructive h-9 gap-1.5 px-3 has-[>svg]:px-2.5 block-controls-button=peer transition-all duration-200 disabled:opacity-30 disabled:cursor-not-a=llowed" aria-label="Move up" data-state="closed"></=div></p=ath><butto=n data-slot="button" class="cursor-pointer inline-flex items-center jus=tify-center rounded-sm whitespace-nowrap text-sm font-semibold disabled:poi=nter-events-none [&_svg]:pointer-events-none [&_svg:not([class*='=size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:b=order-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid=:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:bor=der-destructive h-9 gap-1.5 px-3 has-[>svg]:px-2.5 block-controls-button=peer transition-all duration-200 disabled:opacity-30 disabled:cursor-not-a=llowed" aria-label="Move up" data-state="closed">Visual learning enhances retention<=div class="order-2 image-with-text-text-responsive" style="--text-width=: calc(50% - 0.75rem); opacity: 1; transform: none;">Images make your content m=ore engaging and help learners remember key conce=pts. You can add images alongside text, adjust their position, and customiz=e the layout to match your teaching style.ð¡ Tip:<=/strong> Click on this block to customize the image, text, and layout!<=/div></p=ath><butto=n data-slot="button" class="cursor-pointer inline-flex items-center jus=tify-center rounded-sm whitespace-nowrap text-sm font-semibold disabled:poi=nter-events-none [&_svg]:pointer-events-none [&_svg:not([class*='=size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:b=order-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid=:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:bor=der-destructive h-9 gap-1.5 px-3 has-[>svg]:px-2.5 block-controls-button=peer transition-all duration-200 disabled:opacity-30 disabled:cursor-not-a=llowed" aria-label="Move up" data-state="closed"><=div class="relative h-full"><=/p>Click to flipAbout scormstackScormstack gives you freedo=m to build your own layouts, quizzes, and media-rich coursesâand ex=port them in standard SCORM format for any LMS.=Click to flip back</div=><di=v class="absolute inset-0 flashcard-backface-hidden-front rounded-md  bg-=gray bg-gradient-to-r from-white/70 to-white/90 theme-card-border backdrop-=blur-sm border-0 border-none p-6"><d=iv class="flex w-full justify-center">Modular course buildingClick to flipStack content like slides, blocks, or card=s using our drag-and-drop editor.Click=to flip back<=/div></di=v>SCORM Export=<spa=n class="text-xs opacity-80" style="color: rgb(17, 24, 39);">Click to f=lip<div=class="relative rounded-lg overflow-hidden mb-4"><d=iv class="flex-1 text-foreground">Click o=nce to export your course in SCORM 1.2 or 2004 format, ready for upload to =any LMS.Click to flip back</div=>=Previous cardNext card</butto=n></p=ath><butto=n data-slot="button" class="cursor-pointer inline-flex items-center jus=tify-center rounded-sm whitespace-nowrap text-sm font-semibold disabled:poi=nter-events-none [&_svg]:pointer-events-none [&_svg:not([class*='=size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:b=order-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid=:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:bor=der-destructive h-9 gap-1.5 px-3 has-[>svg]:px-2.5 block-controls-button=peer transition-all duration-200 disabled:opacity-30 disabled:cursor-not-a=llowed" aria-label="Move up" data-state="closed">=</d=iv><div=class="assessment-block__question-counter flex items-center justify-betw=een mb-4 @md:mb-8" data-slot="assessment-question-counter">Question1 / 1Choose the best answer based on what you've lear=ned.Lots of text =and reading materials<lab=el id="assessment-1775858355851-ez6pclfna-assessment-1775858355851-ez6pcl=fna-question-0-assessment-1775858355851-ez6pclfna-choice-0-1-label" for="=assessment-1775858355851-ez6pclfna-assessment-1775858355851-ez6pclfna-quest=ion-0-assessment-1775858355851-ez6pclfna-choice-0-1" class="assessment-bl=ock__choice-label cursor-pointer text-foreground text-left" data-slot="as=sessment-choice-label">Interactive content that engages learners</d=iv><d=iv class="flex-1 min-w-0 text-left">Complex na=vigation and many sections<l=abel id="assessment-1775858355851-ez6pclfna-assessment-1775858355851-ez6p=clfna-question-0-assessment-1775858355851-ez6pclfna-choice-0-3-label" for=="assessment-1775858355851-ez6pclfna-assessment-1775858355851-ez6pclfna-q=uestion-0-assessment-1775858355851-ez6pclfna-choice-0-3" class="assessmen=t-block__choice-label cursor-pointer text-foreground text-left" data-slot=="assessment-choice-label">Very long video lectures</=div>Submit3 attemp=ts available</=div></p=ath><butto=n data-slot="button" class="cursor-pointer inline-flex items-center jus=tify-center rounded-sm whitespace-nowrap text-sm font-semibold disabled:poi=nter-events-none [&_svg]:pointer-events-none [&_svg:not([class*='=size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:b=order-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid=:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:bor=der-destructive h-9 gap-1.5 px-3 has-[>svg]:px-2.5 block-controls-button=peer transition-all duration-200 disabled:opacity-30 disabled:cursor-not-a=llowed" aria-label="Move up" data-state="closed">â­â­â­â­â­<spa=n style="font-size: 20px">ScormStack saved us thousands compared to o=ther authoring tools. The interface is intuitive and our team was productiv=e from day one.</=div></p=ath><butto=n data-slot="button" class="cursor-pointer inline-flex items-center jus=tify-center rounded-sm whitespace-nowrap text-sm font-semibold disabled:poi=nter-events-none [&_svg]:pointer-events-none [&_svg:not([class*='=size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:b=order-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid=:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:bor=der-destructive h-9 gap-1.5 px-3 has-[>svg]:px-2.5 block-controls-button=peer transition-all duration-200 disabled:opacity-30 disabled:cursor-not-a=llowed" aria-label="Move up" data-state="closed"><s=vg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="=http://www.w3.org/2000/svg" class="size-5"><=div class="block-wrapper w-full h-full relative bg-background text-foregr=ound navigation_button default" tabindex="0" role="region" aria-label=="navigation_button block, id: 4e6f33be-09dd-40f1-b879-d38132f15691" styl=e="padding-top: 64px; padding-bottom: 64px; color: var(--background);"><d=iv class="absolute inset-0 overflow-hidden pointer-events-none">=ð=Complete coursePreview or export your c=ourse to see this block in action.</p=ath>Add block</=button>To pick up a draggable item, press the space bar.While dragging, use the arrow keys to move the item.Press space again to drop the item in its new position, or press escape=to cancel.</=div></div=>Messages<di=v class="cc-3eu02"></=circle><=/rect>Yva=in</spa=n>=Questions? Chat with us.</s=pan></=span>Anything you want to ask?<=/span></di=v>Send a fileInsert an emoji</sp=an>We run onCrisp=<=/span></di=v><=/div>0
+
+=== STRUCTURE ===
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Export to SCORMTestInitializing export...=
+<H2> Export to SCORM
+<DIV> <h2=id="radix-_r_1qk_" class="text-sm font-semibol
+<DIV> Upgrade to ProTest</div=>
+<BUTTON> Upgrade to Pro
+<BUTTON> 
+<DIV> Test
+<BUTTON> Test
+<BUTTON> <svg=width="60" height="60" viewBox="0 0 60 60" fi
+<BUTTON> 
+<BUTTON> 
+<BUTTON> Invite
+<DIV> Publish
+<BUTTON> Publish
+<DIV> HTML PackageTestInitializing export...
+<H2> HTML Package
+<DIV> 
+<H2> Search & Replace
+<DIV> 
+<BUTTON> Slides</b=utton>Theme
+<DIV> 
+<BUTTON> Theme
+<DIV> 
+<DIV> 
+<DIV> Slides<sv=g xmlns="http://www.w3.org/2000/svg" wid
+<DIV> Slides<sv=g xmlns="http://www.w3.org/2000/svg" wid
+<H3> Slides
+<DIV> <sv=g xmlns="http://www.w3.org/2000/svg" width="24
+<BUTTON> 
+<BUTTON> <sv=g xmlns="http://www.w3.org/2000/svg" width="24
+<DIV> 
+<DIV> 
+<DIV> <di=v class="flex-1 flex items-center gap-1.5 trun
+<BUTTON> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> <sp=an class="truncate flex-1">Separator block
+<DIV> <sp=an class="truncate flex-1">Separator block
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Image & Text block
+<DIV> Image & Text block
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Flashcard Stack block
+<DIV> Flashcard Stack block
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Image & Text block
+<DIV> Image & Text block
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Navi=gation Button block
+<DIV> Navi=gation Button block
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> </di=v><=div data-slot="skeleton" class="bg-backgr
+<DIV> </di=v><=div data-slot="skeleton" class="bg-backgr
+<DIV> </di=v><=div data-slot="skeleton" class="bg-backgr
+<DIV> </di=v>
+<DIV> 
+<DIV> <=div data-slot="skeleton" class="bg-background-mu
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> <=div class="overflow-x-hidden">
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Lesson 1 of 15 minutes
+<DIV> =Welcome to Test!
+<H1> =Welcome to Test!
+<DIV> 
+<DIV> 
+<DIV> Learning Objectivesð=Learn the basics of Scorms
+<H2> Learning Objectives
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<BUTTON> 
+<DIV> </=div>
+<DIV> </=div>
+<DIV> </=div>
+<DIV> </=div>
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<DIV> 
+<DIV> Visual learning enhances retention<=div class="ord
+<DIV> Visual learning enhances retention
+<DIV> Visual learning enhances retention
+<DIV> Visual learning enhances retention
+<DIV> Visual learning enhances retention
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<DIV> 
+<DIV> <=div class="relative h-full"><=/p>Click to flipAb
+<DIV> <=div class="relative h-full"><=/p>Click to flipAb
+<DIV> <=div class="relative h-full"><=/p>Click to flipAb
+<DIV> <=div class="relative h-full"><=/p>Click to flipAb
+<DIV> <=div class="relative h-full"><=/p>Click to flipAb
+<DIV> <=div class="relative h-full"><=/p>Click to flip
+<DIV> <=div class="relative h-full"><=/p>
+<DIV> 
+<DIV> <=/p>
+<DIV> 
+<DIV> Click to flip
+<DIV> Click to flip
+<DIV> About scormstackScormstack gives you freedo=m to b
+<DIV> About scormstackScormstack gives you freedo=m to b
+<DIV> About scormstackScormstack gives you freedo=m to b
+<DIV> About scormstackScormstack gives you freedo=m to b
+<DIV> 
+<DIV> 
+<DIV> About scormstackScormstack gives you freedo=m to b
+<DIV> Click to flip back
+<DIV> </div=>
+<DIV> 
+<DIV> <di=v class="absolute inset-0 flashcard-backface-h
+<DIV> <di=v class="absolute inset-0 flashcard-backface-h
+<DIV> <di=v class="absolute inset-0 flashcard-backface-h
+<DIV> <d=iv class="flex w-full justify-center">Modular c
+<DIV> <d=iv class="flex w-full justify-center">Modular c
+<DIV> <d=iv class="flex w-full justify-center">
+<DIV> 
+<DIV> Modular course building
+<H3> Modular course building
+<DIV> Click to flip
+<DIV> 
+<DIV> Stack content like slides, blocks, or card=s using
+<DIV> Stack content like slides, blocks, or card=s using
+<DIV> Stack content like slides, blocks, or card=s using
+<DIV> Stack content like slides, blocks, or card=s using
+<DIV> 
+<DIV> Stack content like slides, blocks, or card=s using
+<DIV> Click=to flip back
+<DIV> 
+<DIV> 
+<DIV> </di=v>SCORM Export=<spa=n class="text-xs opacity-
+<DIV> </di=v>SCORM Export=<spa=n class="text-xs opacity-
+<DIV> </di=v>SCORM Export=<spa=n class="text-xs opacity-
+<DIV> </di=v>SCORM Export=<spa=n class="text-xs opacity-
+<DIV> </di=v>SCORM Export=<spa=n class="text-xs opacity-
+<DIV> </di=v>SCORM Export=<spa=n class="text-xs opacity-
+<DIV> </di=v>SCORM Export
+<DIV> </di=v>SCORM Export
+<DIV> </di=v>
+<DIV> SCORM Export
+<H3> SCORM Export
+<DIV> <spa=n class="text-xs opacity-80" style="color: rg
+<DIV> 
+<DIV> <div=class="relative rounded-lg overflow-hidden mb
+<DIV> <div=class="relative rounded-lg overflow-hidden mb
+<DIV> <div=class="relative rounded-lg overflow-hidden mb
+<DIV> Click to flip back</div=>
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> Previous card
+<DIV> 
+<BUTTON> 
+<BUTTON> 
+<BUTTON> 
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<DIV> =</d=iv><div=class="assessment-block__question-cou
+<DIV> </d=iv>
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> <div=class="assessment-block__question-counter fle
+<DIV> Question1 / 1
+<H2> 1 / 1
+<DIV> Lots of text =and reading materials<lab=el id="ass
+<DIV> Lots of text =and reading materials<lab=el id="ass
+<DIV> Lots of text =and reading materials
+<DIV> 
+<DIV> Lots of text =and reading materials
+<DIV> Lots of text =and reading materials
+<DIV> Lots of text =and reading materials
+<DIV> <lab=el id="assessment-1775858355851-ez6pclfna-ass
+<DIV> 
+<DIV> <lab=el id="assessment-1775858355851-ez6pclfna-ass
+<DIV> <lab=el id="assessment-1775858355851-ez6pclfna-ass
+<DIV> <lab=el id="assessment-1775858355851-ez6pclfna-ass
+<DIV> <d=iv class="flex-1 min-w-0 text-left">Complex na=
+<DIV> 
+<DIV> <d=iv class="flex-1 min-w-0 text-left">Complex na=
+<DIV> <d=iv class="flex-1 min-w-0 text-left">Complex na=
+<DIV> <l=abel id="assessment-1775858355851-ez6pclfna-ass
+<DIV> 
+<DIV> <l=abel id="assessment-1775858355851-ez6pclfna-ass
+<DIV> <l=abel id="assessment-1775858355851-ez6pclfna-ass
+<DIV> Submit3 attemp=ts available
+<BUTTON> Submit
+<DIV> 3 attemp=ts available
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<BUTTON> 
+<DIV> â­â­â­â­â­<spa=n style="font-size: 20px">Scor
+<DIV> â­â­â­â­â­<spa=n style="font-size: 20px">Scor
+<DIV> â­â­â­â­â­<spa=n style="font-size: 20px">Scor
+<DIV> â­â­â­â­â­<spa=n style="font-size: 20px">Scor
+<DIV> â­â­â­â­â­<spa=n style="font-size: 20px">Scor
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> â­â­â­â­â­<spa=n style="font-size: 20px">Scor
+<DIV> â­â­â­â­â­<spa=n style="font-size: 20px">Scor
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> 
+<DIV> <butto=n data-slot="button" class="cursor-pointer 
+<DIV> <s=vg width="24" height="24" viewBox="0 0 24 24" f
+<BUTTON> <s=vg width="24" height="24" viewBox="0 0 24 24" f
+<DIV> 
+<BUTTON> 
+<DIV> <=div class="block-wrapper w-full h-full relative 
+<DIV> <=div class="block-wrapper w-full h-full relative 
+<DIV> ð=Complete coursePreview or export your c=ourse
+<DIV> ð=Complete course
+<BUTTON> ð=Complete course
+<DIV> 
+<DIV> 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Messages<di=v class="cc-3eu02">
+<DIV> 
+<DIV> Messages
+<DIV> Messages
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Send a file
+<DIV> 
+<DIV> Send a file
+<DIV> 
+<DIV> Send a file
+<DIV> 
+<DIV> 
+<DIV> Insert an emoji
+<DIV> We run onCrisp=
+<A> We run onCrisp=
+<DIV> 
+<DIV> <=/div>

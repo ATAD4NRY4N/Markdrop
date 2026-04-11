@@ -251,7 +251,7 @@ export default function MainSection({ onTemplatesChange }) {
     try {
       const blocks = JSON.parse(template.content);
       localStorage.setItem("markdown-blocks", JSON.stringify(blocks));
-      navigate("/builder");
+      navigate("/course");
       toast.success(`Using template: ${template.title}`);
     } catch (error) {
       console.error("Error using template:", error);

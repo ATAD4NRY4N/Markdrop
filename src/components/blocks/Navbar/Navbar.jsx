@@ -70,7 +70,7 @@ export default function Navbar() {
     switch (href) {
       case "/":
         return <Home className="h-4 w-4 mr-2" />;
-      case "/builder":
+      case "/course":
         return <Wrench className="h-4 w-4 mr-2" />;
       case "/templates":
         return <FileText className="h-4 w-4 mr-2" />;

@@ -7,6 +7,7 @@ import { PWAStatus, SWStatus } from "@/components/PWAStatus";
 import About from "@/pages/AboutPage";
 import Builder from "@/pages/Builder";
 import ContactPage from "@/pages/ContactUs";
+import CourseBuilder from "@/pages/CourseBuilder";
 // PAGES
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
@@ -37,6 +38,8 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/builder" element={<Builder />} />
           <Route path="/builder/:id" element={<Builder />} />
+          <Route path="/course" element={<CourseBuilder />} />
+          <Route path="/course/:id" element={<CourseBuilder />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-services" element={<TermsOfServices />} />
           <Route path="/about" element={<About />} />

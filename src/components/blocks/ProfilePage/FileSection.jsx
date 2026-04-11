@@ -85,7 +85,7 @@ export default function FileSection({
   const navigate = useNavigate();
 
   const handleDoubleClick = (fileId) => {
-    navigate(`/builder/${fileId}`);
+    navigate(`/course`);
   };
 
   const TopRightLabel = () => (

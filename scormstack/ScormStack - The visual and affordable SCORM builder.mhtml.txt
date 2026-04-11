@@ -1,0 +1,125 @@
+=== TEXT ===
+Content-ID: <!DOCTYPE html><li=nk rel="stylesheet" href="https://app.scormstack.io/_next/static/css/ee=b06e32714c4329.css" data-precedence="next"><l=ink href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,0;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400=;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet"><link=href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0=,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,50=://client.crisp.chat/static/stylesheets/common_default_9af39e7.css"><next-ro=ute-announcer style="position: absolute;"><=div aria-live="assertive" id="__next-route-announcer__" role="alert" =style="position: absolute; border: 0px; height: 1px; margin: -1px; paddin=g: 0px; width: 1px; clip: rect(0px, 0px, 0px, 0px); overflow: hidden; white=-space: nowrap; overflow-wrap: normal;">ScormStack - The visual and afforda=ble SCORM builderDRDanny</sp=an>common.setti=ngsHome</pa=th>Courses<=/span><svg=width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="ht=tp://www.w3.org/2000/svg" class="size-3.5 min-h-[14px] min-w-[14px] shrin=k-0">Reviews=ShortcutsShared with me</=path>scormstack<d=iv class="absolute -right-5 top-1/2 z-20 hidden -translate-y-1/2 min-[992=px]:block"><spa=n class="h-[14px] w-[2px] rounded-full bg-muted-foreground/70 transition-=all duration-100 opacity-100">App Nav<sec=tion class="relative overflow-hidden rounded-md px-4 py-4 md:px-5 md:py-6=">Hello Danny!Build, review, and ship your courses from one place.<button=data-slot="button" class="cursor-pointer inline-flex items-center just=ify-center rounded-sm whitespace-nowrap font-semibold transition-all durati=on-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer=-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg=]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/5=0 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-inval=id:ring-destructive/40 aria-invalid:border-destructive bg-accent text-accen=t-foreground shadow-xs hover:bg-accent/90 h-8 gap-1 has-[>svg]:px-2 text=-xs px-3" type="button">+ New Course<secti=on class="@container">Recent activit=yView all courses=</d=iv><=a href="https://app.scormstack.io/edit/780bd983-4a4d-4c6c-a657-dbb8d638ab=fa">TestDraftTest<d=iv class="mt-auto flex items-center justify-between border-t pt-3">Dr=aftLatest updates</h2=>Adaptive learning: checkpoints & variantsApr 9, 2026Buil=d branching learning paths with variants and checkpoint rules that unlock c=ontent based on learner assessment performance.<d=iv class="swiper-slide swiper-slide-next" style="width: 453px; margin-r=ight: 8px;" role="group" aria-label="2 / 5">Sidebar Color CustomizationMar 17, 2026Choose sidebar color presets i=n Navigation Settings, with theme-aware contrast handling in the SCORM runt=ime.<div=class="p-2.5">Time Requirements BlockMar 13, 2026Add a dedicated bloc=k that requires learners to spend a minimum amount of time before it is mar=ked complete.<art=icle role="link" tabindex="0" class="group relative cursor-pointer ov=erflow-hidden rounded-md border bg-background transition-colors hover:bg-mu=ted/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-r=ing pb-4"></butt=on>Tooltip in Rich EditorMar 12, 2026Add inline hover toolt=ips to selected text directly from the rich text toolbar.</articl=e></pat=h><h=4 class="min-h-10 text-sm font-semibold leading-5 line-clamp-2 !mb-1">Blo=ck-Level Completion ModeMar 4, 2026Control when supported blocks are ma=rked complete: viewed, tried, or completed.=</di=v></div=>Tips<but=ton type="button" class="absolute right-2 top-2 z-10 inline-flex h-4 w-=4 items-center justify-center rounded-full text-muted-foreground transition=-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-P" aria-label="Close"><=/path>Double-click a block to edit instantly</=article>Copy and p=aste blocks across slides and courses<d=iv class="relative size-12 shrink-0 overflow-hidden rounded-sm">Drag to reorder blocks</secti=on>Welcome to Scormstack!<=/main>Open navigation</button=><d=iv class="cc-165wh" id="crisp-chatbox" data-hidden="true" data-force-=show="false" data-color-mode="light" data-availability="online" data-=presentation="default" data-lock-maximized="false" data-website-logo=="false" data-last-operator-face="false" data-ongoing-operator-face="fal=se" data-availability-tooltip="false" data-hide-vacation="false" data-b=locked="false" data-mobile-view="false" data-full-view="false" data-s=mall-view="false" data-large-view="true" data-has-local-messages="fal=se" data-was-availability-online="true" data-is-activity-ongoing="false=" data-hide-on-away="false" data-hide-on-mobile="false" data-position-r=everse="true">Messages<s=vg class="cc-ro90h"></cir=cle></re=ct>Yvain<=/span><=span class="cc-13ftx"><sp=an class="cc-eoluf cc-10cqs">Questions? Chat with us.</span=></spa=n>=Anything you want to ask?</spa=n></=div>S=end a file<texta=rea class="cc-7jtwt cc-3rfgc cc-1icrj" placeholder="Compose your messag=e..." aria-label="Compose your message..." name="message" rows="1" di=r="auto" autocapitalize="off" autocomplete="off" aria-controls="cc-=1wc9t" tab="0" tabindex="0" style="overflow: hidden; overflow-wrap: b=reak-word; height: 18px;">Insert an emoji=</div=>We run onCrisp</=div><!-=-v-if--><span=class="cc-1nvx3"><=span id="recharts_measurement_span" aria-hidden="true" style="positio=n: absolute; top: -20000px; left: 0px; padding: 0px; margin: 0px; border: n=one; white-space: pre; color: hsl(var(--foreground)); font-size: 12px; lett=er-spacing: normal;">0
+
+=== STRUCTURE ===
+<DIV> 
+<DIV> 
+<H2> common.setti=ngs
+<SECTION> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<A> Home
+<A> <svg=width="24" height="24" viewBox="0 0 24 24" fi
+<SECTION> 
+<SECTION> ShortcutsShared with me
+<H2> Shortcuts
+<A> Shared with me
+<DIV> 
+<DIV> <spa=n class="h-[14px] w-[2px] rounded-full bg-mut
+<BUTTON> <spa=n class="h-[14px] w-[2px] rounded-full bg-mut
+<H2> App Nav
+<DIV> 
+<SECTION> <sec=tion class="relative overflow-hidden rounded-
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> Hello Danny!Build, review, and ship your courses f
+<DIV> Hello Danny!Build, review, and ship your courses f
+<DIV> Hello Danny!Build, review, and ship your courses f
+<H1> Hello Danny!
+<DIV> Recent activit=yView all courses
+<H2> Recent activit=y
+<A> View all courses
+<DIV> =</d=iv><=a href="https://app.scormstack.io/edit/7
+<DIV> =</d=iv><=a href="https://app.scormstack.io/edit/7
+<DIV> =</d=iv><=a href="https://app.scormstack.io/edit/7
+<DIV> =</d=iv><=a href="https://app.scormstack.io/edit/7
+<A> =</d=iv><=a href="https://app.scormstack.io/edit/7
+<DIV> </d=iv>
+<DIV> <=a href="https://app.scormstack.io/edit/780bd983-
+<DIV> <=a href="https://app.scormstack.io/edit/780bd983-
+<H3> Test
+<DIV> Draft
+<DIV> Test<d=iv class="mt-auto flex items-center justify
+<A> 
+<DIV> 
+<DIV> 
+<DIV> Test<d=iv class="mt-auto flex items-center justify
+<DIV> Test
+<DIV> Test
+<DIV> Test
+<A> Test
+<H2> Test
+<DIV> 
+<DIV> Adaptive learning: checkpoints & variantsApr 9, 20
+<DIV> Adaptive learning: checkpoints & variantsApr 9, 20
+<DIV> Adaptive learning: checkpoints & variantsApr 9, 20
+<BUTTON> 
+<DIV> 
+<BUTTON> 
+<DIV> 
+<DIV> Sidebar Color CustomizationMar 17, 2026Choose side
+<DIV> <div=class="p-2.5">Time Requirements BlockMar 13, 
+<BUTTON> 
+<DIV> 
+<DIV> 
+<DIV> Tooltip in Rich EditorMar 12, 2026Add inline hover
+<DIV> 
+<DIV> <h=4 class="min-h-10 text-sm font-semibold leading
+<DIV> </di=v></div=>
+<DIV> </di=v>
+<DIV> </di=v>
+<BUTTON> 
+<BUTTON> 
+<BUTTON> 
+<BUTTON> 
+<BUTTON> 
+<DIV> 
+<BUTTON> 
+<BUTTON> 
+<DIV> Tips
+<H2> Tips
+<DIV> Double-click a block to edit instantly
+<DIV> 
+<H3> Double-click a block to edit instantly
+<BUTTON> 
+<DIV> Copy and p=aste blocks across slides and courses
+<DIV> 
+<H3> Copy and p=aste blocks across slides and courses
+<BUTTON> 
+<DIV> <d=iv class="relative size-12 shrink-0 overflow-hi
+<H3> Drag to reorder blocks
+<H2> Welcome to Scormstack!
+<BUTTON> 
+<DIV> <d=iv class="cc-165wh" id="crisp-chatbox" data-hid
+<DIV> 
+<DIV> 
+<DIV> Messages
+<DIV> 
+<DIV> Messages
+<DIV> Messages
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> 
+<DIV> S=end a file
+<DIV> 
+<DIV> S=end a file
+<DIV> S=end a file
+<DIV> 
+<DIV> S=end a file
+<DIV> <texta=rea class="cc-7jtwt cc-3rfgc cc-1icrj" plac
+<DIV> <texta=rea class="cc-7jtwt cc-3rfgc cc-1icrj" plac
+<DIV> <texta=rea class="cc-7jtwt cc-3rfgc cc-1icrj" plac
+<DIV> Insert an emoji=</div=>
+<DIV> Insert an emoji
+<DIV> 
+<DIV> We run onCrisp</=div>
+<A> We run onCrisp
+<DIV> <!-=-v-if--><span=class="cc-1nvx3">
+<DIV> 
+<DIV> 

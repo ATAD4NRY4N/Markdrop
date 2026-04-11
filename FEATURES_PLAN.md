@@ -1,36 +1,47 @@
 # Development Plan: Blending MarkDrop & ScormStack
 
 **Goals**
-Combine MarkDrop's sleek markdown editor with ScormStack's advanced eLearning capabilities to build a modern, intuitive SCORM authoring tool.
+Combine MarkDrop's sleek markdown editor with ScormStack's advanced eLearning capabilities to build a modern, intuitive SCORM authoring tool with powerful layout options and interactive assessments.
 
 ---
 
 ## Roadmap
 
-### Phase 1: Core Editor Engine & Critical Fixes (Current)
-1. **Fix "Add Module" bug:** Resolve initialization and DB migration issues blocking Course creation.
-2. **Page & Slide Structure:** Ensure seamless drag-and-drop of modules and basic text (Markdown) blocks.
-3. **Copy & Paste Architecture:** Implement cross-slide block copying (as seen in ScormStack).
+### Phase 1: Core Editor Engine & Course Management
+1. **Fix "Add Module" Bug [COMPLETED]:** Resolved initialization issues blocking course creation.
+2. **Course Dashboard:** Build a comprehensive dashboard to view all courses, filter by draft/published, and duplicate/delete courses.
+3. **Advanced Drag & Drop:** Ensure seamless drag-and-drop of modules within the Sidebar structure (nested sections/modules).
+4. **Copy & Paste Architecture:** Implement cross-slide and cross-course block copying and pasting (as seen in ScormStack).
 
-### Phase 2: Essential eLearning Blocks
-1. **Callout / Admonition Block:** Implement markdown-based callouts (Info, Warning, Success, Error, Tip, Note).
-2. **Media Blocks:** Carousel Image Block & PDF Viewer Block (with download options).
-3. **Navigation Overhaul:** Top/bottom Slide Navigation Bars with conditional progression (locked until completion).
+### Phase 2: Layouts, Templates & Theming
+1. **CSS GRID Support:** 
+   - Implement a new "Grid/Columns" block to allow placing components side-by-side. 
+   - Define row/column weights and responsive collapsing for mobile.
+2. **Preconfigured Slide Templates:** 
+   - Title Slide, Two-Column (Text/Image), Quote Focus, 3-Step Timeline.
+   - Tailored specifically for product training and sales enablement.
+3. **Custom Themes System:** Global configuration panel for reusable design systems, custom Google Fonts, and layered CSS backgrounds. 
 
-### Phase 3: Advanced Interactive Assessments
-1. **Fill in the Blank:** Text input and dropdown within markdown.
-2. **Matching Assessment:** Drag-and-drop line drawing.
-3. **Hotspot Image:** Click-on-image interactive markers.
-4. **Categorization:** Grouping items into buckets.
+### Phase 3: Essential Interactive Blocks
+1. **Callout / Admonition Block:** Markdown-based callouts with distinct UI states (Info, Warning, Success, Error, Tip, Note).
+2. **Media Blocks:** 
+   - Carousel Image Block with auto-play and pagination.
+   - PDF Viewer Block with integrated accessibility and download options.
+3. **Course Navigation Block:** Top/bottom progress bars, pagination buttons, and conditional progression (e.g., "locked until video watched").
 
-### Phase 4: Layouts, Templates & Theming
-1. **CSS GRID Support:** Implement robust CSS Grid configurations to enable advanced, flexible slide templates.
-2. **Preconfigured Slide Templates:** Develop a thorough selection of built-in templates specifically tailored for product training and sales enablement.
-3. **Custom Themes System:** Allow reusable design systems, Google Fonts, and layered backgrounds. 
-4. **Translation Workflows:** Outline XLIFF Export/Import for professional translations.
+### Phase 4: Advanced Interactive Assessments
+1. **Refined MCQ / Knowledge Check:** Polish the existing Single/Multiple Choice blocks with inline feedback.
+2. **Fill in the Blank:** Support inline text input fields and dropdowns directly within markdown paragraphs.
+3. **Matching Assessment:** Drag-and-drop interactive line drawing to match terms to definitions.
+4. **Hotspot Image Interaction:** Define clickable zones on an uploaded image that reveal popovers or act as quiz answers.
+5. **Categorization Drag & Drop:** Grouping items into defined bucket columns.
 
-### Phase 5: Export & Standalone Analytics
-1. **SCORM 1.2 / 2004 Polish:** Ensure packaged exports track `cmi.score.raw` and `cmi.core.lesson_status` correctly.
-2. **LMS-lite Analytics:** A KPI dashboard for sessions, learners, completion rates, and average scores when hosted directly.
+### Phase 5: Localization workflows
+1. **XLIFF Export/Import:** Features to export text nodes to XLIFF XML for professional translation agencies, and import them to clone translated courses.
+
+### Phase 6: Export & Analytics
+1. **SCORM 1.2 / 2004 Polish:** Ensure packaged ZIP exports meticulously track `cmi.score.raw`, `cmi.core.lesson_status`, and `session_time`.
+2. **Review Link Sharing:** Generate a public "Reviewer" URL for stakeholders to leave slide-specific feedback.
+3. **LMS-Lite Analytics Dashboard:** For natively hosted courses, track sessions, active learners, completion rates, and average scores.
 
 ---

@@ -12,6 +12,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import {
   BookOpen,
   CheckSquare,
+  Clipboard,
   Eye,
   FileDown,
   GitBranch,
@@ -59,7 +60,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { CourseProvider, useCourse } from "@/context/CourseContext";
-import { copyBlocksToClipboard, pasteBlocksFromClipboard } from "@/lib/clipboard";
+import {
+  copyBlocksToClipboard,
+  getClipboardCount,
+  pasteBlocksFromClipboard,
+  setInAppClipboard,
+} from "@/lib/clipboard";
 
 // ---------------------------------------------------------------------------
 // Inner component (needs CourseProvider above it)
@@ -94,6 +100,9 @@ function CourseBuilderInner() {
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
+  // Reactive clipboard count — updated whenever the user copies something so
+  // the toolbar badge and paste-after buttons re-render appropriately.
+  const [clipboardCount, setClipboardCount] = useState(0);
 
   // Sync local blocks from active module whenever activeModuleId changes
   useEffect(() => {
@@ -103,6 +112,20 @@ function CourseBuilderInner() {
     setHistoryIndex(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeModuleId]);
+
+  // Also sync when blocks_json of the active module changes externally
+  // (e.g. paste-into-module triggered from the sidebar for the active module)
+  const activeModuleBlocksJson = modules.find((m) => m.id === activeModuleId)?.blocks_json;
+  useEffect(() => {
+    if (!activeModuleId) return;
+    try {
+      const loaded = JSON.parse(activeModuleBlocksJson || "[]");
+      setBlocks(loaded);
+    } catch {
+      setBlocks([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeModuleBlocksJson]);
 
   // Sync course title/description to local state
   useEffect(() => {
@@ -215,6 +238,7 @@ function CourseBuilderInner() {
       if (block) {
         const success = await copyBlocksToClipboard([block]);
         if (success) {
+          setClipboardCount(getClipboardCount());
           toast.success("Block copied to clipboard");
         } else {
           toast.error("Failed to copy block");
@@ -222,6 +246,34 @@ function CourseBuilderInner() {
       }
     },
     [blocks]
+  );
+
+  const handleCopyModule = useCallback(async () => {
+    if (!blocks.length) {
+      toast.error("No blocks to copy");
+      return;
+    }
+    await copyBlocksToClipboard(blocks);
+    setClipboardCount(getClipboardCount());
+    toast.success(`${blocks.length} block${blocks.length !== 1 ? "s" : ""} copied`);
+  }, [blocks]);
+
+  const handlePasteAfterBlock = useCallback(
+    async (blockId) => {
+      const pastedBlocks = await pasteBlocksFromClipboard();
+      if (!pastedBlocks?.length) {
+        toast.error("Nothing to paste");
+        return;
+      }
+      const idx = blocks.findIndex((b) => b.id === blockId);
+      const newBlocks =
+        idx === -1
+          ? [...blocks, ...pastedBlocks]
+          : [...blocks.slice(0, idx + 1), ...pastedBlocks, ...blocks.slice(idx + 1)];
+      applyBlocks(newBlocks);
+      toast.success(`${pastedBlocks.length} block${pastedBlocks.length !== 1 ? "s" : ""} pasted`);
+    },
+    [blocks, applyBlocks]
   );
 
   const handlePasteBlock = useCallback(async () => {
@@ -424,6 +476,26 @@ function CourseBuilderInner() {
             {/* Right: actions */}
             <div className="flex items-center gap-1 flex-1 justify-end">
               <TooltipProvider>
+                {/* Clipboard indicator badge */}
+                {clipboardCount > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="px-2 gap-1 text-xs text-muted-foreground hidden sm:flex"
+                        onClick={handlePasteBlock}
+                      >
+                        <Clipboard className="h-3.5 w-3.5" />
+                        <span>{clipboardCount}</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Paste {clipboardCount} block{clipboardCount !== 1 ? "s" : ""} at end (Ctrl+V)
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -521,6 +593,9 @@ function CourseBuilderInner() {
                           onBlockDelete={handleBlockDelete}
                           onBlockAdd={handleBlockAdd}
                           onBlockCopy={handleCopyBlock}
+                          onPasteAfter={
+                            clipboardCount > 0 ? handlePasteAfterBlock : undefined
+                          }
                         />
                       )}
                       {activeTab === "raw" && (

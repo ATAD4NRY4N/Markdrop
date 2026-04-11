@@ -11,7 +11,7 @@ Combine MarkDrop's sleek markdown editor with ScormStack's advanced eLearning ca
 1. **Fix "Add Module" Bug [COMPLETED]:** Resolved initialization issues blocking course creation.
 2. **Course Dashboard [COMPLETED]:** Built a comprehensive dashboard to view all courses, filter by draft/published, search by title/description, duplicate courses, toggle publish status, show module counts, and delete courses. Added `status` column via migration 002.
 3. **Advanced Drag & Drop [COMPLETED]:** Seamless drag-and-drop of modules within the sidebar structure — intra-section reorder, cross-section drag, drag-to-unsectioned, `DragOverlay` ghost, droppable empty-section zones, touch sensor support. `persistSections` exposed from `CourseContext`.
-4. **Copy & Paste Architecture:** Implement cross-slide and cross-course block copying and pasting (as seen in ScormStack).
+4. **Copy & Paste Architecture [COMPLETED]:** Cross-slide and cross-course block copying and pasting. In-app clipboard singleton (`clipboard.js`) with synchronous helpers (`clipboardHasContent`, `getClipboardCount`). System clipboard integration with same-session in-app fallback. Clipboard count badge in the editor toolbar; per-block "paste after" button (shown when clipboard is loaded); `handleCopyModule` to copy all blocks of the active module; `handlePasteAfterBlock` to insert pasted blocks at a precise position. Copy/Paste module block actions in the sidebar panel dropdown. `pasteBlocksIntoModule` in `CourseContext` persists cross-slide pastes and syncs the active editor view via `blocks_json`-keyed `useEffect`.
 
 ### Phase 2: Layouts, Templates & Theming
 1. **CSS GRID Support:** 

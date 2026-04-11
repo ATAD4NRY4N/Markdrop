@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Clapperboard, Copy, GripVertical, Trash2 } from "lucide-react";
+import { Clapperboard, Clipboard, Copy, GripVertical, Trash2 } from "lucide-react";
 import { memo, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -158,6 +158,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
   onDelete,
   onBlockAdd,
   onCopy,
+  onPasteAfter,
   slideNumber,
   totalSlides,
 }) {
@@ -172,6 +173,10 @@ const MarkdownBlock = memo(function MarkdownBlock({
   const handleCopy = useCallback(() => {
     if (typeof onCopy === "function") onCopy(block.id);
   }, [onCopy, block.id]);
+
+  const handlePasteAfter = useCallback(() => {
+    if (typeof onPasteAfter === "function") onPasteAfter(block.id);
+  }, [onPasteAfter, block.id]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -322,6 +327,17 @@ const MarkdownBlock = memo(function MarkdownBlock({
               title="Copy block (Ctrl+C)"
             >
               <Copy className="h-4 w-4 md:h-3.5 md:w-3.5" />
+            </Button>
+          )}
+          {typeof onPasteAfter === "function" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 md:h-7 md:w-7 touch-manipulation"
+              onClick={handlePasteAfter}
+              title="Paste after this block"
+            >
+              <Clipboard className="h-4 w-4 md:h-3.5 md:w-3.5" />
             </Button>
           )}
           <Button

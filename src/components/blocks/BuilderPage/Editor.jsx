@@ -9,6 +9,7 @@ const Editor = memo(function Editor({
   onBlockDelete,
   onBlockAdd,
   onBlockCopy,
+  onPasteAfter,
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: "editor-dropzone" });
 
@@ -55,6 +56,7 @@ const Editor = memo(function Editor({
                     onDelete={onBlockDelete}
                     onBlockAdd={onBlockAdd}
                     onCopy={onBlockCopy}
+                    onPasteAfter={onPasteAfter}
                     slideNumber={slideMetadata[block.id]?.slideNumber}
                     totalSlides={slideMetadata[block.id]?.totalSlides}
                   />

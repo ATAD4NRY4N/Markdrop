@@ -17,6 +17,8 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   BookOpen,
+  Clipboard,
+  Copy,
   ChevronRight,
   FolderPlus,
   GripVertical,
@@ -25,6 +27,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,6 +39,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCourse } from "@/context/CourseContext";
+import { copyBlocksToClipboard, pasteBlocksFromClipboard } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -61,6 +65,8 @@ function SortableModuleItem({
   onDelete,
   sections,
   onAssignSection,
+  onCopyModuleBlocks,
+  onPasteIntoModule,
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: module.id,
@@ -176,6 +182,25 @@ function SortableModuleItem({
           >
             Rename
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onCopyModuleBlocks(module);
+            }}
+          >
+            <Copy className="h-3.5 w-3.5 mr-2" />
+            Copy module blocks
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onPasteIntoModule(module.id);
+            }}
+          >
+            <Clipboard className="h-3.5 w-3.5 mr-2" />
+            Paste blocks here
+          </DropdownMenuItem>
           {sections.length > 0 && (
             <>
               <DropdownMenuSeparator />
@@ -281,6 +306,8 @@ function CollapsibleSection({
   onSectionDelete,
   allSections,
   onAssignSection,
+  onCopyModuleBlocks,
+  onPasteIntoModule,
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -374,6 +401,8 @@ function CollapsibleSection({
                 onDelete={onModuleDelete}
                 sections={allSections}
                 onAssignSection={onAssignSection}
+                onCopyModuleBlocks={onCopyModuleBlocks}
+                onPasteIntoModule={onPasteIntoModule}
               />
             ))}
           </SortableContext>
@@ -400,7 +429,34 @@ export default function CourseStructurePanel({ className }) {
     removeSection,
     assignModuleToSection,
     persistSections,
+    pasteBlocksIntoModule,
   } = useCourse();
+
+  const handleCopyModuleBlocks = async (module) => {
+    const blocks = (() => {
+      try {
+        return JSON.parse(module.blocks_json || "[]");
+      } catch {
+        return [];
+      }
+    })();
+    if (!blocks.length) {
+      toast.error("No blocks to copy");
+      return;
+    }
+    await copyBlocksToClipboard(blocks);
+    toast.success(`${blocks.length} block${blocks.length !== 1 ? "s" : ""} copied`);
+  };
+
+  const handlePasteIntoModule = async (moduleId) => {
+    const pasted = await pasteBlocksFromClipboard();
+    if (!pasted?.length) {
+      toast.error("Nothing to paste");
+      return;
+    }
+    await pasteBlocksIntoModule(moduleId, pasted);
+    toast.success(`${pasted.length} block${pasted.length !== 1 ? "s" : ""} pasted`);
+  };
 
   const [draggedId, setDraggedId] = useState(null);
 
@@ -547,6 +603,8 @@ export default function CourseStructurePanel({ className }) {
                     onDelete={removeModule}
                     sections={sections}
                     onAssignSection={assignModuleToSection}
+                    onCopyModuleBlocks={handleCopyModuleBlocks}
+                    onPasteIntoModule={handlePasteIntoModule}
                   />
                 ))}
               </SortableContext>
@@ -571,6 +629,8 @@ export default function CourseStructurePanel({ className }) {
                   onSectionDelete={removeSection}
                   allSections={sections}
                   onAssignSection={assignModuleToSection}
+                  onCopyModuleBlocks={handleCopyModuleBlocks}
+                  onPasteIntoModule={handlePasteIntoModule}
                 />
               );
             })}

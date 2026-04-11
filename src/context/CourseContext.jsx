@@ -218,6 +218,39 @@ export function CourseProvider({ children }) {
     [sections, persistSections]
   );
 
+  /**
+   * Appends fresh-ID copies of `newBlocks` to a module's existing blocks.
+   * Works for both the active module (editor syncs via blocks_json change) and
+   * background modules (cross-slide paste without switching modules).
+   */
+  const pasteBlocksIntoModule = useCallback(
+    async (moduleId, newBlocks) => {
+      const mod = modules.find((m) => m.id === moduleId);
+      if (!mod || !newBlocks?.length) return;
+
+      const existing = (() => {
+        try { return JSON.parse(mod.blocks_json || "[]"); }
+        catch { return []; }
+      })();
+
+      const merged = [
+        ...existing,
+        ...newBlocks.map((b) => ({ ...b, id: crypto.randomUUID() })),
+      ];
+      const blocksJson = JSON.stringify(merged);
+
+      setIsSaving(true);
+      try {
+        const updated = await updateModule(moduleId, { blocks_json: blocksJson });
+        setModules((prev) => prev.map((m) => (m.id === moduleId ? updated : m)));
+        return updated;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [modules]
+  );
+
   return (
     <CourseContext.Provider
       value={{
@@ -246,6 +279,7 @@ export function CourseProvider({ children }) {
         removeSection,
         assignModuleToSection,
         persistSections,
+        pasteBlocksIntoModule,
       }}
     >
       {children}

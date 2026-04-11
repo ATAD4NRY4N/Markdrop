@@ -53,9 +53,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
@@ -100,6 +107,17 @@ function CourseBuilderInner() {
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
+
+  // Per-course theme (persisted in course.theme_json)
+  const DEFAULT_THEME = {
+    headingFont: "Inter",
+    bodyFont: "Inter",
+    primaryColor: "#7c3aed",
+    accentColor: "#06b6d4",
+    bgColor: "",
+  };
+  const [courseTheme, setCourseTheme] = useState(DEFAULT_THEME);
+
   // Reactive clipboard count — updated whenever the user copies something so
   // the toolbar badge and paste-after buttons re-render appropriately.
   const [clipboardCount, setClipboardCount] = useState(0);
@@ -132,7 +150,14 @@ function CourseBuilderInner() {
     if (course) {
       setCourseTitle(course.title || "");
       setCourseDescription(course.description || "");
+      try {
+        const parsed = JSON.parse(course.theme_json || "{}");
+        setCourseTheme({ ...DEFAULT_THEME, ...parsed });
+      } catch {
+        setCourseTheme(DEFAULT_THEME);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [course]);
 
   // Initialize on mount
@@ -223,6 +248,7 @@ function CourseBuilderInner() {
       await saveCourse({
         title: courseTitle.trim() || "Untitled Course",
         description: courseDescription,
+        theme_json: JSON.stringify(courseTheme),
       });
       setShowSettingsDialog(false);
       toast.success("Course settings saved");
@@ -603,7 +629,7 @@ function CourseBuilderInner() {
                           <Raw blocks={blocks} onBlocksChange={setBlocks} />
                         </div>
                       )}
-                      {activeTab === "preview" && <Preview blocks={blocks} />}
+                      {activeTab === "preview" && <Preview blocks={blocks} theme={courseTheme} />}
                     </div>
                   )}
                 </div>
@@ -635,38 +661,154 @@ function CourseBuilderInner() {
         onOpenChange={setShowPreviewDialog}
         course={course}
         modules={modules}
+        theme={courseTheme}
       />
 
       {/* Course Settings Dialog */}
       <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
-        <DialogContent className="sm:max-w-[440px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <GraduationCap className="h-5 w-5 text-violet-500" />
               Course Settings
             </DialogTitle>
-            <DialogDescription>Update your course title and description.</DialogDescription>
+            <DialogDescription>Update course details and appearance.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label>Course Title</Label>
-              <Input
-                value={courseTitle}
-                onChange={(e) => setCourseTitle(e.target.value)}
-                placeholder="My Course"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={courseDescription}
-                onChange={(e) => setCourseDescription(e.target.value)}
-                placeholder="What will learners learn?"
-                className="resize-none min-h-[80px]"
-              />
-            </div>
-          </div>
-          <DialogFooter>
+
+          <Tabs defaultValue="general" className="mt-1">
+            <TabsList className="w-full">
+              <TabsTrigger value="general" className="flex-1 text-xs">General</TabsTrigger>
+              <TabsTrigger value="appearance" className="flex-1 text-xs">Appearance</TabsTrigger>
+            </TabsList>
+
+            {/* ── General tab ─────────────────────────────────────────── */}
+            <TabsContent value="general" className="space-y-4 pt-3">
+              <div className="space-y-2">
+                <Label>Course Title</Label>
+                <Input
+                  value={courseTitle}
+                  onChange={(e) => setCourseTitle(e.target.value)}
+                  placeholder="My Course"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={courseDescription}
+                  onChange={(e) => setCourseDescription(e.target.value)}
+                  placeholder="What will learners learn?"
+                  className="resize-none min-h-[80px]"
+                />
+              </div>
+            </TabsContent>
+
+            {/* ── Appearance tab ──────────────────────────────────────── */}
+            <TabsContent value="appearance" className="space-y-4 pt-3">
+              {/* Font selectors */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs">Heading Font</Label>
+                  <Select
+                    value={courseTheme.headingFont}
+                    onValueChange={(v) => setCourseTheme((t) => ({ ...t, headingFont: v }))}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["Inter", "Playfair Display", "Montserrat", "Lora", "Raleway", "Poppins"].map((f) => (
+                        <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Body Font</Label>
+                  <Select
+                    value={courseTheme.bodyFont}
+                    onValueChange={(v) => setCourseTheme((t) => ({ ...t, bodyFont: v }))}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["Inter", "Source Serif 4", "Merriweather", "Nunito", "Open Sans", "Roboto"].map((f) => (
+                        <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Color pickers */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs">Primary Color</Label>
+                  <div className="flex items-center gap-2 border rounded-md px-2 h-8">
+                    <input
+                      type="color"
+                      value={courseTheme.primaryColor}
+                      onChange={(e) => setCourseTheme((t) => ({ ...t, primaryColor: e.target.value }))}
+                      className="h-5 w-5 rounded cursor-pointer border-0 bg-transparent p-0"
+                    />
+                    <span className="text-xs font-mono text-muted-foreground">{courseTheme.primaryColor}</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Accent Color</Label>
+                  <div className="flex items-center gap-2 border rounded-md px-2 h-8">
+                    <input
+                      type="color"
+                      value={courseTheme.accentColor}
+                      onChange={(e) => setCourseTheme((t) => ({ ...t, accentColor: e.target.value }))}
+                      className="h-5 w-5 rounded cursor-pointer border-0 bg-transparent p-0"
+                    />
+                    <span className="text-xs font-mono text-muted-foreground">{courseTheme.accentColor}</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Background</Label>
+                  <div className="flex items-center gap-2 border rounded-md px-2 h-8">
+                    <input
+                      type="color"
+                      value={courseTheme.bgColor || "#ffffff"}
+                      onChange={(e) => setCourseTheme((t) => ({ ...t, bgColor: e.target.value }))}
+                      className="h-5 w-5 rounded cursor-pointer border-0 bg-transparent p-0"
+                    />
+                    <span className="text-xs font-mono text-muted-foreground">{courseTheme.bgColor || "default"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Live preview swatch */}
+              <div
+                className="rounded-md border p-3 text-sm overflow-hidden"
+                style={{
+                  backgroundColor: courseTheme.bgColor || undefined,
+                  fontFamily: courseTheme.bodyFont + ", sans-serif",
+                }}
+              >
+                <p
+                  className="font-bold text-base mb-1"
+                  style={{
+                    color: courseTheme.primaryColor,
+                    fontFamily: courseTheme.headingFont + ", sans-serif",
+                  }}
+                >
+                  Preview Heading
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Body text in {courseTheme.bodyFont}. The{" "}
+                  <span style={{ color: courseTheme.accentColor }} className="font-medium">
+                    accent colour
+                  </span>{" "}
+                  is used for highlights and interactive elements.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter className="mt-2">
             <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
               Cancel
             </Button>

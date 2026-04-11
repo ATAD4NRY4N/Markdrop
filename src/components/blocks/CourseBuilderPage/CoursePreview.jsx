@@ -10,21 +10,21 @@ import {
 } from "@/components/ui/dialog";
 import { buildPreviewHtml } from "@/lib/scormUtils";
 
-export default function CoursePreview({ open, onOpenChange, course, modules }) {
+export default function CoursePreview({ open, onOpenChange, course, modules, theme }) {
   const iframeRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const loadModule = useCallback(
     (index) => {
       if (!iframeRef.current || !modules || !modules[index]) return;
-      const html = buildPreviewHtml(modules[index], course?.title);
+      const html = buildPreviewHtml(modules[index], course?.title, theme);
       const blob = new Blob([html], { type: "text/html;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       iframeRef.current.src = url;
       // Revoke after a tick
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     },
-    [modules, course]
+    [modules, course, theme]
   );
 
   useEffect(() => {

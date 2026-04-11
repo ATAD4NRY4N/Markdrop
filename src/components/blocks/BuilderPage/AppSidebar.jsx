@@ -5,6 +5,7 @@ import {
   CheckSquare,
   Clock,
   Code2,
+  Columns2,
   CreditCard,
   FileSliders,
   Flag,
@@ -18,6 +19,7 @@ import {
   HelpCircle,
   Image,
   ImagePlay,
+  LayoutGrid,
   Layers,
   Link2,
   ListChecks,
@@ -106,6 +108,90 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
   const { setNodeRef } = useDroppable({ id: "sidebar" });
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // ── Slide Templates ─────────────────────────────────────────────────────
+  const SLIDE_TEMPLATES = [
+    {
+      key: "title-slide",
+      label: "Title Slide",
+      description: "Course title, subtitle, intro paragraph",
+      icon: LayoutGrid,
+      blocks: [
+        { type: "h1", content: "Course Title" },
+        { type: "h3", content: "Subtitle or tagline" },
+        { type: "separator", content: "" },
+        { type: "paragraph", content: "Welcome to this course. In this module you will learn…" },
+        {
+          type: "learning-objective",
+          content: "",
+          objectives: ["Learners will be able to…", "Identify key concepts of…"],
+        },
+      ],
+    },
+    {
+      key: "two-column",
+      label: "Two-Column",
+      description: "Text left, image right (2:1)",
+      icon: Columns2,
+      blocks: [
+        { type: "h2", content: "Section Title" },
+        {
+          type: "grid",
+          content: "",
+          columns: [
+            { type: "text", content: "### Key Point\n\nExplain this concept in detail. Use **bold** for emphasis, bullet points for lists:\n\n- First takeaway\n- Second takeaway\n- Third takeaway" },
+            { type: "image", content: "" },
+          ],
+          weights: [2, 1],
+        },
+      ],
+    },
+    {
+      key: "quote-focus",
+      label: "Quote Focus",
+      description: "Pull quote + supporting paragraph",
+      icon: Quote,
+      blocks: [
+        { type: "h2", content: "Key Insight" },
+        { type: "blockquote", content: "The most powerful tool we have as developers is automation. — Scott Hanselman" },
+        { type: "paragraph", content: "Expand on the quote here. Explain why it matters in the context of this course and how learners can apply this insight." },
+        {
+          type: "knowledge-check",
+          content: "",
+          prompt: "What does this quote highlight about…?",
+          options: ["Option A", "Option B", "Option C"],
+          correctIndex: 0,
+        },
+      ],
+    },
+    {
+      key: "three-step-timeline",
+      label: "3-Step Timeline",
+      description: "Three sequential steps in columns",
+      icon: Layers,
+      blocks: [
+        { type: "h2", content: "Three-Step Process" },
+        {
+          type: "grid",
+          content: "",
+          columns: [
+            { type: "text", content: "**Step 1: Discover**\n\nDescribe the first step in the process." },
+            { type: "text", content: "**Step 2: Design**\n\nDescribe the second step in the process." },
+            { type: "text", content: "**Step 3: Deliver**\n\nDescribe the third step in the process." },
+          ],
+          weights: [1, 1, 1],
+        },
+        { type: "paragraph", content: "Summarise the process and what learners should do next." },
+      ],
+    },
+  ];
+
+  const handleTemplateInsert = (template) => {
+    if (!onBlockAdd) return;
+    template.blocks.forEach((blockData) => {
+      onBlockAdd(null, { id: Date.now().toString() + Math.random().toString(36).slice(2), ...blockData });
+    });
+  };
 
   const handleDoubleClickAdd = (blockType) => {
     if (!onBlockAdd) return;
@@ -213,6 +299,14 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
         opacity: "",
       }),
       // eLearning block defaults
+      ...(blockType === "grid" && {
+        columns: [
+          { type: "text", content: "" },
+          { type: "text", content: "" },
+        ],
+        weights: null,
+      }),
+      // eLearning block defaults
       ...(blockType === "learning-objective" && {
         objectives: ["Learners will be able to…"],
       }),
@@ -317,6 +411,9 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
       { title: "Math Expression", key: "math", icon: Sigma },
       { title: "Diagram", key: "diagram", icon: Network },
     ],
+    layout: [
+      { title: "Columns / Grid", key: "grid", icon: Columns2 },
+    ],
     lists: [
       { title: "Ordered List", key: "ol", icon: OrderedList },
       { title: "Unordered List", key: "ul", icon: UnorderedList },
@@ -409,6 +506,42 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
               ))}
             </div>
           </TooltipProvider>
+
+          {/* Slide Templates section */}
+          {showFullContent && (
+            <div className="mt-2 border-t pt-3 pb-2">
+              <div className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">
+                Slide Templates
+              </div>
+              <div className="px-2 space-y-1 mt-1">
+                {SLIDE_TEMPLATES.map((tpl) => {
+                  const Icon = tpl.icon;
+                  return (
+                    <TooltipProvider key={tpl.key}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="w-full flex items-start gap-2 px-2 py-2 rounded-md text-left hover:bg-muted/60 transition-colors group"
+                            onClick={() => handleTemplateInsert(tpl)}
+                          >
+                            <Icon className="h-4 w-4 mt-0.5 shrink-0 text-violet-500" />
+                            <div className="min-w-0">
+                              <p className="text-xs font-medium truncate">{tpl.label}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{tpl.description}</p>
+                            </div>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="text-xs">
+                          Click to insert {tpl.blocks.length} blocks
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </ScrollArea>
       </SidebarContent>
 

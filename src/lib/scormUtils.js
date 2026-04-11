@@ -911,8 +911,25 @@ async function _buildAndDownload(course, modules, version, options = {}) {
  * Build a preview HTML string for a single module (no SCORM API calls).
  * Used by CoursePreview component.
  */
-export function buildPreviewHtml(module, courseTitle) {
-  return buildScoHtml(module, courseTitle || "Preview");
+export function buildPreviewHtml(module, courseTitle, theme) {
+  const cssOverride = theme ? buildThemeCss(theme) : "";
+  return buildScoHtml(module, courseTitle || "Preview", cssOverride);
+}
+
+// Build an inline CSS snippet from a theme object
+function buildThemeCss(theme) {
+  const fonts = [];
+  if (theme.headingFont && theme.headingFont !== "Inter") fonts.push(theme.headingFont);
+  if (theme.bodyFont && theme.bodyFont !== "Inter" && theme.bodyFont !== theme.headingFont) fonts.push(theme.bodyFont);
+  const fontImport = fonts.length
+    ? `@import url('https://fonts.googleapis.com/css2?${fonts.map((f) => `family=${f.replace(/ /g, "+")}:wght@400;600;700`).join("&")}&display=swap');`
+    : "";
+  return `
+${fontImport}
+body { ${theme.bodyFont ? `font-family: '${theme.bodyFont}', sans-serif;` : ""} ${theme.bgColor ? `background-color: ${theme.bgColor};` : ""} }
+h1, h2, h3, h4, h5, h6 { ${theme.headingFont ? `font-family: '${theme.headingFont}', sans-serif;` : ""} ${theme.primaryColor ? `color: ${theme.primaryColor};` : ""} }
+a { ${theme.accentColor ? `color: ${theme.accentColor};` : ""} }
+  `.trim();
 }
 
 // ---------------------------------------------------------------------------

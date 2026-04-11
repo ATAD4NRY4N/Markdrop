@@ -14,13 +14,9 @@ Combine MarkDrop's sleek markdown editor with ScormStack's advanced eLearning ca
 4. **Copy & Paste Architecture [COMPLETED]:** Cross-slide and cross-course block copying and pasting. In-app clipboard singleton (`clipboard.js`) with synchronous helpers (`clipboardHasContent`, `getClipboardCount`). System clipboard integration with same-session in-app fallback. Clipboard count badge in the editor toolbar; per-block "paste after" button (shown when clipboard is loaded); `handleCopyModule` to copy all blocks of the active module; `handlePasteAfterBlock` to insert pasted blocks at a precise position. Copy/Paste module block actions in the sidebar panel dropdown. `pasteBlocksIntoModule` in `CourseContext` persists cross-slide pastes and syncs the active editor view via `blocks_json`-keyed `useEffect`.
 
 ### Phase 2: Layouts, Templates & Theming
-1. **CSS GRID Support:** 
-   - Implement a new "Grid/Columns" block to allow placing components side-by-side. 
-   - Define row/column weights and responsive collapsing for mobile.
-2. **Preconfigured Slide Templates:** 
-   - Title Slide, Two-Column (Text/Image), Quote Focus, 3-Step Timeline.
-   - Tailored specifically for product training and sales enablement.
-3. **Custom Themes System:** Global configuration panel for reusable design systems, custom Google Fonts, and layered CSS backgrounds. 
+1. **CSS GRID Support [COMPLETED]:** Fixed the orphaned `GridBlock` component (`onUpdate` signature bug repaired — now calls `onUpdate(block.id, updatedBlock)`). Added column weight presets (1:1, 1:1:1, 1:1:1:1, 2:1, 1:2, 1:2:1) via `block.weights` array and CSS `fr` units. Added a "layout" section to the AppSidebar palette with a "Columns / Grid" entry (double-click to add). Preview.jsx now renders `GridBlock` through the `ELEARNING_TYPES`/`ELEARNING_COMPONENTS` registry. Responsive: stacks to a single column on mobile (`max-sm:grid-cols-1`).
+2. **Preconfigured Slide Templates [COMPLETED]:** Four preconfigured templates added to a new "Slide Templates" section at the bottom of AppSidebar: **Title Slide** (heading + learning objectives), **Two-Column** (H2 + 2:1 grid with text and image columns), **Quote Focus** (blockquote + knowledge check), **3-Step Timeline** (H2 + 1:1:1 grid). Clicking a template inserts all its blocks in sequence via `onBlockAdd`. Visible only in expanded sidebar state.
+3. **Custom Themes System [COMPLETED]:** Per-course theme (heading font, body font, primary colour, accent colour, background colour) stored as `theme_json JSONB` in the `courses` table (migration `003_add_course_theme.sql`). Course Settings dialog expanded to two tabs — General (title/description) and Appearance (font selectors + colour pickers with live swatch preview). Theme applied in the inline Preview pane via injected CSS custom properties and a Google Fonts `@import`. Also threaded through `CoursePreview` (learner preview) and `buildPreviewHtml`/`buildScoHtml` in `scormUtils.js` so the exported SCORM package respects the chosen fonts and colours.
 
 ### Phase 3: Essential Interactive Blocks
 1. **Callout / Admonition Block:** Markdown-based callouts with distinct UI states (Info, Warning, Success, Error, Tip, Note).

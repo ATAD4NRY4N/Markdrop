@@ -13,6 +13,7 @@ import BranchingBlock from "@/components/blocks/BuilderPage/blocks/BranchingBloc
 import CategorizationBlock from "@/components/blocks/BuilderPage/blocks/CategorizationBlock";
 import CourseNavBlock from "@/components/blocks/BuilderPage/blocks/CourseNavBlock";
 import FlashcardBlock from "@/components/blocks/BuilderPage/blocks/FlashcardBlock";
+import GridBlock from "@/components/blocks/BuilderPage/blocks/GridBlock";
 import KnowledgeCheckBlock from "@/components/blocks/BuilderPage/blocks/KnowledgeCheckBlock";
 import LearningObjectiveBlock from "@/components/blocks/BuilderPage/blocks/LearningObjectiveBlock";
 import ProgressMarkerBlock from "@/components/blocks/BuilderPage/blocks/ProgressMarkerBlock";
@@ -517,6 +518,7 @@ const MOTION_VARIANTS = {
 
 // eLearning block types that render as interactive React components in preview
 const ELEARNING_TYPES = new Set([
+  "grid",
   "learning-objective",
   "quiz",
   "knowledge-check",
@@ -529,6 +531,7 @@ const ELEARNING_TYPES = new Set([
 ]);
 
 const ELEARNING_COMPONENTS = {
+  grid: GridBlock,
   "learning-objective": LearningObjectiveBlock,
   quiz: QuizBlock,
   "knowledge-check": KnowledgeCheckBlock,
@@ -602,7 +605,49 @@ function AnimatedBlockPreview({ block, mdComponents }) {
   );
 }
 
-export default function Preview({ blocks = [] }) {
+// Build a <style> block that injects Google Fonts and CSS custom properties
+// for the current course theme.
+function buildThemeStyle(theme) {
+  if (!theme) return "";
+  const fonts = new Set();
+  if (theme.headingFont && theme.headingFont !== "Inter") fonts.add(theme.headingFont);
+  if (theme.bodyFont && theme.bodyFont !== "Inter") fonts.add(theme.bodyFont);
+
+  const fontImport = fonts.size
+    ? `@import url('https://fonts.googleapis.com/css2?${[...fonts]
+        .map((f) => `family=${f.replace(/ /g, "+")}:wght@400;600;700`)
+        .join("&")}&display=swap');`
+    : "";
+
+  return `
+    ${fontImport}
+    .course-preview-root {
+      ${theme.bodyFont ? `--preview-body-font: "${theme.bodyFont}", sans-serif;` : ""}
+      ${theme.headingFont ? `--preview-heading-font: "${theme.headingFont}", sans-serif;` : ""}
+      ${theme.primaryColor ? `--preview-primary: ${theme.primaryColor};` : ""}
+      ${theme.accentColor ? `--preview-accent: ${theme.accentColor};` : ""}
+      ${theme.bgColor ? `--preview-bg: ${theme.bgColor};` : ""}
+    }
+    .course-preview-root {
+      font-family: var(--preview-body-font, inherit);
+      ${theme.bgColor ? "background-color: var(--preview-bg);" : ""}
+    }
+    .course-preview-root h1,
+    .course-preview-root h2,
+    .course-preview-root h3,
+    .course-preview-root h4,
+    .course-preview-root h5,
+    .course-preview-root h6 {
+      font-family: var(--preview-heading-font, inherit);
+      color: var(--preview-primary, inherit);
+    }
+    .course-preview-root a {
+      color: var(--preview-accent, inherit);
+    }
+  `.trim();
+}
+
+export default function Preview({ blocks = [], theme }) {
   // Shared markdown component overrides — defined once, passed to each per-block renderer
   const mdComponents = {
     h1: ({ ...props }) => (
@@ -807,8 +852,16 @@ export default function Preview({ blocks = [] }) {
     },
   };
 
+  const themeStyle = buildThemeStyle(theme);
+
   return (
     <div className="w-full h-full rounded-lg transition-colors relative">
+      {themeStyle && (
+        <style
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: themeStyle }}
+        />
+      )}
       {blocks.length === 0 ? (
         <div className="absolute inset-4 flex items-center justify-center border-2 border-dashed rounded-lg border-muted-foreground/20">
           <p className="text-center text-sm text-muted-foreground px-4">
@@ -817,7 +870,7 @@ export default function Preview({ blocks = [] }) {
         </div>
       ) : (
         <div className="h-full overflow-y-auto overflow-x-hidden">
-          <div className="p-2 sm:p-4 space-y-0">
+          <div className="course-preview-root p-2 sm:p-4 space-y-0">
             {blocks.map((block) => (
               <AnimatedBlockPreview key={block.id} block={block} mdComponents={mdComponents} />
             ))}

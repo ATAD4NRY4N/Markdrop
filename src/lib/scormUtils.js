@@ -8,6 +8,7 @@
 
 import JSZip from "jszip";
 import { marked } from "marked";
+import { buildModulesMeta, parseAdaptiveConfig } from "./adaptiveUtils";
 
 // ---------------------------------------------------------------------------
 // Block → HTML conversion (reused from exportUtils patterns)
@@ -235,7 +236,7 @@ function buildKnowledgeCheckHtml(block) {
     </button>`
     )
     .join("");
-  return `<div class="knowledge-check" id="${qid}">
+  return `<div class="knowledge-check" id="${qid}" data-block-id="${escHtml(block.id || qid)}">
   <p class="kc-prompt">${escHtml(block.prompt || "Knowledge Check")}</p>
   <div class="mc-options">${opts}</div>
   <div class="kc-feedback" id="${qid}_fb" style="display:none"></div>
@@ -301,7 +302,7 @@ function buildQuizHtml(block) {
 
   const points = JSON.stringify(questions.map((q) => q.points ?? 1));
 
-  return `<div class="quiz-block" id="${qid}" data-total-pts="${totalPts}" data-pass="${block.passThreshold ?? 80}">
+  return `<div class="quiz-block" id="${qid}" data-block-id="${escHtml(block.id || qid)}" data-total-pts="${totalPts}" data-pass="${block.passThreshold ?? 80}">
   <p class="quiz-title"><strong>${escHtml(block.title || "Quiz")}</strong></p>
   ${questionsHtml}
   <button class="btn-submit-quiz" onclick="submitQuiz('${qid}',${correctAnswers},${feedbacks},${points})">Submit Quiz</button>
@@ -429,6 +430,111 @@ function buildCategorizationHtml(block) {
 // Full SCO HTML page builder
 // ---------------------------------------------------------------------------
 
+const ADAPTIVE_RUNTIME_JS = `
+// ── Adaptive Learning Runtime ─────────────────────────────────────────────
+var _adaptiveState = { unlockedVariantIds: [], checkpointScores: {} };
+function adaptiveInit() {
+  var raw = "";
+  try { if (_scorm) raw = scormGet("cmi.suspend_data"); } catch(e) {}
+  if (raw) {
+    try {
+      var s = JSON.parse(raw);
+      if (s && typeof s === "object") _adaptiveState = s;
+      if (!Array.isArray(_adaptiveState.unlockedVariantIds)) _adaptiveState.unlockedVariantIds = [];
+      if (typeof _adaptiveState.checkpointScores !== "object" || !_adaptiveState.checkpointScores) _adaptiveState.checkpointScores = {};
+    } catch(e) {}
+  }
+}
+function adaptiveSaveState() {
+  if (!_scorm) return;
+  try { scormSet("cmi.suspend_data", JSON.stringify(_adaptiveState)); scormCommit(); } catch(e) {}
+}
+function adaptiveIsVisible(moduleId) {
+  var meta = window._ALL_MODULES_META || [];
+  for (var i = 0; i < meta.length; i++) {
+    if (meta[i].id === moduleId) {
+      var vid = meta[i].variantId;
+      if (vid == null) return true;
+      return _adaptiveState.unlockedVariantIds.indexOf(vid) >= 0;
+    }
+  }
+  return true;
+}
+function adaptiveNextFile(curIdx) {
+  var meta = window._ALL_MODULES_META || [];
+  for (var i = 0; i < meta.length; i++) {
+    if (meta[i].fileIndex > curIdx && adaptiveIsVisible(meta[i].id)) return meta[i].fileIndex;
+  }
+  return -1;
+}
+function adaptivePrevFile(curIdx) {
+  var meta = window._ALL_MODULES_META || [];
+  var found = -1;
+  for (var i = 0; i < meta.length; i++) {
+    if (meta[i].fileIndex >= curIdx) break;
+    if (adaptiveIsVisible(meta[i].id)) found = meta[i].fileIndex;
+  }
+  return found;
+}
+function adaptiveNavigate(dir) {
+  var cur = window._CURRENT_FILE_INDEX || 1;
+  var target = dir === "next" ? adaptiveNextFile(cur) : adaptivePrevFile(cur);
+  if (target < 0) return;
+  window.location.href = "../module_" + target + "/index.html";
+}
+function nextModule() { adaptiveNavigate("next"); }
+function prevModule() { adaptiveNavigate("prev"); }
+function adaptiveEvaluate(blockId, scorePercent) {
+  var cfg = window._ADAPTIVE_CONFIG || { variants: [], checkpoints: [] };
+  var toUnlock = [];
+  var cps = cfg.checkpoints || [];
+  for (var ci = 0; ci < cps.length; ci++) {
+    var cp = cps[ci];
+    if (cp.blockId !== blockId) continue;
+    var matched = false;
+    var rules = cp.rules || [];
+    for (var ri = 0; ri < rules.length; ri++) {
+      var rule = rules[ri];
+      var hit = rule.type === "score" &&
+        ((rule.operator === "gte" && scorePercent >= rule.threshold) ||
+         (rule.operator === "lt"  && scorePercent <  rule.threshold));
+      if (hit) {
+        matched = true;
+        var rv = rule.variantIds || [];
+        for (var vi = 0; vi < rv.length; vi++) { if (toUnlock.indexOf(rv[vi]) < 0) toUnlock.push(rv[vi]); }
+        break;
+      }
+    }
+    if (!matched) {
+      var fb = cp.fallbackVariantIds || [];
+      for (var fi = 0; fi < fb.length; fi++) { if (toUnlock.indexOf(fb[fi]) < 0) toUnlock.push(fb[fi]); }
+    }
+  }
+  if (!_adaptiveState.checkpointScores) _adaptiveState.checkpointScores = {};
+  _adaptiveState.checkpointScores[blockId] = scorePercent;
+  var variants = cfg.variants || [];
+  var newNames = [];
+  for (var ui = 0; ui < toUnlock.length; ui++) {
+    if (_adaptiveState.unlockedVariantIds.indexOf(toUnlock[ui]) < 0) {
+      _adaptiveState.unlockedVariantIds.push(toUnlock[ui]);
+      for (var vj = 0; vj < variants.length; vj++) {
+        if (variants[vj].id === toUnlock[ui]) { newNames.push(variants[vj].name); break; }
+      }
+    }
+  }
+  adaptiveSaveState();
+  if (newNames.length > 0) _adaptiveToast("\uD83D\uDD13 Unlocked: " + newNames.join(", "));
+}
+function _adaptiveToast(msg) {
+  var el = document.createElement("div");
+  el.style.cssText = "position:fixed;top:16px;right:16px;background:#4ade80;color:#15803d;padding:10px 18px;border-radius:8px;font-weight:600;font-size:.875rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.15)";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 4000);
+}
+window.addEventListener("load", function() { adaptiveInit(); });
+`;
+
 const SCORM_RUNTIME_SHIM = `
 var _scorm = null;
 function findAPI(win) {
@@ -526,6 +632,12 @@ function kcAnswer(qid, chosen, correct) {
     if (btns[correct]) { btns[correct].style.background = "#22c55e22"; btns[correct].style.borderColor = "#22c55e"; }
     if (fb) { fb.textContent = "Incorrect."; fb.style.color = "#dc2626"; fb.style.display = "block"; }
   }
+  // Adaptive: evaluate checkpoint rules for knowledge checks (100 = correct, 0 = wrong)
+  if (typeof adaptiveEvaluate === "function") {
+    var kcScore = chosen === correct ? 100 : 0;
+    var kcBlockId = container ? (container.getAttribute("data-block-id") || qid) : qid;
+    adaptiveEvaluate(kcBlockId, kcScore);
+  }
 }
 function flipCard(id) {
   var el = document.getElementById(id);
@@ -601,6 +713,11 @@ function submitQuiz(qid, answers, feedbacks, points) {
     scormSet(_scorm.version === "1.2" ? "cmi.core.score.raw" : "cmi.score.raw", rawScore);
     scormSet(_scorm.version === "1.2" ? "cmi.core.score.scaled" : "cmi.score.scaled", scaledScore);
     scormFinish(passed ? "passed" : "failed");
+  }
+  // Adaptive: evaluate checkpoint rules
+  if (typeof adaptiveEvaluate === "function") {
+    var adaptBlockId = container.getAttribute("data-block-id") || qid;
+    adaptiveEvaluate(adaptBlockId, rawScore);
   }
 }
 var _catSelected = null;
@@ -804,24 +921,20 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2rem 0; }
 `;
 
 function buildNavBarHtml(moduleIndex, totalModules, position, showProgress = false) {
-  const isFirst = moduleIndex === 0;
-  const isLast = moduleIndex === totalModules - 1;
-  const prevHref = isFirst ? "#" : `../module_${moduleIndex}/index.html`;
-  const nextHref = isLast ? "#" : `../module_${moduleIndex + 2}/index.html`;
   const posClass = position === "top" ? "nav-top" : "";
   const pct = totalModules > 1 ? Math.round(((moduleIndex) / (totalModules - 1)) * 100) : 100;
   const progressBar = showProgress
     ? `<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:#e5e7eb"><div style="height:100%;width:${pct}%;background:#3b82f6;transition:width 0.4s"></div></div>`
     : "";
   return `<nav class="slide-nav-bar ${posClass}" aria-label="Course navigation" style="position:relative">
-  <a href="${prevHref}" class="nav-bar-btn"${isFirst ? ` aria-disabled="true"` : ""}>&larr; Previous</a>
+  <button class="nav-bar-btn" onclick="adaptiveNavigate('prev')">&larr; Previous</button>
   <span class="nav-bar-indicator">${moduleIndex + 1} / ${totalModules}</span>
-  <a href="${nextHref}" class="nav-bar-btn"${isLast ? ` aria-disabled="true"` : ""}>Next &rarr;</a>
+  <button class="nav-bar-btn" onclick="adaptiveNavigate('next')">Next &rarr;</button>
   ${progressBar}
 </nav>`;
 }
 
-function buildScoHtml(module, courseTitle, cssOverride = "", navBarOptions = null) {
+function buildScoHtml(module, courseTitle, cssOverride = "", navBarOptions = null, adaptiveOptions = null) {
   const blocks = (() => {
     try {
       return JSON.parse(module.blocks_json || "[]");
@@ -833,13 +946,14 @@ function buildScoHtml(module, courseTitle, cssOverride = "", navBarOptions = nul
   const bodyHtml = blocks.map((b) => blockToHtml(b)).join("\n");
 
   const navEnabled = navBarOptions && navBarOptions.position && navBarOptions.position !== "none";
-  const navHtml = navEnabled
-    ? buildNavBarHtml(navBarOptions.moduleIndex, navBarOptions.totalModules, navBarOptions.position, navBarOptions.showProgress)
-    : "";
   const navTop = navEnabled && (navBarOptions.position === "top" || navBarOptions.position === "both");
   const navBottom = navEnabled && (navBarOptions.position === "bottom" || navBarOptions.position === "both");
   const navTopHtml = navTop ? buildNavBarHtml(navBarOptions.moduleIndex, navBarOptions.totalModules, "top", navBarOptions.showProgress) : "";
   const navBottomHtml = navBottom ? buildNavBarHtml(navBarOptions.moduleIndex, navBarOptions.totalModules, "bottom", navBarOptions.showProgress) : "";
+
+  const adaptOpts = adaptiveOptions || { config: { variants: [], checkpoints: [] }, modulesMeta: [], currentFileIndex: 1 };
+  // Sanitize: prevent </script> injection in embedded JSON
+  const safeJson = (obj) => JSON.stringify(obj).replace(/<\/script>/gi, "<\\/script>");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -861,7 +975,11 @@ ${bodyHtml}
 ${navBottomHtml}
 ${navEnabled ? "</div>" : ""}
 <script>
+window._ADAPTIVE_CONFIG = ${safeJson(adaptOpts.config)};
+window._ALL_MODULES_META = ${safeJson(adaptOpts.modulesMeta)};
+window._CURRENT_FILE_INDEX = ${adaptOpts.currentFileIndex};
 ${SCORM_RUNTIME_SHIM}
+${ADAPTIVE_RUNTIME_JS}
 ${QUIZ_ENGINE_JS}
 </script>
 </body>
@@ -1001,6 +1119,8 @@ async function _buildAndDownload(course, modules, version, options = {}) {
   if (!modules || modules.length === 0) throw new Error("No modules to export");
 
   const navBarPosition = options.navBar?.position || "none";
+  const adaptiveConfig = parseAdaptiveConfig(course);
+  const modulesMeta = buildModulesMeta(modules, adaptiveConfig.variants);
 
   const zip = new JSZip();
   const manifestXml =
@@ -1014,7 +1134,8 @@ async function _buildAndDownload(course, modules, version, options = {}) {
       navBarPosition !== "none"
         ? { position: navBarPosition, moduleIndex: i, totalModules: modules.length, showProgress: false }
         : null;
-    const html = buildScoHtml(mod, course.title || "Course", "", navBarOptions);
+    const adaptiveOptions = { config: adaptiveConfig, modulesMeta, currentFileIndex: i + 1 };
+    const html = buildScoHtml(mod, course.title || "Course", "", navBarOptions, adaptiveOptions);
     zip.file(`module_${i + 1}/index.html`, html);
   }
 
@@ -1038,9 +1159,10 @@ async function _buildAndDownload(course, modules, version, options = {}) {
  * Build a preview HTML string for a single module (no SCORM API calls).
  * Used by CoursePreview component.
  */
-export function buildPreviewHtml(module, courseTitle, theme) {
+export function buildPreviewHtml(module, courseTitle, theme, adaptiveOptions = null) {
   const cssOverride = theme ? buildThemeCss(theme) : "";
-  return buildScoHtml(module, courseTitle || "Preview", cssOverride);
+  const adaptOpts = adaptiveOptions || { config: { variants: [], checkpoints: [] }, modulesMeta: [], currentFileIndex: 1 };
+  return buildScoHtml(module, courseTitle || "Preview", cssOverride, null, adaptOpts);
 }
 
 // Build an inline CSS snippet from a theme object

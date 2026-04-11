@@ -20,6 +20,8 @@ export function CourseProvider({ children }) {
   const [isSaving, setIsSaving] = useState(false);
   // Sections: [{id, title, moduleIds: []}]
   const [sections, setSections] = useState([]);
+  // Adaptive config: {variants: [], checkpoints: []}
+  const [adaptiveConfig, setAdaptiveConfig] = useState({ variants: [], checkpoints: [] });
 
   // Load a course and its modules by ID
   const loadCourse = useCallback(async (courseId) => {
@@ -36,6 +38,15 @@ export function CourseProvider({ children }) {
     } catch {
       setSections([]);
     }
+    try {
+      const parsedAdaptive = JSON.parse(loadedCourse.adaptive_config || '{"variants":[],"checkpoints":[]}');
+      setAdaptiveConfig({
+        variants: Array.isArray(parsedAdaptive.variants) ? parsedAdaptive.variants : [],
+        checkpoints: Array.isArray(parsedAdaptive.checkpoints) ? parsedAdaptive.checkpoints : [],
+      });
+    } catch {
+      setAdaptiveConfig({ variants: [], checkpoints: [] });
+    }
     if (loadedModules.length > 0) {
       setActiveModuleId(loadedModules[0].id);
     }
@@ -51,6 +62,7 @@ export function CourseProvider({ children }) {
       setCourse(newCourse);
       setModules([firstModule]);
       setActiveModuleId(firstModule.id);
+      setAdaptiveConfig({ variants: [], checkpoints: [] });
       return newCourse;
     } finally {
       setIsSaving(false);
@@ -223,6 +235,17 @@ export function CourseProvider({ children }) {
    * Works for both the active module (editor syncs via blocks_json change) and
    * background modules (cross-slide paste without switching modules).
    */
+  const saveAdaptiveConfig = useCallback(
+    async (config) => {
+      if (!course?.id) return;
+      setAdaptiveConfig(config);
+      const updated = await updateCourse(course.id, { adaptive_config: JSON.stringify(config) });
+      setCourse(updated);
+      return updated;
+    },
+    [course]
+  );
+
   const pasteBlocksIntoModule = useCallback(
     async (moduleId, newBlocks) => {
       const mod = modules.find((m) => m.id === moduleId);
@@ -280,6 +303,9 @@ export function CourseProvider({ children }) {
         assignModuleToSection,
         persistSections,
         pasteBlocksIntoModule,
+        // Adaptive
+        adaptiveConfig,
+        saveAdaptiveConfig,
       }}
     >
       {children}

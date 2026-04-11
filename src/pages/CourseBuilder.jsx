@@ -40,6 +40,7 @@ import AppSidebar from "@/components/blocks/BuilderPage/AppSidebar";
 import Editor from "@/components/blocks/BuilderPage/Editor";
 import Preview from "@/components/blocks/BuilderPage/Preview";
 import Raw from "@/components/blocks/BuilderPage/Raw";
+import AdaptivePanel from "@/components/blocks/CourseBuilderPage/AdaptivePanel";
 import CollaboratorsDialog from "@/components/blocks/CourseBuilderPage/CollaboratorsDialog";
 import CoursePreview from "@/components/blocks/CourseBuilderPage/CoursePreview";
 import CourseStructurePanel from "@/components/blocks/CourseBuilderPage/CourseStructurePanel";
@@ -113,6 +114,7 @@ function CourseBuilderInner() {
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showCollaboratorsDialog, setShowCollaboratorsDialog] = useState(false);
   const [showReviewPanel, setShowReviewPanel] = useState(false);
+  const [showAdaptivePanel, setShowAdaptivePanel] = useState(false);
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
@@ -567,6 +569,22 @@ function CourseBuilderInner() {
                       variant="outline"
                       size="sm"
                       className="gap-1.5 hidden sm:flex"
+                      onClick={() => setShowAdaptivePanel(true)}
+                      disabled={!modules.length}
+                    >
+                      <GitBranch className="h-4 w-4" />
+                      <span className="hidden lg:inline">Adaptive</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Configure adaptive learning paths</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 hidden sm:flex"
                       onClick={() => setShowReviewPanel(true)}
                       disabled={!course?.id}
                     >
@@ -719,6 +737,8 @@ function CourseBuilderInner() {
         course={course}
         modules={modules}
       />
+
+      <AdaptivePanel open={showAdaptivePanel} onOpenChange={setShowAdaptivePanel} />
 
       <CollaboratorsDialog
         open={showCollaboratorsDialog}

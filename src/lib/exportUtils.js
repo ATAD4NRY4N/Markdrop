@@ -27,10 +27,38 @@ const blockToMarkdown = (block) => {
     case "paragraph":
       return block.content;
     case "grid": {
-      // Very basic fallback into markdown pseudo-columns or a table
-      const columns = block.columns || [];
-      const row = columns.map(c => c.type === "image" ? \`![](\${c.content})\` : (c.content || "")).map(v => v.replace(/\\n/g, "<br>"));
-      return \`|<div style="width: 50%;">\${row[0] || ""}</div>|<div style="width: 50%;">\${row[1] || ""}</div>|\\n|---|---|\\n\`;
+      const rawCols = block.columns || [];
+      // Migrate old {type, content} format
+      const columns = rawCols.map((col, i) => {
+        if (Array.isArray(col.blocks)) return col;
+        const b =
+          col.type === "image"
+            ? { type: "image", content: col.content || "", alt: "" }
+            : { type: "paragraph", content: col.content || "" };
+        return { blocks: [b] };
+      });
+
+      const PREFIX = { h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### " };
+      const getCellText = (col) =>
+        (col.blocks || [])
+          .map((b) => {
+            if (b.type === "separator") return "---";
+            if (b.type === "image") return `![${b.alt || ""}](${b.content || ""})`;
+            if (b.type === "alert")
+              return `> [!${(b.alertType || "note").toUpperCase()}]\n> ${b.content || ""}`;
+            return (PREFIX[b.type] || "") + (b.content || "");
+          })
+          .join("\n\n");
+
+      // Render as an HTML flex row (markdown has no native multi-col support)
+      const colWidth = `${Math.floor(100 / Math.max(columns.length, 1))}%`;
+      const cells = columns
+        .map(
+          (col) =>
+            `<div style="width:${colWidth};display:inline-block;vertical-align:top;padding-right:12px">${getCellText(col).replace(/\n\n/g, "<br><br>")}</div>`
+        )
+        .join("");
+      return `<div style="display:flex;flex-wrap:wrap">${cells}</div>\n\n`;
     }
     case "blockquote":
       return `> ${block.content}`;

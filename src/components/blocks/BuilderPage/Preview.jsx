@@ -557,10 +557,14 @@ function AnimatedBlockPreview({ block, mdComponents }) {
   // eLearning blocks render their own interactive React components
   if (ELEARNING_TYPES.has(block.type)) {
     const BlockComponent = ELEARNING_COMPONENTS[block.type];
+    // Display-only blocks get null so they render in read-only / rendered mode.
+    // Interactive blocks (quiz, flashcard, etc.) get a noop so they can track
+    // internal state without crashes.
+    const DISPLAY_ONLY = new Set(["grid", "carousel", "pdf"]);
+    const updateFn = DISPLAY_ONLY.has(block.type) ? null : () => {};
     const content = (
       <div className="my-2">
-        {/* no-op onUpdate — preview is read-only */}
-        <BlockComponent block={block} onUpdate={() => {}} />
+        <BlockComponent block={block} onUpdate={updateFn} />
       </div>
     );
     if (anim.type === "none" || !variant.initial) return <div>{content}</div>;

@@ -135,15 +135,32 @@ function buildFlashcardHtml(block) {
 }
 
 function buildGridHtml(block) {
-  const columns = block.columns || [];
-  const colHtml = columns.map(c => {
-    if (c.type === "image" && c.content) {
-      return `<div class="grid-col"><img src="${escHtml(c.content)}" alt="Grid Image" style="width:100%; border-radius:8px;"/></div>`;
-    }
-    return `<div class="grid-col">${marked.parse(c.content || "")}</div>`;
-  }).join("");
+  const rawCols = block.columns || [];
 
-  return `<div class="scorm-grid scorm-grid-cols-${columns.length || 2}">${colHtml}</div>`;
+  // Migrate old {type, content} format transparently
+  const columns = rawCols.map((col, i) => {
+    if (Array.isArray(col.blocks)) return col;
+    const b =
+      col.type === "image"
+        ? { id: `nb_leg_${i}`, type: "image", content: col.content || "", alt: "" }
+        : { id: `nb_leg_${i}`, type: "paragraph", content: col.content || "" };
+    return { id: `nc_leg_${i}`, blocks: [b] };
+  });
+
+  const weights = block.weights;
+  const colsStyle =
+    weights?.length === columns.length
+      ? `style="grid-template-columns:${weights.map((w) => `${w}fr`).join(" ")}"`
+      : `style="grid-template-columns:repeat(${columns.length || 2},1fr)"`;
+
+  const colHtml = columns
+    .map((col) => {
+      const inner = (col.blocks || []).map((b) => blockToHtml(b)).join("\n");
+      return `<div class="grid-col">${inner}</div>`;
+    })
+    .join("\n");
+
+  return `<div class="scorm-grid" ${colsStyle}>${colHtml}</div>`;
 }
 
 function buildCarouselHtml(block) {

@@ -302,8 +302,8 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
       // eLearning block defaults
       ...(blockType === "grid" && {
         columns: [
-          { type: "text", content: "" },
-          { type: "text", content: "" },
+          { id: "nc_init_0", blocks: [{ id: "nb_init_0", type: "h2", content: "" }, { id: "nb_init_1", type: "paragraph", content: "" }] },
+          { id: "nc_init_1", blocks: [{ id: "nb_init_2", type: "h2", content: "" }, { id: "nb_init_3", type: "paragraph", content: "" }] },
         ],
         weights: null,
       }),

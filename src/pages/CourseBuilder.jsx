@@ -20,6 +20,7 @@ import {
   Moon,
   Package,
   Pencil,
+  FileText,
   RotateCcw,
   Save,
   Sparkles,
@@ -34,6 +35,7 @@ import { toast } from "sonner";
 import AppSidebar from "@/components/blocks/BuilderPage/AppSidebar";
 import Editor from "@/components/blocks/BuilderPage/Editor";
 import Preview from "@/components/blocks/BuilderPage/Preview";
+import Raw from "@/components/blocks/BuilderPage/Raw";
 import CoursePreview from "@/components/blocks/CourseBuilderPage/CoursePreview";
 import CourseStructurePanel from "@/components/blocks/CourseBuilderPage/CourseStructurePanel";
 import ScormExportDialog from "@/components/blocks/CourseBuilderPage/ScormExportDialog";
@@ -391,13 +393,20 @@ function CourseBuilderInner() {
             {/* Center: tabs */}
             <div className="absolute left-1/2 -translate-x-1/2 px-2">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid grid-cols-2 w-[180px] bg-muted/50 p-1">
+                <TabsList className="grid grid-cols-3 w-[240px] bg-muted/50 p-1">
                   <TabsTrigger
                     value="editor"
                     className="text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm flex items-center gap-1.5"
                   >
                     <Pencil className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Edit</span>
+                    <span className="hidden sm:inline">Editor</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="raw"
+                    className="text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm flex items-center gap-1.5"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Raw</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="preview"
@@ -511,6 +520,11 @@ function CourseBuilderInner() {
                           onBlockAdd={handleBlockAdd}
                           onBlockCopy={handleCopyBlock}
                         />
+                      )}
+                      {activeTab === "raw" && (
+                        <div className="w-full h-full">
+                          <Raw blocks={blocks} onBlocksChange={setBlocks} />
+                        </div>
                       )}
                       {activeTab === "preview" && <Preview blocks={blocks} />}
                     </div>

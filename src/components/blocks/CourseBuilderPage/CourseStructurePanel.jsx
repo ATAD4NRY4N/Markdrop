@@ -372,7 +372,11 @@ export default function CourseStructurePanel({ className }) {
           variant="outline"
           size="sm"
           className="w-full h-7 text-xs gap-1"
-          onClick={() => addModule()}
+          onClick={() => {
+            if (course?.id) addModule();
+            else console.warn("Course not loaded yet");
+          }}
+          disabled={!course?.id}
         >
           <Plus className="h-3.5 w-3.5" />
           Add Module
@@ -381,7 +385,11 @@ export default function CourseStructurePanel({ className }) {
           variant="ghost"
           size="sm"
           className="w-full h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
-          onClick={() => addSection()}
+          onClick={() => {
+             if (course?.id) addSection();
+             else console.warn("Course not loaded yet");
+          }}
+          disabled={!course?.id}
         >
           <FolderPlus className="h-3.5 w-3.5" />
           Add Section

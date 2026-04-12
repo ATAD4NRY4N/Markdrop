@@ -12,6 +12,7 @@ import {
   Image,
   Kanban,
   Keyboard,
+  Languages,
   LayoutDashboard,
   LayoutGrid,
   LayoutTemplate,
@@ -47,7 +48,7 @@ const ICONS = {
   Users, MessageSquare,
   GitBranch, CheckCircle2,
   LayoutDashboard, Search,
-  ShieldCheck, ImageWithText: Image, Keyboard,
+  ShieldCheck, ImageWithText: Image, Keyboard, Languages,
 };
 
 function Icon({ name, className }) {

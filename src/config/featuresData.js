@@ -921,6 +921,46 @@ export const FEATURES = [
     ],
     cta: { label: "Try the editor", href: "/course" },
   },
+  {
+    slug: "rtl-support",
+    group: "accessibility",
+    icon: "Languages",
+    title: "RTL Languages Support",
+    tagline: "Courses in right\u2011to\u2011left languages look and feel natural \u2014 from text flow to navigation.",
+    description:
+      "CourseForge lets you reach new regions and audiences without compromising on usability or design. With RTL support, every course element \u2014 text, assessments, interactive blocks, and exported SCORM packages \u2014 behaves as learners of Arabic, Hebrew, Persian, Urdu, and other RTL languages expect.",
+    howItWorks: [
+      {
+        step: "Correct text direction",
+        detail:
+          "Headings, body text, questions, and answers all flow right\u2011to\u2011left so RTL learners can read comfortably without any manual text-direction overrides.",
+      },
+      {
+        step: "Mirrored layouts",
+        detail:
+          "Sidebars, navigation buttons, and progress indicators flip to follow RTL reading order while keeping your course design fully intact.",
+      },
+      {
+        step: "Consistent interactive experience",
+        detail:
+          "Whether learners are reading content, answering a quiz, or exploring an interactive block, everything behaves as they expect in an RTL interface \u2014 with no jarring LTR islands.",
+      },
+      {
+        step: "RTL\u2011ready SCORM export",
+        detail:
+          "Export SCORM packages with the correct language and text-direction settings so LMSs render your course natively. Build once, localize to RTL, and ship a version that feels truly native to RTL audiences.",
+      },
+    ],
+    highlights: [
+      "Full right\u2011to\u2011left text flow for all content block types",
+      "Layout mirroring: navigation, sidebars, and progress indicators flip for RTL",
+      "RTL-aware quiz and assessment rendering \u2014 options, feedback, and scoring all correct",
+      "SCORM export includes correct lang and dir attributes for LMS compatibility",
+      "No duplicate course required \u2014 build once and localize to RTL",
+      "Supports Arabic, Hebrew, Persian, Urdu, and other RTL script languages",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

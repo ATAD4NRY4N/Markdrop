@@ -71,5 +71,6 @@ Build a modern, full-featured eLearning authoring studio with a visual block edi
 
 ### Phase 11: Responsive Authoring [COMPLETED]
 1. **Responsive Authoring [COMPLETED]:** `responsive-authoring` added to the Authoring feature group in the feature catalogue (`MonitorSmartphone` icon). Courses built from content blocks naturally reflow on any screen size. Images, videos, and carousels resize gracefully. Themes keep typography and spacing balanced across desktop, tablet, and phone. The SCORM player and inline preview render identically on all devices. No separate mobile course version is required.
+2. **Course Navigation [COMPLETED]:** `course-navigation` added to the Authoring feature group (`Map` icon). Supports sidebar, hamburger, and minimal navigation menu styles. Visual progress indicators track learner progress. Sequential locking enforces prerequisite completion before advancing. Free-exploration mode available for self-directed learners. A Course Nav block in the palette provides in-slide navigation, styled by the active theme.
 
 ---

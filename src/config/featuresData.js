@@ -1003,6 +1003,48 @@ export const FEATURES = [
     ],
     cta: { label: "Start building", href: "/course" },
   },
+
+  // ── Course Navigation ──────────────────────────────────────────
+  {
+    slug: "course-navigation",
+    group: "authoring",
+    icon: "Map",
+    title: "Course Navigation",
+    tagline: "Control how learners move through your course \u2014 menus, progress, and sequencing rules all in one place.",
+    description:
+      "CourseForge gives you full control over how learners navigate your content. Set up menus, progress indicators, and navigation rules that fit your instructional design \u2014 whether you want free exploration, a guided linear path, or locked sequences that enforce prerequisite completion.",
+    howItWorks: [
+      {
+        step: "Choose a menu style",
+        detail:
+          "Pick from sidebar menus, hamburger menus, or minimal navigation to match your course structure and visual design.",
+      },
+      {
+        step: "Track learner progress",
+        detail:
+          "Visual progress indicators show learners exactly where they are in the course, how much they\u2019ve completed, and what\u2019s still ahead.",
+      },
+      {
+        step: "Configure sequential locking",
+        detail:
+          "Require learners to complete a section before advancing to the next, enforcing prerequisite logic and structured learning paths.",
+      },
+      {
+        step: "Course nav block",
+        detail:
+          "Drop a Course Nav block into any slide to give learners a consistent, accessible way to jump between modules \u2014 fully styled by your active theme.",
+      },
+    ],
+    highlights: [
+      "Sidebar, hamburger, and minimal navigation menu styles",
+      "Visual progress bar and completion indicators for learners",
+      "Sequential locking \u2014 require section completion before advancing",
+      "Free-exploration mode for self-directed learners",
+      "Course Nav block available in the block palette for in-slide navigation",
+      "Navigation styles inherit your active theme for a consistent look",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

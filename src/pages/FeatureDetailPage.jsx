@@ -7,6 +7,7 @@ import {
   Brush,
   CheckCircle,
   CheckCircle2,
+  ClipboardCheck,
   CreditCard,
   FileCode2,
   GitBranch,
@@ -67,6 +68,7 @@ const ICONS = {
   FileCode2, Globe2, Tag, PackageCheck,
   MessageCircleMore,
   SendHorizonal, ListChecks, Layers2,
+  ClipboardCheck,
 };
 
 function Icon({ name, className }) {

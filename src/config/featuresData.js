@@ -1461,6 +1461,48 @@ export const FEATURES = [
     ],
     cta: { label: "Export a course", href: "/course" },
   },
+
+  // ── Assessments & Quizzes ─────────────────────────────────────────
+  {
+    slug: "assessments-quizzes",
+    group: "assessments",
+    icon: "ClipboardCheck",
+    title: "Assessments & Quizzes",
+    tagline: "Move from content-only to truly measurable learning \u2014 without a separate quiz tool.",
+    description:
+      "CourseForge\u2019s built-in assessment blocks let you check understanding, track performance, and feed meaningful results back into your LMS. Multiple question types, smart attempt controls, partial credit, and SCORM-ready scoring are all included \u2014 no plugins or third-party tools required.",
+    howItWorks: [
+      {
+        step: "Choose the right question type",
+        detail:
+          "Mix and match multiple-choice, multi-response, fill-in-the-blank, matching, click-on-image, and scenario-based success meter questions within a single course to keep assessments varied and engaging.",
+      },
+      {
+        step: "Configure scoring and pass criteria",
+        detail:
+          "Set pass scores, grade cutoffs, and assessment weights so each quiz or activity contributes to the final course result exactly the way you intend \u2014 no code needed.",
+      },
+      {
+        step: "Control attempts and feedback",
+        detail:
+          "Choose how many attempts learners get, when they see correct answers, and whether partial credit applies \u2014 all from the block settings panel.",
+      },
+      {
+        step: "Report results to your LMS",
+        detail:
+          "Scores, attempts, completion status, and session continuity data are packaged in a way LMSs understand via SCORM or xAPI, so your reporting dashboards stay trustworthy and accurate.",
+      },
+    ],
+    highlights: [
+      "Multiple-choice and multi-response questions for quick checks and formal tests",
+      "Fill-in-the-blank with support for multiple correct answers and partial credit",
+      "Drag-style matching interactions for concepts, definitions, and visuals",
+      "Click-on-image questions \u2014 ideal for diagrams, interfaces, and real-world scenarios",
+      "Scenario-based success meter questions to assess judgement and decision-making",
+      "SCORM/xAPI-ready scoring: scores, attempts, and completion reported to any LMS",
+    ],
+    cta: { label: "Add an assessment", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

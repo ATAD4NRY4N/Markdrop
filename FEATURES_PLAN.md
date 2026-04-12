@@ -89,4 +89,7 @@ Build a modern, full-featured eLearning authoring studio with a visual block edi
 2. **Flexible Completion & Grading [COMPLETED]:** `flexible-completion` added to the Export group (`ListChecks` icon). Completion rules based on slides viewed, assessments passed, or both. Minimum slide progress threshold. Pass/fail grade cutoff as a percentage. Weighted assessment categories for multi-component grading programmes. Rules travel with SCORM/xAPI export.
 3. **Multiple Output Formats [COMPLETED]:** `multiple-output-formats` added to the Export group (`Layers2` icon). SCORM 1.2 and 2004, xAPI (Tin Can), self-contained HTML with embed code, and shareable preview links. All generated from a single source course with no duplicates.
 
+### Phase 15: Assessments & Quizzes [COMPLETED]
+1. **Assessments & Quizzes [COMPLETED]:** `assessments-quizzes` added to the Assessments group (`ClipboardCheck` icon). Question types: multiple-choice/multi-response, fill-in-the-blank (with partial credit), matching, click-on-image, and scenario-based success meter. Smart attempt controls, pass score/grade cutoff configuration, and partial credit \u2014 all via block settings with no code. Session continuity preserves answers and scores across sessions. SCORM/xAPI-ready results reported to LMS automatically.
+
 ---

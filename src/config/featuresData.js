@@ -961,6 +961,48 @@ export const FEATURES = [
     ],
     cta: { label: "Start building", href: "/course" },
   },
+
+  // ── Responsive Authoring ──────────────────────────────────────────
+  {
+    slug: "responsive-authoring",
+    group: "authoring",
+    icon: "MonitorSmartphone",
+    title: "Responsive Authoring",
+    tagline: "Courses that look great on every device \u2014 without extra layout work.",
+    description:
+      "CourseForge automatically turns your courses into responsive experiences that look great on laptops, tablets, and phones. Every slide, image, video, and interaction adapts to the learner\u2019s screen so you don\u2019t have to think about breakpoints, device types, or mobile versions.",
+    howItWorks: [
+      {
+        step: "Block-based layout",
+        detail:
+          "Courses are built from content blocks instead of rigid pages, so designs naturally reflow on different screen sizes without any manual adjustment.",
+      },
+      {
+        step: "Smart media behaviour",
+        detail:
+          "Images, videos, and carousels resize gracefully, preserving readability and visual impact on small and large displays alike.",
+      },
+      {
+        step: "Consistent look and feel",
+        detail:
+          "Themes keep typography, colours, and spacing balanced across breakpoints, giving learners a polished experience regardless of device.",
+      },
+      {
+        step: "What you design is what learners see",
+        detail:
+          "The inline learner preview and SCORM player render identically \u2014 everything adapts automatically so you preview on one screen and know it looks right everywhere.",
+      },
+    ],
+    highlights: [
+      "Content blocks reflow naturally \u2014 no manual breakpoint or column tweaking",
+      "Images, videos, and carousels scale gracefully on any screen size",
+      "Typography and spacing stay balanced across desktop, tablet, and phone",
+      "SCORM player and inline preview render identically on all devices",
+      "No separate mobile course version needed \u2014 one build, all screens",
+      "Interactions, quizzes, and hotspots are touch-friendly on mobile",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

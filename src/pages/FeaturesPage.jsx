@@ -18,6 +18,7 @@ import {
   LayoutTemplate,
   Layers,
   MessageSquare,
+  MonitorSmartphone,
   Network,
   Package,
   Palette,
@@ -42,7 +43,7 @@ import { fadeInUp, staggerContainer, staggerItem } from "@/lib/animations";
 
 const ICONS = {
   Accessibility, Brush, Brain, Rocket, Users2, Network, Zap,
-  Layers, LayoutTemplate, LayoutGrid, Palette,
+  Layers, LayoutTemplate, LayoutGrid, Palette, MonitorSmartphone,
   HelpCircle, Type, ArrowLeftRight, Target, Kanban, CreditCard,
   Package, Globe,
   Users, MessageSquare,

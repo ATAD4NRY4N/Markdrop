@@ -1045,6 +1045,88 @@ export const FEATURES = [
     ],
     cta: { label: "Start building", href: "/course" },
   },
+
+  // ── Branding ───────────────────────────────────────────────────
+  {
+    slug: "custom-fonts",
+    group: "authoring",
+    icon: "WholeWord",
+    title: "Custom Fonts",
+    tagline: "Use the exact fonts your brand requires \u2014 Google Fonts or your own uploads.",
+    description:
+      "Typography is a key part of brand identity. CourseForge lets you import fonts from the Google Fonts library or upload your own font files, then apply custom typography to headings, body text, and UI elements across all your course content.",
+    howItWorks: [
+      {
+        step: "Choose from Google Fonts",
+        detail:
+          "Search and import from 1,500+ fonts in the Google Fonts library directly inside the theme editor \u2014 no manual URL entry required.",
+      },
+      {
+        step: "Upload your own font files",
+        detail:
+          "Upload WOFF, WOFF2, TTF, or OTF files for complete brand control when your typeface isn\u2019t available in any public library.",
+      },
+      {
+        step: "Set font pairing",
+        detail:
+          "Assign different fonts to headings, body text, and UI elements independently so your typographic hierarchy is intentional and on-brand.",
+      },
+      {
+        step: "Fonts travel with your export",
+        detail:
+          "Custom fonts are bundled into your SCORM export so learners see the correct typography in any LMS, even without internet access.",
+      },
+    ],
+    highlights: [
+      "1,500+ Google Fonts searchable and importable from inside the editor",
+      "Upload WOFF, WOFF2, TTF, and OTF font files for full brand control",
+      "Separate font settings for headings, body, captions, and UI labels",
+      "Font choices saved as part of your reusable course theme",
+      "Custom fonts bundled into SCORM export for offline LMS rendering",
+      "Live preview updates as you change fonts \u2014 no save-and-reload cycle",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
+  {
+    slug: "course-themes",
+    group: "authoring",
+    icon: "Swatch",
+    title: "Course Themes",
+    tagline: "Design once, apply everywhere \u2014 branded themes for every course.",
+    description:
+      "Build themes that capture your brand\u2019s visual identity and apply them to any course with one click. Colors, fonts, and styles all update together, giving you a consistent learner experience across your entire catalogue without rebuilding anything.",
+    howItWorks: [
+      {
+        step: "Define your color palette",
+        detail:
+          "Set primary, secondary, accent, and background colors to match your brand guidelines. Full color control over every UI element in the course.",
+      },
+      {
+        step: "Configure typography",
+        detail:
+          "Set fonts for headings, body text, and captions. Combine with CourseForge\u2019s Custom Fonts feature to use Google Fonts or your own uploads.",
+      },
+      {
+        step: "Save and reuse",
+        detail:
+          "Save your theme to the theme library and apply it to any course instantly. Switch themes on existing courses without rebuilding a single slide.",
+      },
+      {
+        step: "Build a theme library",
+        detail:
+          "Create multiple themes \u2014 one per client, brand, or project \u2014 and keep them all in your library ready to apply in one click.",
+      },
+    ],
+    highlights: [
+      "Full color control \u2014 primary, secondary, accent, background, and text colors",
+      "Typography settings for headings, body text, and captions",
+      "Save themes to a reusable library for consistent branding across courses",
+      "Quick-apply: switch themes on existing courses without rebuilding",
+      "Theme library supports multiple brands, clients, or projects",
+      "All theme settings \u2014 colors, fonts, spacing \u2014 update together on apply",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

@@ -26,10 +26,12 @@ import {
   Rocket,
   Search,
   ShieldCheck,
+  Swatches,
   Target,
   Type,
   Users,
   Users2,
+  WholeWord,
   Zap,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -45,6 +47,7 @@ import { fadeInUp, staggerContainer, staggerItem } from "@/lib/animations";
 const ICONS = {
   Accessibility, Brush, Brain, Rocket, Users2, Network, Zap,
   Layers, LayoutTemplate, LayoutGrid, Palette, MonitorSmartphone, Map,
+  WholeWord, Swatch: Swatches,
   HelpCircle, Type, ArrowLeftRight, Target, Kanban, CreditCard,
   Package, Globe,
   Users, MessageSquare,

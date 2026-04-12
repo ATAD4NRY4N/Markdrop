@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Clock, Copy, Edit2, FileText, GraduationCap,
-  LayoutTemplate, MoreVertical, Play, Plus, Search, Trash2,
-  Globe, Lock,
+  LayoutTemplate, MoreVertical, Play, Plus, Search, Tag, Trash2,
+  Globe, Lock, X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -23,6 +23,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { duplicateCourse } from "@/lib/storage";
+import { extractTagsFromModules } from "@/lib/tagUtils";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const formatDate = (dateStr) =>
@@ -30,7 +31,7 @@ const formatDate = (dateStr) =>
     month: "short", day: "numeric", year: "numeric",
   });
 
-const moduleCount = (course) => course.course_modules?.[0]?.count ?? 0;
+const moduleCount = (course) => course.course_modules?.length ?? 0;
 
 // ─── component ───────────────────────────────────────────────────────────────
 export default function CoursesDashboard() {
@@ -44,6 +45,11 @@ export default function CoursesDashboard() {
   const [search, setSearch]           = useState("");
   const [duplicating, setDuplicating] = useState(new Set());
 
+  const [tagFilter, setTagFilter]             = useState(null);
+  const [versionFilter, setVersionFilter]     = useState(null);
+  const [editingVersionId, setEditingVersionId] = useState(null);
+  const [versionInput, setVersionInput]       = useState("");
+
   // ── fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.id) return;
@@ -53,7 +59,7 @@ export default function CoursesDashboard() {
         setLoading(true);
         const { data, error: fetchError } = await supabase
           .from("courses")
-          .select("*, course_modules(count)")
+          .select("*, course_modules(id, blocks_json)")
           .eq("user_id", user.id)
           .order("updated_at", { ascending: false });
 
@@ -65,7 +71,31 @@ export default function CoursesDashboard() {
           }
           throw fetchError;
         }
-        setCourses(data || []);
+
+        const loaded = data || [];
+        setCourses(loaded);
+
+        // Auto-generate H1-based content tags for courses that have none yet
+        const needsTags = loaded.filter((c) => !c.tags?.length && c.course_modules?.length);
+        if (needsTags.length) {
+          const updates = needsTags.flatMap((c) => {
+            const derived = extractTagsFromModules(c.course_modules);
+            return derived.length ? [{ id: c.id, tags: derived }] : [];
+          });
+          if (updates.length) {
+            await Promise.all(
+              updates.map(({ id, tags }) =>
+                supabase.from("courses").update({ tags }).eq("id", id)
+              )
+            );
+            setCourses((prev) =>
+              prev.map((c) => {
+                const upd = updates.find((u) => u.id === c.id);
+                return upd ? { ...c, tags: upd.tags } : c;
+              })
+            );
+          }
+        }
       } catch (err) {
         console.error("Error fetching courses:", err);
         setError("Failed to load courses. Database tables may not exist.");
@@ -84,20 +114,41 @@ export default function CoursesDashboard() {
     published: courses.filter((c) => c.status === "published").length,
   }), [courses]);
 
+  const allTags = useMemo(() => {
+    const s = new Set();
+    courses.forEach((c) => (c.tags || []).forEach((t) => s.add(t)));
+    return [...s].sort();
+  }, [courses]);
+
+  const allVersionTags = useMemo(() => {
+    const s = new Set();
+    courses.forEach((c) => (c.version_tags || []).forEach((t) => s.add(t)));
+    return [...s].sort();
+  }, [courses]);
+
   const filteredCourses = useMemo(() => {
     let list = courses;
     if (filter !== "all") {
       list = list.filter((c) => (c.status ?? "draft") === filter);
     }
+    if (tagFilter) {
+      list = list.filter((c) => (c.tags || []).includes(tagFilter));
+    }
+    if (versionFilter) {
+      list = list.filter((c) => (c.version_tags || []).includes(versionFilter));
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
-        (c) => c.title.toLowerCase().includes(q) ||
-               (c.description || "").toLowerCase().includes(q),
+        (c) =>
+          c.title.toLowerCase().includes(q) ||
+          (c.description || "").toLowerCase().includes(q) ||
+          (c.tags || []).some((t) => t.toLowerCase().includes(q)) ||
+          (c.version_tags || []).some((t) => t.toLowerCase().includes(q)),
       );
     }
     return list;
-  }, [courses, filter, search]);
+  }, [courses, filter, tagFilter, versionFilter, search]);
 
   // ── actions ────────────────────────────────────────────────────────────────
   const handleCreateCourse = async () => {
@@ -140,7 +191,7 @@ export default function CoursesDashboard() {
       const copy = await duplicateCourse(course.id, user.id);
       const { data } = await supabase
         .from("courses")
-        .select("*, course_modules(count)")
+        .select("*, course_modules(id, blocks_json)")
         .eq("id", copy.id)
         .single();
       if (data) setCourses((prev) => [data, ...prev]);
@@ -160,7 +211,7 @@ export default function CoursesDashboard() {
         .from("courses")
         .update({ status: next })
         .eq("id", course.id)
-        .select("*, course_modules(count)")
+        .select("*, course_modules(id, blocks_json)")
         .single();
       if (upErr) throw upErr;
       setCourses((prev) => prev.map((c) => (c.id === course.id ? data : c)));
@@ -168,6 +219,41 @@ export default function CoursesDashboard() {
     } catch (err) {
       console.error(err);
       toast.error("Failed to update course status.");
+    }
+  };
+
+  // ── tag management ─────────────────────────────────────────────────────────
+  const handleAddVersionTag = async (courseId, tag) => {
+    const trimmed = tag.trim();
+    if (!trimmed) return;
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return;
+    const existing = course.version_tags || [];
+    if (existing.includes(trimmed)) return;
+    const updated = [...existing, trimmed];
+    try {
+      await supabase.from("courses").update({ version_tags: updated }).eq("id", courseId);
+      setCourses((prev) =>
+        prev.map((c) => (c.id === courseId ? { ...c, version_tags: updated } : c))
+      );
+    } catch (err) {
+      toast.error("Failed to save version tag.");
+      console.error(err);
+    }
+  };
+
+  const handleRemoveVersionTag = async (courseId, tag) => {
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return;
+    const updated = (course.version_tags || []).filter((t) => t !== tag);
+    try {
+      await supabase.from("courses").update({ version_tags: updated }).eq("id", courseId);
+      setCourses((prev) =>
+        prev.map((c) => (c.id === courseId ? { ...c, version_tags: updated } : c))
+      );
+    } catch (err) {
+      toast.error("Failed to remove version tag.");
+      console.error(err);
     }
   };
 
@@ -221,24 +307,80 @@ export default function CoursesDashboard() {
 
         {/* ── Filters + Search ── */}
         {!loading && courses.length > 0 && (
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <Tabs value={filter} onValueChange={setFilter} className="shrink-0">
-              <TabsList className="bg-neutral-800 border border-neutral-700">
-                <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-                <TabsTrigger value="draft">Drafts ({stats.draft})</TabsTrigger>
-                <TabsTrigger value="published">Published ({stats.published})</TabsTrigger>
-              </TabsList>
-            </Tabs>
+          <div className="mb-6 space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Tabs value={filter} onValueChange={setFilter} className="shrink-0">
+                <TabsList className="bg-neutral-800 border border-neutral-700">
+                  <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
+                  <TabsTrigger value="draft">Drafts ({stats.draft})</TabsTrigger>
+                  <TabsTrigger value="published">Published ({stats.published})</TabsTrigger>
+                </TabsList>
+              </Tabs>
 
-            <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500 pointer-events-none" />
-              <Input
-                placeholder="Search courses…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500 focus-visible:ring-neutral-600"
-              />
+              <div className="relative flex-1 min-w-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500 pointer-events-none" />
+                <Input
+                  placeholder="Search courses…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 bg-neutral-800 border-neutral-700 placeholder:text-neutral-500 focus-visible:ring-neutral-600"
+                />
+              </div>
             </div>
+
+            {/* ── Tag filter chips ── */}
+            {(allTags.length > 0 || allVersionTags.length > 0) && (
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
+                {allTags.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[11px] text-neutral-500 flex items-center gap-1 shrink-0">
+                      <Tag className="h-3 w-3" /> Content
+                    </span>
+                    {allTags.map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border transition-colors ${
+                          tagFilter === tag
+                            ? "bg-violet-600 border-violet-500 text-white"
+                            : "bg-neutral-800 border-neutral-700 text-neutral-300 hover:border-violet-500/60"
+                        }`}
+                      >
+                        {tag}
+                        {tagFilter === tag && <X className="h-2.5 w-2.5" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {allVersionTags.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[11px] text-neutral-500 shrink-0">Version</span>
+                    {allVersionTags.map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => setVersionFilter(versionFilter === tag ? null : tag)}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border transition-colors ${
+                          versionFilter === tag
+                            ? "bg-sky-600 border-sky-500 text-white"
+                            : "bg-neutral-800 border-neutral-700 text-neutral-300 hover:border-sky-500/60"
+                        }`}
+                      >
+                        {tag}
+                        {versionFilter === tag && <X className="h-2.5 w-2.5" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {(tagFilter || versionFilter) && (
+                  <button
+                    onClick={() => { setTagFilter(null); setVersionFilter(null); }}
+                    className="text-[11px] text-neutral-500 hover:text-neutral-300 transition-colors"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -265,7 +407,13 @@ export default function CoursesDashboard() {
               <>
                 <h3 className="text-lg font-medium">No matches</h3>
                 <p className="text-neutral-400 mt-1">
-                  {search ? `No courses match "${search}"` : `No ${filter} courses.`}
+                  {search
+                    ? `No courses match "${search}"`
+                    : tagFilter
+                    ? `No courses tagged "${tagFilter}"`
+                    : versionFilter
+                    ? `No courses with version tag "${versionFilter}"`
+                    : `No ${filter} courses.`}
                 </p>
               </>
             )}
@@ -367,6 +515,69 @@ export default function CoursesDashboard() {
                             <Clock className="h-3 w-3" />
                             {formatDate(course.updated_at)}
                           </span>
+                        </div>
+
+                        {/* Content tags — auto-derived from H1 headings */}
+                        {(course.tags || []).length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {(course.tags || []).map((tag) => (
+                              <span
+                                key={tag}
+                                className="px-1.5 py-0.5 rounded text-[10px] bg-violet-500/10 border border-violet-500/30 text-violet-300 cursor-default"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Version tags — manually set by the team */}
+                        <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                          {(course.version_tags || []).map((tag) => (
+                            <span
+                              key={tag}
+                              className="group inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] bg-sky-500/10 border border-sky-500/30 text-sky-300"
+                            >
+                              {tag}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveVersionTag(course.id, tag);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity ml-0.5"
+                              >
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </span>
+                          ))}
+                          {editingVersionId === course.id ? (
+                            <form
+                              className="flex items-center gap-1"
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                handleAddVersionTag(course.id, versionInput);
+                                setVersionInput("");
+                                setEditingVersionId(null);
+                              }}
+                            >
+                              <Input
+                                autoFocus
+                                placeholder="e.g. v3.0"
+                                value={versionInput}
+                                onChange={(e) => setVersionInput(e.target.value)}
+                                onBlur={() => { setEditingVersionId(null); setVersionInput(""); }}
+                                className="h-5 text-[10px] bg-neutral-900 border-neutral-600 px-1.5 w-20 rounded"
+                              />
+                            </form>
+                          ) : (
+                            <button
+                              onClick={() => setEditingVersionId(course.id)}
+                              className="text-[10px] text-neutral-600 hover:text-neutral-400 flex items-center gap-0.5 transition-colors"
+                            >
+                              <Plus className="h-2.5 w-2.5" />
+                              version tag
+                            </button>
+                          )}
                         </div>
                       </CardHeader>
 

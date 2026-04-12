@@ -62,6 +62,14 @@ export const FEATURE_GROUPS = [
       "CourseForge is built so your courses can reach every learner — including those who rely on assistive technologies. The player, blocks, and authoring tools align with WCAG inclusive-design principles from the ground up.",
     color: "teal",
   },
+  {
+    id: "localization",
+    icon: "Globe2",
+    title: "Localization",
+    description:
+      "Turn a single well-designed course into a complete multilingual learning experience. CourseForge gives you XLIFF workflows for working with translation teams, a localization panel for managing multiple language versions, and per-language SCORM exports that carry the correct metadata for any LMS.",
+    color: "indigo",
+  },
 ];
 
 // ── Feature catalogue ─────────────────────────────────────────────────────────
@@ -1126,6 +1134,168 @@ export const FEATURES = [
       "All theme settings \u2014 colors, fonts, spacing \u2014 update together on apply",
     ],
     cta: { label: "Start building", href: "/course" },
+  },
+
+  // ── Localization ───────────────────────────────────────────────
+  {
+    slug: "xliff-workflows",
+    group: "localization",
+    icon: "FileCode2",
+    title: "XLIFF Translation Workflows",
+    tagline: "Export content to industry-standard XLIFF for professional translation, then import back in one click.",
+    description:
+      "Send XLIFF files to your translation team or agency without any custom tooling. CourseForge exports all translatable course content in XLIFF 1.2, 2.0, or 2.1 format \u2014 headings, paragraphs, questions, feedback, and UI labels \u2014 and imports completed translations back instantly, preserving all rich text formatting through the round trip.",
+    howItWorks: [
+      {
+        step: "Export to XLIFF",
+        detail:
+          "Choose XLIFF 1.2, 2.0, or 2.1 and export all translatable content from your course in one file, ready to send to any professional translation team or agency.",
+      },
+      {
+        step: "Translate externally",
+        detail:
+          "Your translators work in their preferred CAT tools (SDL Trados, memoQ, Phrase, etc.) using the industry-standard XLIFF format they already know.",
+      },
+      {
+        step: "Import completed translations",
+        detail:
+          "When translations come back, import the completed XLIFF file and CourseForge applies every translated string to the correct block \u2014 no manual copy-paste needed.",
+      },
+      {
+        step: "Formatting preserved end-to-end",
+        detail:
+          "Bold, italic, links, and other inline rich-text markup survive the translation round trip intact, so your course looks right in every language.",
+      },
+    ],
+    highlights: [
+      "XLIFF 1.2, 2.0, and 2.1 export formats supported",
+      "All translatable content exported: headings, body, questions, feedback, and UI labels",
+      "One-click import applies every translated string to the correct block automatically",
+      "Rich text formatting (bold, italic, links) preserved through the full round trip",
+      "Compatible with SDL Trados, memoQ, Phrase, and other major CAT tools",
+      "Combine with the localization panel to manage all language versions in one place",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
+  {
+    slug: "content-localization",
+    group: "localization",
+    icon: "Globe2",
+    title: "Content Localization",
+    tagline: "One course, multiple languages \u2014 manage every locale from a single localization panel.",
+    description:
+      "CourseForge lets you translate not just interface labels, but the actual learning content \u2014 headings, paragraphs, questions, feedback, and more. Each language gets its own version of the course while sharing the same structure, navigation, and assessments. Manage all locales from one panel, use AI to generate first-pass drafts, and preview any locale as learners will see it.",
+    howItWorks: [
+      {
+        step: "Add locales",
+        detail:
+          "Create language entries (English, French, Spanish, Arabic, and more) for the same course from the localization panel. Each locale shares the base structure \u2014 only the text changes.",
+      },
+      {
+        step: "Translate block by block",
+        detail:
+          "Switch to any locale and translate the text inside your existing blocks. Layouts, media, and interactions stay in sync across all languages automatically.",
+      },
+      {
+        step: "Speed up with AI drafts",
+        detail:
+          "Use integrated AI translation assistance to generate first-pass translations you can then refine and approve, cutting the time needed before handing off to a human reviewer.",
+      },
+      {
+        step: "Preview in any locale",
+        detail:
+          "Switch locale in the course preview to see exactly how learners will experience the localized version \u2014 navigation, UI labels, and content all shown together.",
+      },
+    ],
+    highlights: [
+      "Unlimited locales per course \u2014 manage all languages from one panel",
+      "Block-by-block translation: layouts, media, and interactions stay aligned across locales",
+      "Set a default language while offering additional localized variants",
+      "AI-assisted first-pass translation drafts for faster turnaround",
+      "Switch locale in the preview to verify the full learner experience",
+      "Works alongside XLIFF workflows for agency or team translation handoffs",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
+  {
+    slug: "custom-labels",
+    group: "localization",
+    icon: "Tag",
+    title: "Custom Labels & Interface Text",
+    tagline: "Tailor every button, prompt, and message to match your tone of voice.",
+    description:
+      "The words learners see in a course \u2014 buttons, messages, and prompts \u2014 are part of the learning experience. CourseForge lets you rename key actions and adjust system messages so the interface fits your organisation\u2019s terminology, style, and tone of voice.",
+    howItWorks: [
+      {
+        step: "Rename key actions",
+        detail:
+          "Change labels like \u2018Next\u2019, \u2018Submit answer\u2019, or \u2018Finish\u2019 so they match your organisation\u2019s terminology and instructional style.",
+      },
+      {
+        step: "Align tone and clarity",
+        detail:
+          "Adjust system messages to be more formal, more friendly, or more instructional \u2014 whatever best serves your audience and brand.",
+      },
+      {
+        step: "Localise labels per language",
+        detail:
+          "Custom labels are scoped per locale, so your French learners see \u2018Suivant\u2019 while English learners see \u2018Next\u2019 \u2014 both customised to your voice.",
+      },
+      {
+        step: "Export with localised labels",
+        detail:
+          "Exported SCORM packages carry your custom labels for each locale so learners experience both content and UI in their preferred language.",
+      },
+    ],
+    highlights: [
+      "Rename navigation labels: Next, Previous, Submit, Finish, and more",
+      "Customise feedback messages, error prompts, and completion notices",
+      "Labels scoped per locale \u2014 each language version keeps its own custom text",
+      "Tone control: adjust formality to match your brand voice",
+      "Custom labels bundled into SCORM export for every locale",
+      "Changes visible immediately in the inline learner preview",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
+  {
+    slug: "localized-exports",
+    group: "localization",
+    icon: "PackageCheck",
+    title: "Exporting Localised Courses",
+    tagline: "Export the exact language version you need \u2014 one clean SCORM package per locale.",
+    description:
+      "Once your translations are in place, CourseForge makes it straightforward to export the right language version of your course as a standard SCORM package. Every export keeps the same slides, blocks, and assessments \u2014 changing only the labels and content language \u2014 and carries the correct language and text-direction metadata so LMSs display it correctly.",
+    howItWorks: [
+      {
+        step: "Pick your locale to export",
+        detail:
+          "Choose which language version to export \u2014 English, French, Arabic, and more \u2014 without duplicating the whole course or managing separate copies.",
+      },
+      {
+        step: "Same structure, different language",
+        detail:
+          "Every export keeps the same slides, blocks, and assessments. Only the text content and UI labels change to match the chosen locale.",
+      },
+      {
+        step: "Correct LMS metadata",
+        detail:
+          "Exported packages carry the right language and text-direction (`lang`, `dir`) HTML attributes so LMSs render them correctly \u2014 including full RTL support for Arabic and other RTL languages.",
+      },
+      {
+        step: "No duplicated authoring work",
+        detail:
+          "Build once, manage all translations in the localization panel, and generate as many per-language SCORM exports as you need from that single source.",
+      },
+    ],
+    highlights: [
+      "Per-locale SCORM export \u2014 pick the language version at export time",
+      "Identical course structure across all exports: same slides, blocks, assessments",
+      "Correct `lang` and `dir` HTML metadata for proper LMS rendering",
+      "Full RTL metadata included for Arabic, Hebrew, Persian, and other RTL locales",
+      "No duplicate course copies \u2014 one source, unlimited language exports",
+      "Works with XLIFF import to complete the full translation-to-export pipeline",
+    ],
+    cta: { label: "Export a course", href: "/course" },
   },
 ];
 

@@ -8,8 +8,10 @@ import {
   CheckCircle,
   CheckCircle2,
   CreditCard,
+  FileCode2,
   GitBranch,
   Globe,
+  Globe2,
   HelpCircle,
   Image,
   Kanban,
@@ -24,11 +26,13 @@ import {
   MonitorSmartphone,
   Network,
   Package,
+  PackageCheck,
   PaintBucket,
   Palette,
   Rocket,
   Search,
   ShieldCheck,
+  Tag,
   Target,
   Type,
   Users,
@@ -56,6 +60,7 @@ const ICONS = {
   GitBranch, CheckCircle2,
   LayoutDashboard, Search,
   ShieldCheck, ImageWithText: Image, Keyboard, Languages,
+  FileCode2, Globe2, Tag, PackageCheck,
 };
 
 function Icon({ name, className }) {
@@ -73,6 +78,7 @@ const GROUP_COLORS = {
   adaptive:      { bg: "bg-rose-100 dark:bg-rose-900/30",     text: "text-rose-600 dark:text-rose-400",     border: "border-rose-200 dark:border-rose-800",     divider: "bg-rose-500" },
   productivity:  { bg: "bg-slate-100 dark:bg-slate-800/50",   text: "text-slate-600 dark:text-slate-400",   border: "border-slate-200 dark:border-slate-700",   divider: "bg-slate-500" },
   accessibility: { bg: "bg-teal-100 dark:bg-teal-900/30",     text: "text-teal-600 dark:text-teal-400",     border: "border-teal-200 dark:border-teal-800",     divider: "bg-teal-500" },
+  localization:  { bg: "bg-indigo-100 dark:bg-indigo-900/30", text: "text-indigo-600 dark:text-indigo-400", border: "border-indigo-200 dark:border-indigo-800", divider: "bg-indigo-500" },
 };
 
 // ── 404 state ─────────────────────────────────────────────────────────────────

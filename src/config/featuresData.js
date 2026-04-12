@@ -1503,6 +1503,208 @@ export const FEATURES = [
     ],
     cta: { label: "Add an assessment", href: "/course" },
   },
+
+  // ── Block Authoring Detail ─────────────────────────────────────────
+  {
+    slug: "block-based-authoring",
+    group: "authoring",
+    icon: "LayoutPanelLeft",
+    title: "Block-Based Authoring",
+    tagline: "Build courses like stacking building blocks \u2014 drop, arrange, and rearrange at any time.",
+    description:
+      "CourseForge lets you build courses by dropping in text, media, interactions, and navigation elements exactly where you want them, then rearranging them at any time. You never have to fight a rigid template or layout system \u2014 duplicate slides, swap layouts, or introduce new interactions without rebuilding from the ground up.",
+    howItWorks: [
+      {
+        step: "Start from rich presets",
+        detail:
+          "Choose from presets like \u2018Image & Text\u2019, \u2018Flashcard Stack\u2019, \u2018Resources Grid\u2019, or \u2018Slide Intro\u2019 instead of building every screen from scratch. Presets give you a strong starting point you can immediately customise.",
+      },
+      {
+        step: "Drop and arrange blocks",
+        detail:
+          "Add text, media, interactive, assessment, and navigation blocks to any slide in any order. Drag to reorder, duplicate, or delete \u2014 everything is reversible.",
+      },
+      {
+        step: "Fine-tune visual details",
+        detail:
+          "Adjust width, alignment, spacing, animations, and button styles through simple settings panels instead of custom design work. No CSS required.",
+      },
+      {
+        step: "Control learning behaviour per block",
+        detail:
+          "Decide how each block contributes to progress: some complete on view, others on interaction or successful quiz completion, so tracking stays meaningful.",
+      },
+    ],
+    highlights: [
+      "Text & layout blocks: headings, paragraphs, two-column, accordions, tabs",
+      "Media blocks: images, video, audio, carousels, hotspot images, web simulations",
+      "Assessment blocks: MCQ, fill-in-the-blank, matching, click-on-image, success meter",
+      "Navigation blocks: slide intros, separators, nav buttons, resource lists",
+      "Rich presets for common screen types \u2014 no blank-canvas paralysis",
+      "Per-block learning behaviour: complete on view, interaction, or quiz pass",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
+  {
+    slug: "images",
+    group: "authoring",
+    icon: "Images",
+    title: "Images",
+    tagline: "Millions of professional photos, smart cropping, and AI-generated visuals \u2014 all in one block.",
+    description:
+      "CourseForge gives you flexible image block variants for every layout need, access to a searchable library of millions of royalty-free photos, smart cropping and alignment controls, and AI-assisted image generation \u2014 so every visual fits naturally into your course without separate design work.",
+    howItWorks: [
+      {
+        step: "Search the photo library",
+        detail:
+          "Find the perfect visual in seconds by searching millions of high-quality, royalty-free photos by keyword, then drop them straight into your course.",
+      },
+      {
+        step: "Choose your image variant",
+        detail:
+          "Pick the layout that fits your content: full-width hero, image-and-text, grid, or carousel. Each variant adapts to your theme and looks great on any screen size.",
+      },
+      {
+        step: "Adjust cropping and alignment",
+        detail:
+          "Control focus point, aspect ratio, alignment, and size so each image fits perfectly into its layout without distorting or cutting off important details.",
+      },
+      {
+        step: "Generate with AI",
+        detail:
+          "Generate on-brand images from a simple text prompt and fine-tune them with your course colours \u2014 useful when stock photos don\u2019t quite fit.",
+      },
+    ],
+    highlights: [
+      "Full-width hero, image-and-text, grid, and carousel image block variants",
+      "Searchable library of millions of royalty-free photos \u2014 drop in without leaving the editor",
+      "Smart cropping: control focus point, aspect ratio, and alignment",
+      "AI image generation from a text prompt, styled to your course theme",
+      "Upload your own images and reuse them across courses from the media library",
+      "All image variants are fully responsive on desktop, tablet, and mobile",
+    ],
+    cta: { label: "Add an image block", href: "/course" },
+  },
+  {
+    slug: "video",
+    group: "authoring",
+    icon: "Film",
+    title: "Video",
+    tagline: "Embed from YouTube and Vimeo, or host your own \u2014 video as a first-class learning block.",
+    description:
+      "CourseForge turns video into the centrepiece of a learning experience. Drop in a YouTube or Vimeo link to keep the viewing experience familiar, or upload your own files so everything lives in one place. The player aligns with your course theme so videos feel like part of your brand, not an external embed.",
+    howItWorks: [
+      {
+        step: "Embed from a platform",
+        detail:
+          "Paste a link from YouTube, Vimeo, or other major video hosts. The block handles the embed automatically and the player adapts to your course layout.",
+      },
+      {
+        step: "Upload your own video",
+        detail:
+          "Host training videos, product walkthroughs, or intro recordings directly in CourseForge so learners never leave your course to watch something.",
+      },
+      {
+        step: "Match your brand",
+        detail:
+          "Player accents inherit your active course theme so the video block looks like an intentional part of the design, not a third-party widget.",
+      },
+      {
+        step: "Set completion behaviour",
+        detail:
+          "Mark the video block as required viewing and configure whether progress counts on play, on reaching a certain percentage watched, or on full completion.",
+      },
+    ],
+    highlights: [
+      "Embed from YouTube, Vimeo, and other major video platforms",
+      "Upload and host your own video files directly in CourseForge",
+      "Branded player \u2014 accent colours follow your active course theme",
+      "Completion behaviour: count progress on play, percentage watched, or full view",
+      "Responsive player that looks great on desktop, tablet, and mobile",
+      "Videos stored in the media library and reusable across courses",
+    ],
+    cta: { label: "Add a video block", href: "/course" },
+  },
+  {
+    slug: "audio",
+    group: "authoring",
+    icon: "Headphones",
+    title: "Audio",
+    tagline: "Voice-over, podcasts, and narration \u2014 with a clean player that works everywhere.",
+    description:
+      "Add a rich layer of sound to your courses without making learners wrestle with clunky players. CourseForge\u2019s audio block gives learners a sleek bar with play, pause, seek, speed control, and optional transcript \u2014 tailored for narration, podcast-style explainers, or ambient background sound.",
+    howItWorks: [
+      {
+        step: "Upload or link your audio",
+        detail:
+          "Upload MP3 or WAV files directly, or link to an external audio source. Files go into your media library for reuse across any course.",
+      },
+      {
+        step: "Learners get a clean player",
+        detail:
+          "A sleek audio bar with clear play, pause, and seek controls works beautifully on desktop and mobile without taking up excessive screen space.",
+      },
+      {
+        step: "Enable speed and scrubbing",
+        detail:
+          "Let learners listen faster, replay key moments, or jump back and forth in small increments to review important content at their own pace.",
+      },
+      {
+        step: "Attach an optional transcript",
+        detail:
+          "Provide a transcript learners can open when they need to read along, scan for specific information, or access the content without sound.",
+      },
+    ],
+    highlights: [
+      "Upload MP3/WAV files or link external audio sources",
+      "Sleek, accessible audio bar with play, pause, and seek controls",
+      "Playback speed control and small-increment scrubbing",
+      "Optional collapsible transcript for accessibility and scanning",
+      "Themed player \u2014 accent colours follow your active course theme",
+      "Audio files stored in the media library and reusable across courses",
+    ],
+    cta: { label: "Add an audio block", href: "/course" },
+  },
+  {
+    slug: "documents-downloads",
+    group: "authoring",
+    icon: "FolderOpen",
+    title: "Documents & Downloads",
+    tagline: "Attach supporting materials to any slide \u2014 PDFs, worksheets, slides, and more.",
+    description:
+      "CourseForge lets you attach supporting materials directly to your courses without losing track of files. Group links, documents, and references into a dedicated Resources section on any slide, present them as a clean list or a card-style grid, and back everything with a central media library so files are uploaded once and reused everywhere.",
+    howItWorks: [
+      {
+        step: "Add a Resources block",
+        detail:
+          "Drop a Resources block onto any slide and add files, links, and references. Choose between a list layout for simplicity or a card grid for a more visual presentation.",
+      },
+      {
+        step: "Upload to the media library",
+        detail:
+          "Upload PDFs, Word documents, spreadsheets, or slide decks once and they\u2019re available to attach to any course or module \u2014 no re-uploading needed.",
+      },
+      {
+        step: "Add context with icons and descriptions",
+        detail:
+          "Each resource entry supports an icon, title, and short description so learners know exactly what they\u2019re downloading before they click.",
+      },
+      {
+        step: "Learners download or open inline",
+        detail:
+          "PDFs can open inline in the course for quick reading, or learners can download files directly to their device \u2014 your choice per resource.",
+      },
+    ],
+    highlights: [
+      "Resources block available on any slide \u2014 list or card-grid layout",
+      "Supports PDFs, Word docs, spreadsheets, slide decks, and external links",
+      "Media library: upload once, reuse across any course or module",
+      "Per-resource icon, title, and description for clear learner guidance",
+      "Inline preview or direct download \u2014 configurable per resource",
+      "Resource blocks styled by your active course theme",
+    ],
+    cta: { label: "Add a resources block", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

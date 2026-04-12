@@ -1705,6 +1705,370 @@ export const FEATURES = [
     ],
     cta: { label: "Add a resources block", href: "/course" },
   },
+
+  // ── Content Blocks ────────────────────────────────────────────────────────
+  {
+    slug: "table-block",
+    group: "authoring",
+    icon: "Table2",
+    title: "Table Block",
+    tagline: "Present structured data, comparisons, and schedules in clean, readable tables.",
+    description:
+      "The Table block brings full rich-text table editing into your course slides. Add rows and columns, apply cell colours, use bold, italic, and links inside cells, and choose from striped, compact, or bordered display options — all without leaving the editor. Tables render in both the course builder preview and every export format.",
+    howItWorks: [
+      {
+        step: "Insert a Table block",
+        detail:
+          "Drop a Table block onto any slide from the block palette. The block opens with a default grid you can immediately start editing.",
+      },
+      {
+        step: "Edit with the rich text toolbar",
+        detail:
+          "Add and remove rows and columns from the toolbar. Apply cell background and text colours, bold, italic, and links — the same rich editor you already know, extended with table support.",
+      },
+      {
+        step: "Resize and customise layout",
+        detail:
+          "Drag column borders to resize them. Switch between striped rows, compact mode, and bordered or borderless styles to match your course design.",
+      },
+      {
+        step: "Export anywhere",
+        detail:
+          "Tables render identically in the course builder preview, SCORM exports, and HTML exports. They also support content variables and entrance animations like every other block.",
+      },
+    ],
+    highlights: [
+      "Add and remove rows and columns from the inline toolbar",
+      "Cell background and text colours for visual emphasis",
+      "Rich text inside cells — bold, italic, links, and more",
+      "Resizable columns by dragging borders",
+      "Striped rows, compact mode, and bordered/borderless display options",
+      "Tables render in both SCORM and HTML exports with full fidelity",
+    ],
+    cta: { label: "Add a table block", href: "/course" },
+  },
+  {
+    slug: "pdf-viewer",
+    group: "authoring",
+    icon: "FileText",
+    title: "PDF Viewer Block",
+    tagline: "Embed PDF documents directly into slides — no external links, no file hunting.",
+    description:
+      "The PDF Viewer block lets you embed documents directly inside your courses so learners never have to leave the slide to access reference materials. Upload a PDF or paste a URL, add page navigation controls, and optionally let learners download the file — all in a responsive, high-DPI viewer that looks sharp on every screen.",
+    howItWorks: [
+      {
+        step: "Upload or link your PDF",
+        detail:
+          "Upload a PDF file directly into your media library or paste a URL to an externally hosted document. The viewer renders it automatically.",
+      },
+      {
+        step: "Add to any slide",
+        detail:
+          "Drop a PDF Viewer block onto any slide. The document appears inline with page-by-page navigation controls so learners browse without scrolling past the block.",
+      },
+      {
+        step: "Configure display settings",
+        detail:
+          "Toggle the page count indicator, enable or disable the download button, and set the viewer height to fit your slide layout.",
+      },
+      {
+        step: "Responsive and high-DPI",
+        detail:
+          "The viewer scales to any container width while preserving the document's aspect ratio. High-DPI rendering ensures sharp text and graphics on retina displays.",
+      },
+    ],
+    highlights: [
+      "Upload PDFs to the media library or link external URLs",
+      "Page-by-page navigation with intuitive previous/next controls",
+      "Optional download button for offline learner access",
+      "Responsive viewer — scales to container width, preserves aspect ratio",
+      "High-DPI rendering for sharp text on retina and 4K displays",
+      "Renders in both SCORM and HTML export formats",
+    ],
+    cta: { label: "Add a PDF viewer", href: "/course" },
+  },
+  {
+    slug: "web-simulation",
+    group: "authoring",
+    icon: "MonitorPlay",
+    title: "Web Simulation Block",
+    tagline: "Guide learners through software and interfaces step-by-step with interactive screenshots.",
+    description:
+      "The Web Simulation block transforms static screenshots into guided, clickable walkthroughs of websites and applications. Define hotspots for each step, add tooltips, write a welcome message, and let learners explore at their own pace — perfect for software training, product demos, and onboarding without live software access.",
+    howItWorks: [
+      {
+        step: "Add screenshots as simulation steps",
+        detail:
+          "Upload a screenshot for each step of the workflow. Steps can link linearly or branch to support non-linear exploration.",
+      },
+      {
+        step: "Define clickable hotspots",
+        detail:
+          "Draw interactive areas on each screenshot and assign tooltips that guide learners to the next step. Toggle hotspot visibility to show highlighted zones or keep them invisible with pointer hints.",
+      },
+      {
+        step: "Add welcome and completion messages",
+        detail:
+          "Write a rich HTML introduction and a completion message so learners know what to expect and get a sense of achievement when they finish.",
+      },
+      {
+        step: "Track progress in SCORM",
+        detail:
+          "Simulation state — which steps learners have completed — is persisted in SCORM suspend data and restored on resume so sessions carry over across LMS logins.",
+      },
+    ],
+    highlights: [
+      "Multi-step screenshot walkthroughs with unlimited steps",
+      "Clickable hotspots with custom tooltips guiding learners to the next step",
+      "Toggle hotspot visibility — highlighted zones or invisible pointer hints",
+      "Visual progress bar showing learner's journey through the simulation",
+      "Rich welcome and completion messages with custom HTML content",
+      "Full SCORM state persistence — simulation resumes where learners left off",
+    ],
+    cta: { label: "Try a simulation", href: "/course" },
+  },
+  {
+    slug: "time-requirements",
+    group: "authoring",
+    icon: "Timer",
+    title: "Time Requirements Block",
+    tagline: "Enforce minimum time-on-task without locking learners out — essential for compliance training.",
+    description:
+      "The Time Requirements block prevents learners from rushing through content by requiring a configurable minimum time on a slide before the block completes. Elapsed time is tracked per learner and persisted through SCORM suspend data so resuming a session picks up exactly where it left off — no re-counting from zero.",
+    howItWorks: [
+      {
+        step: "Add a Time Requirements block",
+        detail:
+          "Drop the block onto any compliance slide from the navigation and control section of the block palette.",
+      },
+      {
+        step: "Set the required duration",
+        detail:
+          "Configure the minimum time in minutes (or seconds for shorter gates). Learners must spend at least that long on the slide before the block marks complete.",
+      },
+      {
+        step: "Show optional progress feedback",
+        detail:
+          "Enable the progress display to show learners how much time has elapsed and how much remains — reducing frustration from waiting without feedback.",
+      },
+      {
+        step: "Resume-safe tracking",
+        detail:
+          "Elapsed time is stored in SCORM suspend data so learners who leave mid-session don't lose their accumulated time when they return.",
+      },
+    ],
+    highlights: [
+      "Configurable minimum time requirement in minutes or seconds",
+      "Optional elapsed/remaining progress display for learners",
+      "'Hide on completed' option removes the block after the time requirement is met",
+      "Attempt-based completion — once time is reached the block completes",
+      "Time tracked per learner and persisted via SCORM suspend data",
+      "Ideal for compliance training where time-on-task must be enforced",
+    ],
+    cta: { label: "Build a compliance course", href: "/course" },
+  },
+  {
+    slug: "course-sections",
+    group: "authoring",
+    icon: "FolderTree",
+    title: "Course Sections",
+    tagline: "Organise long courses into logical groups for authors and learners alike.",
+    description:
+      "Sections let you group related slides together into named, collapsible units inside the course editor. Whether you're building a multi-module training or a structured learning path, sections make it faster to navigate while authoring and give learners a clear, organised structure in the SCORM player.",
+    howItWorks: [
+      {
+        step: "Create a section",
+        detail:
+          "Click 'New Section' in the slides panel. Give it a title and icon from the section menu, then drag existing slides into it or add new ones directly.",
+      },
+      {
+        step: "Collapse and expand",
+        detail:
+          "Collapse sections you're not working on to keep the slide panel tidy. Expand to reveal the slides inside. Long courses become much easier to navigate in the editor.",
+      },
+      {
+        step: "Drag-and-drop organisation",
+        detail:
+          "Drag slides into, out of, and between sections with clear visual drop indicators. Mix standalone slides and sections freely in any order.",
+      },
+      {
+        step: "Learners see the same structure",
+        detail:
+          "Sections are fully supported in SCORM exports. Learners see the same organised structure in their LMS — grouped content with clear labels and hierarchy.",
+      },
+    ],
+    highlights: [
+      "Named, collapsible sections in the slide panel for clean course organisation",
+      "Customisable section title and icon from the section properties menu",
+      "Drag-and-drop: move slides into, out of, and between sections",
+      "Mix standalone slides and sections freely in any order",
+      "Sections fully supported in SCORM and HTML exports",
+      "Learners see the same organised structure in their LMS",
+    ],
+    cta: { label: "Structure a course", href: "/course" },
+  },
+  {
+    slug: "custom-css",
+    group: "authoring",
+    icon: "Code2",
+    title: "Custom CSS",
+    tagline: "Fine-tune your course's visual appearance with theme-level and course-level CSS.",
+    description:
+      "For when theme settings aren't enough, CourseForge gives you a built-in CSS editor at both the theme level and the course level. Add custom styles that apply across all your themed courses, then override at the course level for specific exceptions — without touching the shared theme.",
+    howItWorks: [
+      {
+        step: "Write theme-level CSS",
+        detail:
+          "Open Theme Customizer → Advanced → Custom CSS. Styles written here apply to every course using that theme, including previews and all export formats.",
+      },
+      {
+        step: "Override per course",
+        detail:
+          "Open Course Settings → Advanced → Course Custom CSS. This CSS is applied after your theme CSS and affects only the current course — the shared theme stays unchanged.",
+      },
+      {
+        step: "Edit with a full-featured editor",
+        detail:
+          "The built-in CSS editor includes syntax highlighting and an expanded dialog mode for more comfortable editing of longer stylesheets.",
+      },
+      {
+        step: "Styles travel with exports",
+        detail:
+          "Both theme CSS and course CSS are merged and injected into slide editor previews and all export outputs — SCORM, HTML, and share links.",
+      },
+    ],
+    highlights: [
+      "Theme-level Custom CSS in Theme Customizer → Advanced",
+      "Course-level CSS override in Course Settings → Advanced — doesn't affect the shared theme",
+      "Built-in CSS editor with syntax highlighting and expanded dialog mode",
+      "Theme CSS and course CSS merged automatically — duplicate segments deduplicated",
+      "CSS injected into slide editor previews and all export formats",
+      "Ideal for pixel-perfect brand alignment that theme settings alone can't achieve",
+    ],
+    cta: { label: "Customise a theme", href: "/course" },
+  },
+  {
+    slug: "ai-captions",
+    group: "authoring",
+    icon: "Mic2",
+    title: "AI Captions & Transcripts",
+    tagline: "Auto-generate captions and transcripts for video and audio blocks in seconds.",
+    description:
+      "CourseForge uses AI to automatically generate VTT caption files for video blocks and text transcripts for audio uploads. Review and edit cues in the built-in caption editor before publishing, or upload your own subtitle file when you prefer full manual control. Captions and transcripts improve accessibility, speed up localisation, and make it easier to reuse media across courses.",
+    howItWorks: [
+      {
+        step: "Generate captions or a transcript",
+        detail:
+          "Open any video or audio block and click 'Generate captions' or 'Generate transcript'. AI processes your media and produces a draft in seconds.",
+      },
+      {
+        step: "Edit in the built-in caption editor",
+        detail:
+          "Open Manage Captions to edit cue text, adjust timing, reorder entries, or delete unwanted segments — all without leaving the editor.",
+      },
+      {
+        step: "Upload your own file",
+        detail:
+          "Prefer your own subtitles? Upload a .vtt file to override or supplement the AI-generated captions at any time.",
+      },
+      {
+        step: "Captions ship with your export",
+        detail:
+          "Caption files and transcripts are bundled into SCORM and HTML exports so learners see them in any LMS or web delivery format.",
+      },
+    ],
+    highlights: [
+      "AI-generated VTT captions for video blocks — draft ready in seconds",
+      "AI-generated transcripts for audio uploads",
+      "Built-in caption editor: edit cue text, timing, and order before publishing",
+      "Upload your own .vtt subtitle file as an alternative to AI generation",
+      "Captions and transcripts bundled into SCORM and HTML exports",
+      "AI generation available on Pro plans; manual upload always free",
+    ],
+    cta: { label: "Add captions to a video", href: "/course" },
+  },
+
+  // ── AI & Productivity ─────────────────────────────────────────────────────
+  {
+    slug: "ai-course-generation",
+    group: "productivity",
+    icon: "Sparkles",
+    title: "AI Course Generation",
+    tagline: "Describe what you want to teach — AI builds the full course for you to refine.",
+    description:
+      "Creating a course from scratch just got dramatically faster. Tell CourseForge what you want to teach, upload reference documents, review learning objectives, approve the slide outline, and generate a complete course — all slide content, blocks, and assessments — ready to review and refine. Powered by Mistral AI for strong multilingual capability and content quality.",
+    howItWorks: [
+      {
+        step: "Describe your course",
+        detail:
+          "Enter a title and choose a course length — short, medium, or long. CourseForge uses this to calibrate the depth and scope of the generated content.",
+      },
+      {
+        step: "Upload reference documents",
+        detail:
+          "Attach up to 10 source files (PDFs, Word docs, slide decks). The AI grounds its content in your material so generated courses reflect your actual subject matter.",
+      },
+      {
+        step: "Review objectives and outline",
+        detail:
+          "Approve AI-suggested learning objectives (edit, reorder, or add), then review the proposed slide structure with block types before generation starts.",
+      },
+      {
+        step: "Generate and refine",
+        detail:
+          "Hit Generate and watch real-time progress as every slide and block is created. Once done, the course is fully editable — rearrange slides, tweak wording, swap blocks, or add your own media.",
+      },
+    ],
+    highlights: [
+      "Multi-step guided workflow: describe → upload docs → objectives → outline → generate",
+      "Upload up to 10 reference files — AI grounds content in your source material",
+      "Generates text, flashcards, accordions, tabs, callouts, MCQ assessments, and images",
+      "Real-time generation progress — see slides appear as they're created",
+      "Fully editable output — rearrange, rewrite, swap blocks, or add media after generation",
+      "Powered by Mistral AI with strong multilingual capabilities",
+    ],
+    cta: { label: "Generate a course", href: "/course" },
+  },
+  {
+    slug: "learner-tracking",
+    group: "productivity",
+    icon: "BarChart2",
+    title: "Learner Progress Tracking",
+    tagline: "Track who's learning and how far they've got — no LMS required.",
+    description:
+      "CourseForge can capture real learner progress when you distribute a course via public link or embedded iframe — without a traditional LMS. An optional email prompt identifies learners, a built-in KPI dashboard shows sessions, scores, progress, and time spent, and a learner table lets you search, sort, and export data to CSV or Excel.",
+    howItWorks: [
+      {
+        step: "Publish with tracking enabled",
+        detail:
+          "When publishing via Public Link or Embed, toggle 'Track Progress'. CourseForge immediately starts capturing session data for every learner who opens the link.",
+      },
+      {
+        step: "Optionally identify learners",
+        detail:
+          "Enable the email prompt to ask learners for their address before starting. This ties progress data to a named individual rather than an anonymous session.",
+      },
+      {
+        step: "Review your KPI dashboard",
+        detail:
+          "Head to the Track tab to see Total Sessions, Unique Learners, Average Score, Average Progress, Avg Time per Session, Total Time Spent, and Completion Rate — all in one view.",
+      },
+      {
+        step: "Export learner data",
+        detail:
+          "The learner table supports search, sort, and one-click export to CSV or Excel — useful for compliance reporting, manager dashboards, or feeding data into other tools.",
+      },
+    ],
+    highlights: [
+      "Tracks learner progress from public links and iFrame embeds — no LMS needed",
+      "KPIs: Total Sessions, Unique Learners, Average Score, Completion Rate, and more",
+      "Charts: Sessions Over Time, Active Learners, Average Progress, Average Score",
+      "Optional email prompt to identify learners with their consent",
+      "Learner table with search, sort, and CSV/Excel export",
+      "Privacy-first: email collection is opt-in and requires your consent notice",
+    ],
+    cta: { label: "Publish and track", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

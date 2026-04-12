@@ -1297,6 +1297,48 @@ export const FEATURES = [
     ],
     cta: { label: "Export a course", href: "/course" },
   },
+
+  // ── Course Review ──────────────────────────────────────────────
+  {
+    slug: "course-review",
+    group: "collaboration",
+    icon: "MessageCircleMore",
+    title: "Course Review",
+    tagline: "Review and sign-off built into the authoring workspace \u2014 no exports, no email chains.",
+    description:
+      "CourseForge makes review and sign-off a built-in part of authoring, not an afterthought. Invite teammates and stakeholders into the same workspace so they can see the latest version of a course, leave structured feedback on any slide or block, and help get it ready for release \u2014 all without leaving the platform.",
+    howItWorks: [
+      {
+        step: "Invite reviewers via email",
+        detail:
+          "Share access with subject-matter experts and stakeholders via email invitations. Reviewers get a realistic learner view so they can check copy, flow, and interactions before launch.",
+      },
+      {
+        step: "Comment on slides and blocks",
+        detail:
+          "Add comments on an entire slide or tie them to a specific block \u2014 a quiz question, an image, a heading. Threaded conversations keep replies and resolutions together so nothing gets lost.",
+      },
+      {
+        step: "Manage the review cycle",
+        detail:
+          "Use statuses (open, in progress, resolved), priorities, and filters to stay on top of feedback across complex courses with multiple stakeholders. Search by text or author to find any discussion instantly.",
+      },
+      {
+        step: "Edit, re-preview, and sign off",
+        detail:
+          "Make edits in place and re-preview instantly until everyone is satisfied. Publishing becomes a confident last step, not a gamble.",
+      },
+    ],
+    highlights: [
+      "Email invitations for subject-matter experts and stakeholders",
+      "Collaboration roles: Course Owner, Editor, and Reviewer",
+      "Slide-level and block-level comments with threaded replies",
+      "Comment statuses (open, in progress, resolved) and priority flags",
+      "Filter and search comments by text or author across the whole course",
+      "Realistic learner preview for reviewers \u2014 including navigation and assessments",
+    ],
+    cta: { label: "Invite your team", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

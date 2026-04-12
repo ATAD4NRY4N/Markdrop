@@ -81,4 +81,7 @@ Build a modern, full-featured eLearning authoring studio with a visual block edi
 3. **Custom Labels & Interface Text [COMPLETED]:** `custom-labels` in the Localization group (`Tag` icon). Rename navigation labels (Next, Previous, Submit, Finish) and system messages to match brand voice. Labels scoped per locale so each language version carries its own custom text. Changes visible immediately in the inline preview and bundled into SCORM export.
 4. **Exporting Localised Courses [COMPLETED]:** `localized-exports` in the Localization group (`PackageCheck` icon). Per-locale SCORM export — choose the language at export time without duplicating the course. Same slides, blocks, and assessments in every export; only labels and content text change. Correct `lang` and `dir` HTML metadata for proper LMS rendering, including full RTL support.
 
+### Phase 13: Course Review [COMPLETED]
+1. **Course Review [COMPLETED]:** `course-review` added to the Collaboration group (`MessageCircleMore` icon). Email invitations for stakeholders and SMEs. Three collaboration roles: Course Owner, Editor, Reviewer. Slide-level and block-level threaded comments with statuses (open, in progress, resolved) and priority flags. Filter and search comments by text or author. Reviewers see a realistic learner preview including navigation and assessments. Edits can be made in place and re-previewed instantly before sign-off.
+
 ---

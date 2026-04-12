@@ -20,6 +20,7 @@ import {
   LayoutTemplate,
   Layers,
   Map,
+  MessageCircleMore,
   MessageSquare,
   MonitorSmartphone,
   Network,
@@ -59,6 +60,7 @@ const ICONS = {
   LayoutDashboard, Search,
   ShieldCheck, ImageWithText: Image, Keyboard, Languages,
   FileCode2, Globe2, Tag, PackageCheck,
+  MessageCircleMore,
 };
 
 function Icon({ name, className }) {

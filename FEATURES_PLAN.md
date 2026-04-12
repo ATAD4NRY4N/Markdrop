@@ -84,4 +84,9 @@ Build a modern, full-featured eLearning authoring studio with a visual block edi
 ### Phase 13: Course Review [COMPLETED]
 1. **Course Review [COMPLETED]:** `course-review` added to the Collaboration group (`MessageCircleMore` icon). Email invitations for stakeholders and SMEs. Three collaboration roles: Course Owner, Editor, Reviewer. Slide-level and block-level threaded comments with statuses (open, in progress, resolved) and priority flags. Filter and search comments by text or author. Reviewers see a realistic learner preview including navigation and assessments. Edits can be made in place and re-previewed instantly before sign-off.
 
+### Phase 14: Publishing & Export [COMPLETED]
+1. **Publishing & Export [COMPLETED]:** `publishing-export` added to the Export group (`SendHorizonal` icon). Overview feature covering all export channels: SCORM 1.2/2004, xAPI, HTML with embed code, and shareable preview links. All formats from one source course. Custom fonts, media, and RTL metadata bundled into every export.
+2. **Flexible Completion & Grading [COMPLETED]:** `flexible-completion` added to the Export group (`ListChecks` icon). Completion rules based on slides viewed, assessments passed, or both. Minimum slide progress threshold. Pass/fail grade cutoff as a percentage. Weighted assessment categories for multi-component grading programmes. Rules travel with SCORM/xAPI export.
+3. **Multiple Output Formats [COMPLETED]:** `multiple-output-formats` added to the Export group (`Layers2` icon). SCORM 1.2 and 2004, xAPI (Tin Can), self-contained HTML with embed code, and shareable preview links. All generated from a single source course with no duplicates.
+
 ---

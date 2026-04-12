@@ -1339,6 +1339,128 @@ export const FEATURES = [
     ],
     cta: { label: "Invite your team", href: "/course" },
   },
+
+  // ── Publishing & Export ──────────────────────────────────────────
+  {
+    slug: "publishing-export",
+    group: "export",
+    icon: "SendHorizonal",
+    title: "Publishing & Export",
+    tagline: "Export to SCORM, HTML, xAPI, or a share link \u2014 one click to publish anywhere.",
+    description:
+      "CourseForge gives you the flexibility to deliver courses through any channel. Export SCORM 1.2 or 2004 packages for any LMS, generate HTML packages for web hosting, produce xAPI packages for Learning Record Stores, or generate a shareable preview link for instant stakeholder review \u2014 all from the same course, with no rebuilding.",
+    howItWorks: [
+      {
+        step: "Choose your output format",
+        detail:
+          "Pick SCORM 1.2, SCORM 2004, xAPI, or HTML at export time. Each format is generated from the same source course so you never need to build separate versions.",
+      },
+      {
+        step: "Export for your LMS",
+        detail:
+          "Download a SCORM-compliant ZIP file and upload it to any LMS \u2014 Moodle, Canvas, Cornerstone, Docebo, SAP SuccessFactors, and more. Completion and grade data are reported back automatically.",
+      },
+      {
+        step: "Publish to the web",
+        detail:
+          "Generate a self-contained HTML package for hosting on your own server, intranet, or CDN. Includes an embed code so any page can host the course in an iframe.",
+      },
+      {
+        step: "Share a preview link",
+        detail:
+          "Generate a shareable link for stakeholder review in seconds. No LMS, no login required \u2014 reviewers open the link and see the course exactly as learners will.",
+      },
+    ],
+    highlights: [
+      "SCORM 1.2 and SCORM 2004 export compatible with any LMS",
+      "xAPI export for Learning Record Stores and richer activity tracking",
+      "Self-contained HTML package with embed code for web hosting",
+      "Shareable preview link for stakeholder review \u2014 no login needed",
+      "All formats generated from the same source course \u2014 no rebuilding",
+      "Custom fonts, media, and RTL metadata bundled into every export",
+    ],
+    cta: { label: "Export a course", href: "/course" },
+  },
+  {
+    slug: "flexible-completion",
+    group: "export",
+    icon: "ListChecks",
+    title: "Flexible Completion & Grading",
+    tagline: "Define exactly what \u2018course complete\u2019 means for your organisation.",
+    description:
+      "Every organisation measures success differently. CourseForge lets you configure completion rules, grade cutoffs, and advanced grading policies so pass/fail decisions align with your standards \u2014 whether that\u2019s finishing a set of slides, passing a quiz, or meeting a weighted grade across multiple assessment categories.",
+    howItWorks: [
+      {
+        step: "Set your completion rule",
+        detail:
+          "Define completion based on slides viewed, assessments passed, or both together. Mix and match criteria to fit your instructional design.",
+      },
+      {
+        step: "Configure slide progress thresholds",
+        detail:
+          "Set a minimum percentage of slides that must be visited before the course counts as complete \u2014 useful for compliance content where full coverage matters.",
+      },
+      {
+        step: "Define grade cutoffs",
+        detail:
+          "Configure pass/fail grade cutoffs with an intuitive percentage scale so learner outcomes align with your organisation\u2019s policies.",
+      },
+      {
+        step: "Apply advanced grading policies",
+        detail:
+          "Use weighted assessment categories \u2014 quizzes, assignments, final exams \u2014 for sophisticated grading programmes that reflect the relative importance of each assessment type.",
+      },
+    ],
+    highlights: [
+      "Completion rules: slides viewed, assessments passed, or both combined",
+      "Minimum slide progress threshold for compliance-style completion",
+      "Pass/fail grade cutoff configured as a percentage",
+      "Weighted assessment categories for multi-component grading",
+      "Completion and grade data reported to LMS via SCORM or xAPI",
+      "Rules set per course so different programmes can have different standards",
+    ],
+    cta: { label: "Configure your course", href: "/course" },
+  },
+  {
+    slug: "multiple-output-formats",
+    group: "export",
+    icon: "Layers2",
+    title: "Multiple Output Formats",
+    tagline: "SCORM, xAPI, HTML, or a share link \u2014 one course, every delivery channel.",
+    description:
+      "Whether you need SCORM for your LMS, HTML for your website, xAPI for a Learning Record Store, or a shareable link for quick review \u2014 CourseForge has you covered. Every format is generated from the same source course so you always have a consistent, up-to-date version wherever learners access it.",
+    howItWorks: [
+      {
+        step: "SCORM export",
+        detail:
+          "Export SCORM 1.2 or 2004 packages compatible with any LMS. Completion, score, and progress data are reported back automatically through the standard SCORM runtime.",
+      },
+      {
+        step: "Web publishing",
+        detail:
+          "Generate a self-contained HTML package for self-hosting, or use the embed code to drop the course into any web page or intranet portal.",
+      },
+      {
+        step: "xAPI export",
+        detail:
+          "Export xAPI (Tin Can) packages for Learning Record Stores that need richer learner activity tracking beyond what SCORM supports.",
+      },
+      {
+        step: "Share links",
+        detail:
+          "Generate a shareable preview link for stakeholder review or informal distribution. Recipients click the link and experience the course as a learner \u2014 no account required.",
+      },
+    ],
+    highlights: [
+      "SCORM 1.2 and SCORM 2004 \u2014 compatible with all major LMSs",
+      "xAPI (Tin Can) export for Learning Record Stores",
+      "Self-contained HTML package with embed code for web hosting",
+      "Shareable preview links for review or informal distribution",
+      "All formats generated from the same source \u2014 no duplicate courses",
+      "Custom completion rules and grade settings travel with every export",
+    ],
+    cta: { label: "Export a course", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

@@ -19,6 +19,8 @@ import {
   LayoutGrid,
   LayoutTemplate,
   Layers,
+  Layers2,
+  ListChecks,
   Map,
   MessageCircleMore,
   MessageSquare,
@@ -30,6 +32,7 @@ import {
   Palette,
   Rocket,
   Search,
+  SendHorizonal,
   ShieldCheck,
   Tag,
   Target,
@@ -61,6 +64,7 @@ const ICONS = {
   ShieldCheck, ImageWithText: Image, Keyboard, Languages,
   FileCode2, Globe2, Tag, PackageCheck,
   MessageCircleMore,
+  SendHorizonal, ListChecks, Layers2,
 };
 
 function Icon({ name, className }) {

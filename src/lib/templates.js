@@ -71,6 +71,7 @@ export async function createTemplate(template) {
         thumbnail: template.thumbnail,
         images: template.images || [],
         tags: template.tags || [],
+        user_id: template.user_id,
       })
       .select()
       .single();

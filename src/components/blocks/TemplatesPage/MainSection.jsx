@@ -184,6 +184,7 @@ export default function MainSection({ onTemplatesChange }) {
         content: "[]",
         thumbnail: templateImages[0] || null,
         tags: [],
+        user_id: user.id,
       };
 
       if (templateImages.length > 0) {

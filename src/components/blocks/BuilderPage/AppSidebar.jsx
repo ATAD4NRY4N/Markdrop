@@ -26,6 +26,7 @@ import {
   Layers,
   Link2,
   ListChecks,
+  Lock,
   MessageSquareCode,
   Minus,
   Network,
@@ -105,7 +106,7 @@ function DraggableItem({ id, title, icon: Icon, isCollapsed, isMobile, onDoubleC
   return itemContent;
 }
 
-export default function AppSidebar({ onBlockAdd, presentationMode = false, ...props }) {
+export default function AppSidebar({ onBlockAdd, presentationMode = false, readonlyStructure = false, ...props }) {
   const { setNodeRef } = useDroppable({ id: "sidebar" });
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
@@ -507,6 +508,19 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
 
       <SidebarContent>
         <ScrollArea className="h-full">
+          {readonlyStructure ? (
+            <div className="flex flex-col items-center justify-center gap-2 px-4 py-8 text-center">
+              <Lock className="h-6 w-6 text-muted-foreground/50" />
+              {showFullContent && (
+                <>
+                  <p className="text-xs font-medium text-muted-foreground">Structure locked</p>
+                  <p className="text-[11px] text-muted-foreground/60 leading-relaxed">
+                    This course uses a template. Block structure is fixed — you can only edit content.
+                  </p>
+                </>
+              )}
+            </div>
+          ) : (
           <TooltipProvider>
             <div className="space-y-4 py-2">
               {Object.entries(data).map(([section, items], i, arr) => (
@@ -538,9 +552,10 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, ...pr
               ))}
             </div>
           </TooltipProvider>
+          )}
 
           {/* Slide Templates section */}
-          {showFullContent && (
+          {showFullContent && !readonlyStructure && (
             <div className="mt-2 border-t pt-3 pb-2">
               <div className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">
                 Slide Templates

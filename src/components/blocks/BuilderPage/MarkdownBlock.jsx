@@ -163,6 +163,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
   onPasteAfter,
   slideNumber,
   totalSlides,
+  readonlyStructure = false,
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: block.id,
@@ -272,28 +273,32 @@ const MarkdownBlock = memo(function MarkdownBlock({
   if (block.type === "slide") {
     return (
       <div ref={setNodeRef} style={style} className="relative group">
-        <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 md:h-7 md:w-7 cursor-grab active:cursor-grabbing touch-manipulation"
-            {...attributes}
-            {...listeners}
-            style={{ touchAction: "none" }}
-          >
-            <GripVertical className="h-5 w-5 md:h-4 md:w-4" />
-          </Button>
-        </div>
-        <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 md:h-7 md:w-7 text-destructive hover:text-destructive touch-manipulation"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
-          </Button>
-        </div>
+        {!readonlyStructure && (
+          <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 md:h-7 md:w-7 cursor-grab active:cursor-grabbing touch-manipulation"
+              {...attributes}
+              {...listeners}
+              style={{ touchAction: "none" }}
+            >
+              <GripVertical className="h-5 w-5 md:h-4 md:w-4" />
+            </Button>
+          </div>
+        )}
+        {!readonlyStructure && (
+          <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 md:h-7 md:w-7 text-destructive hover:text-destructive touch-manipulation"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
+            </Button>
+          </div>
+        )}
         <div className="w-full">{renderBlock()}</div>
       </div>
     );
@@ -307,18 +312,20 @@ const MarkdownBlock = memo(function MarkdownBlock({
         className="group relative rounded-lg border border-transparent hover:border-muted-foreground/20 transition-all p-3 touch-manipulation"
       >
         {/* Controls - always visible on mobile, hover on desktop */}
-        <div className="absolute -left-8 top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 md:h-7 md:w-7 cursor-grab active:cursor-grabbing touch-manipulation"
-            {...attributes}
-            {...listeners}
-            style={{ touchAction: "none" }}
-          >
-            <GripVertical className="h-5 w-5 md:h-4 md:w-4" />
-          </Button>
-        </div>
+        {!readonlyStructure && (
+          <div className="absolute -left-8 top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 md:h-7 md:w-7 cursor-grab active:cursor-grabbing touch-manipulation"
+              {...attributes}
+              {...listeners}
+              style={{ touchAction: "none" }}
+            >
+              <GripVertical className="h-5 w-5 md:h-4 md:w-4" />
+            </Button>
+          </div>
+        )}
 
         <div className="absolute -right-8 top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-1">
           {!NO_ANIMATION_TYPES.has(block.type) && (
@@ -346,14 +353,16 @@ const MarkdownBlock = memo(function MarkdownBlock({
               <Clipboard className="h-4 w-4 md:h-3.5 md:w-3.5" />
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 md:h-7 md:w-7 text-destructive hover:text-destructive touch-manipulation"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
-          </Button>
+          {!readonlyStructure && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 md:h-7 md:w-7 text-destructive hover:text-destructive touch-manipulation"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-5 w-5 md:h-4 md:w-4" />
+            </Button>
+          )}
         </div>
 
         {/* Block content */}

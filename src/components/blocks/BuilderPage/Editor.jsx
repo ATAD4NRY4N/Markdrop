@@ -11,6 +11,7 @@ const Editor = memo(function Editor({
   onBlockCopy,
   onPasteAfter,
   focusBlockId,
+  readonlyStructure = false,
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: "editor-dropzone" });
   const scrollRef = useRef(null);
@@ -59,17 +60,21 @@ const Editor = memo(function Editor({
       ) : (
         <div ref={scrollRef} className="h-full overflow-y-auto overflow-x-hidden">
           <div className="p-2 sm:p-4">
-            <SortableContext items={blockIds} strategy={verticalListSortingStrategy}>
+            <SortableContext
+              items={readonlyStructure ? [] : blockIds}
+              strategy={verticalListSortingStrategy}
+            >
               <div className="space-y-3">
                 {blocks.map((block) => (
                   <div key={block.id} data-block-id={block.id}>
                     <MarkdownBlock
                       block={block}
                       onUpdate={onBlockUpdate}
-                      onDelete={onBlockDelete}
-                      onBlockAdd={onBlockAdd}
+                      onDelete={readonlyStructure ? undefined : onBlockDelete}
+                      onBlockAdd={readonlyStructure ? undefined : onBlockAdd}
                       onCopy={onBlockCopy}
-                      onPasteAfter={onPasteAfter}
+                      onPasteAfter={readonlyStructure ? undefined : onPasteAfter}
+                      readonlyStructure={readonlyStructure}
                       slideNumber={slideMetadata[block.id]?.slideNumber}
                       totalSlides={slideMetadata[block.id]?.totalSlides}
                     />
@@ -77,7 +82,7 @@ const Editor = memo(function Editor({
                 ))}
                 {/* Extended drop zone at the bottom */}
                 <div className="h-32 w-full">
-                  {isOver && (
+                  {isOver && !readonlyStructure && (
                     <div className="h-16 border-2 border-dashed border-primary rounded-lg bg-muted/30 flex items-center justify-center">
                       <p className="text-sm text-muted-foreground">Drop here</p>
                     </div>

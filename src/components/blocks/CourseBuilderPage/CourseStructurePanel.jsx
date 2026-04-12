@@ -22,6 +22,7 @@ import {
   ChevronRight,
   FolderPlus,
   GripVertical,
+  Lock,
   MoreHorizontal,
   Plus,
   Trash2,
@@ -67,6 +68,7 @@ function SortableModuleItem({
   onAssignSection,
   onCopyModuleBlocks,
   onPasteIntoModule,
+  readonlyStructure = false,
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: module.id,
@@ -116,9 +118,8 @@ function SortableModuleItem({
         variant="ghost"
         size="icon"
         className="h-6 w-6 shrink-0 cursor-grab active:cursor-grabbing opacity-30 group-hover:opacity-60"
-        {...attributes}
-        {...listeners}
-        style={{ touchAction: "none" }}
+        {...(readonlyStructure ? {} : { ...attributes, ...listeners })}
+        style={{ touchAction: "none", visibility: readonlyStructure ? "hidden" : undefined }}
         onClick={(e) => e.stopPropagation()}
       >
         <GripVertical className="h-3.5 w-3.5" />
@@ -174,15 +175,17 @@ function SortableModuleItem({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              setEditing(true);
-            }}
-          >
-            Rename
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          {!readonlyStructure && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditing(true);
+              }}
+            >
+              Rename
+            </DropdownMenuItem>
+          )}
+          {!readonlyStructure && <DropdownMenuSeparator />}
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
@@ -229,15 +232,17 @@ function SortableModuleItem({
             </>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(module.id);
-            }}
-          >
-            Delete
-          </DropdownMenuItem>
+          {!readonlyStructure && (
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(module.id);
+              }}
+            >
+              Delete
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -308,6 +313,7 @@ function CollapsibleSection({
   onAssignSection,
   onCopyModuleBlocks,
   onPasteIntoModule,
+  readonlyStructure = false,
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -403,6 +409,7 @@ function CollapsibleSection({
                 onAssignSection={onAssignSection}
                 onCopyModuleBlocks={onCopyModuleBlocks}
                 onPasteIntoModule={onPasteIntoModule}
+                readonlyStructure={readonlyStructure}
               />
             ))}
           </SortableContext>
@@ -431,6 +438,8 @@ export default function CourseStructurePanel({ className }) {
     persistSections,
     pasteBlocksIntoModule,
   } = useCourse();
+
+  const isTemplateLocked = !!course?.template_id;
 
   const handleCopyModuleBlocks = async (module) => {
     const blocks = (() => {
@@ -484,6 +493,7 @@ export default function CourseStructurePanel({ className }) {
 
   const handleDragEnd = ({ active, over }) => {
     setDraggedId(null);
+    if (isTemplateLocked) return;
     if (!over || active.id === over.id) return;
 
     const activeId = active.id;
@@ -572,9 +582,13 @@ export default function CourseStructurePanel({ className }) {
       <div className="flex items-center gap-2 px-3 py-3 border-b shrink-0">
         <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
         <span className="text-sm font-medium truncate flex-1">{course?.title || "Course"}</span>
-        <span className="text-xs text-muted-foreground shrink-0">
-          {modules.length} mod{modules.length !== 1 ? "s" : ""}
-        </span>
+        {isTemplateLocked ? (
+          <Lock className="h-3.5 w-3.5 text-amber-500 shrink-0" title="Structure locked by template" />
+        ) : (
+          <span className="text-xs text-muted-foreground shrink-0">
+            {modules.length} mod{modules.length !== 1 ? "s" : ""}
+          </span>
+        )}
       </div>
 
       <ScrollArea className="flex-1">
@@ -605,6 +619,7 @@ export default function CourseStructurePanel({ className }) {
                     onAssignSection={assignModuleToSection}
                     onCopyModuleBlocks={handleCopyModuleBlocks}
                     onPasteIntoModule={handlePasteIntoModule}
+                    readonlyStructure={isTemplateLocked}
                   />
                 ))}
               </SortableContext>
@@ -631,6 +646,7 @@ export default function CourseStructurePanel({ className }) {
                   onAssignSection={assignModuleToSection}
                   onCopyModuleBlocks={handleCopyModuleBlocks}
                   onPasteIntoModule={handlePasteIntoModule}
+                  readonlyStructure={isTemplateLocked}
                 />
               );
             })}
@@ -659,7 +675,7 @@ export default function CourseStructurePanel({ className }) {
             if (course?.id) addModule();
             else console.warn("Course not loaded yet");
           }}
-          disabled={!course?.id}
+          disabled={!course?.id || isTemplateLocked}
         >
           <Plus className="h-3.5 w-3.5" />
           Add Module
@@ -672,7 +688,7 @@ export default function CourseStructurePanel({ className }) {
             if (course?.id) addSection();
             else console.warn("Course not loaded yet");
           }}
-          disabled={!course?.id}
+          disabled={!course?.id || isTemplateLocked}
         >
           <FolderPlus className="h-3.5 w-3.5" />
           Add Section

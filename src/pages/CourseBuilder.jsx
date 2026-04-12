@@ -19,6 +19,7 @@ import {
   Globe,
   GraduationCap,
   HelpCircle,
+  Lock,
   MessageSquare,
   Moon,
   Package,
@@ -127,6 +128,9 @@ function CourseBuilderInner() {
   const [showAdaptivePanel, setShowAdaptivePanel] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [focusBlockId, setFocusBlockId] = useState(null);
+
+  // Template-locked mode: course has a template assigned but is not itself a template
+  const isTemplateLocked = !!course?.template_id;
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [initialized, setInitialized] = useState(false);
@@ -373,6 +377,7 @@ function CourseBuilderInner() {
   const handleDragEnd = (event) => {
     const { over, active } = event;
     setActiveId(null);
+    if (isTemplateLocked) return;
     if (!over || over.id === "sidebar") return;
 
     if (over && active.id !== over.id && blocks.find((b) => b.id === active.id)) {
@@ -535,7 +540,7 @@ function CourseBuilderInner() {
         onDragEnd={handleDragEnd}
         onDragCancel={() => setActiveId(null)}
       >
-        <AppSidebar onBlockAdd={handleBlockAdd} />
+        <AppSidebar onBlockAdd={handleBlockAdd} readonlyStructure={isTemplateLocked} />
 
         <SidebarInset>
           {/* Header */}
@@ -792,26 +797,35 @@ function CourseBuilderInner() {
                       </div>
                     </div>
                   ) : (
-                    <div className="w-full h-full rounded-xl border bg-card shadow-sm overflow-hidden">
-                      {activeTab === "editor" && (
-                        <Editor
-                          blocks={blocks}
-                          onBlockUpdate={handleBlockUpdate}
-                          onBlockDelete={handleBlockDelete}
-                          onBlockAdd={handleBlockAdd}
-                          onBlockCopy={handleCopyBlock}
-                          onPasteAfter={
-                            clipboardCount > 0 ? handlePasteAfterBlock : undefined
-                          }
-                          focusBlockId={focusBlockId}
-                        />
-                      )}
-                      {activeTab === "raw" && (
-                        <div className="w-full h-full">
-                          <Raw blocks={blocks} onBlocksChange={setBlocks} />
+                    <div className="w-full h-full rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col">
+                      {isTemplateLocked && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs shrink-0">
+                          <Lock className="h-3.5 w-3.5 shrink-0" />
+                          <span>Template structure is locked — you can edit content but cannot add, remove, or reorder blocks.</span>
                         </div>
                       )}
-                      {activeTab === "preview" && <Preview blocks={blocks} theme={courseTheme} />}
+                      <div className="flex-1 overflow-hidden">
+                        {activeTab === "editor" && (
+                          <Editor
+                            blocks={blocks}
+                            onBlockUpdate={handleBlockUpdate}
+                            onBlockDelete={handleBlockDelete}
+                            onBlockAdd={handleBlockAdd}
+                            onBlockCopy={handleCopyBlock}
+                            onPasteAfter={
+                              clipboardCount > 0 ? handlePasteAfterBlock : undefined
+                            }
+                            focusBlockId={focusBlockId}
+                            readonlyStructure={isTemplateLocked}
+                          />
+                        )}
+                        {activeTab === "raw" && (
+                          <div className="w-full h-full">
+                            <Raw blocks={blocks} onBlocksChange={setBlocks} />
+                          </div>
+                        )}
+                        {activeTab === "preview" && <Preview blocks={blocks} theme={courseTheme} />}
+                      </div>
                     </div>
                   )}
                 </div>

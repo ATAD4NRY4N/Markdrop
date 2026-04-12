@@ -444,17 +444,37 @@ export default function CoursesDashboard() {
                         <div className="flex justify-between items-start gap-2">
                           <div className="min-w-0 flex-1">
                             {/* Status badge */}
-                            <Badge
-                              variant="outline"
-                              className={
-                                isDraft
-                                  ? "border-amber-500/40 text-amber-400 bg-amber-500/10 text-[10px] mb-2"
-                                  : "border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-[10px] mb-2"
-                              }
-                            >
-                              {isDraft ? <Lock className="h-2.5 w-2.5 mr-1" /> : <Globe className="h-2.5 w-2.5 mr-1" />}
-                              {isDraft ? "Draft" : "Published"}
-                            </Badge>
+                            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                              <Badge
+                                variant="outline"
+                                className={
+                                  isDraft
+                                    ? "border-amber-500/40 text-amber-400 bg-amber-500/10 text-[10px]"
+                                    : "border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-[10px]"
+                                }
+                              >
+                                {isDraft ? <Lock className="h-2.5 w-2.5 mr-1" /> : <Globe className="h-2.5 w-2.5 mr-1" />}
+                                {isDraft ? "Draft" : "Published"}
+                              </Badge>
+                              {course.is_template && (
+                                <Badge
+                                  variant="outline"
+                                  className="border-purple-500/40 text-purple-400 bg-purple-500/10 text-[10px]"
+                                >
+                                  <LayoutTemplate className="h-2.5 w-2.5 mr-1" />
+                                  Template
+                                </Badge>
+                              )}
+                              {course.template_id && (
+                                <Badge
+                                  variant="outline"
+                                  className="border-sky-500/40 text-sky-400 bg-sky-500/10 text-[10px]"
+                                >
+                                  <Lock className="h-2.5 w-2.5 mr-1" />
+                                  Template Locked
+                                </Badge>
+                              )}
+                            </div>
 
                             <CardTitle className="text-base leading-snug line-clamp-2 mb-1">
                               {course.title}

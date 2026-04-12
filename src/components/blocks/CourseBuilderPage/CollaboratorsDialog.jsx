@@ -33,6 +33,7 @@ import {
 const ROLE_COLORS = {
   editor: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   reviewer: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  template_designer: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
 };
 
 const INVITE_ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
@@ -169,6 +170,7 @@ export default function CollaboratorsDialog({ open, onOpenChange, courseId }) {
                   <SelectContent>
                     <SelectItem value="editor">Editor</SelectItem>
                     <SelectItem value="reviewer">Reviewer</SelectItem>
+                    <SelectItem value="template_designer">Designer</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
@@ -218,6 +220,7 @@ export default function CollaboratorsDialog({ open, onOpenChange, courseId }) {
                         <SelectContent>
                           <SelectItem value="editor">Editor</SelectItem>
                           <SelectItem value="reviewer">Reviewer</SelectItem>
+                          <SelectItem value="template_designer">Designer</SelectItem>
                         </SelectContent>
                       </Select>
                       <Button
@@ -251,6 +254,14 @@ export default function CollaboratorsDialog({ open, onOpenChange, courseId }) {
                   Reviewer
                 </span>
                 Gets a read-only learner preview to review content and leave feedback.
+              </p>
+              <p>
+                <span
+                  className={`inline-flex px-1.5 py-0.5 rounded text-[11px] font-medium mr-1.5 ${ROLE_COLORS.template_designer}`}
+                >
+                  Designer
+                </span>
+                Can create and manage course templates that define the structure for other courses.
               </p>
             </div>
           </TabsContent>

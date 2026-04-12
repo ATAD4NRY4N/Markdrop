@@ -602,10 +602,51 @@ export const FEATURES = [
     cta: { label: "Invite your team", href: "/course" },
   },
   {
+    slug: "template-designer",
+    group: "collaboration",
+    icon: "LayoutTemplate",
+    title: "Course Templates & Template Designer",
+    tagline: "Lock course structure with templates — editors can only change content, never layout.",
+    description:
+      "The Template Designer system lets designated team members build reusable course structures. A template course defines all the modules and block components. When a regular course is linked to a template, its structure is frozen: authors can edit text, media, and interactive content inside each block, but cannot add, remove, reorder, or restructure blocks or modules. This ensures brand consistency and instructional design compliance across all courses based on the same template.",
+    howItWorks: [
+      {
+        step: "Create a template course",
+        detail:
+          "A user with the Template Designer role creates a course with is_template=true. They build out all the sections, modules, and block components freely.",
+      },
+      {
+        step: "Link a course to a template",
+        detail:
+          "Set the template_id on a regular course to point to the template. Once linked, that course enters template-locked mode.",
+      },
+      {
+        step: "Content editing only",
+        detail:
+          "When editing a template-locked course, the block palette in the sidebar is replaced by a 'Structure locked' notice. Drag handles, delete buttons, and paste-after controls are hidden on every block.",
+      },
+      {
+        step: "Module structure frozen",
+        detail:
+          "In the Course Structure panel, Add Module and Add Section buttons are disabled. Module rename and delete options are removed from the context menu. A lock icon appears in the panel header.",
+      },
+    ],
+    highlights: [
+      "New 'Template Designer' collaborator role for template authors",
+      "is_template flag marks a course as a reusable template definition",
+      "template_id on a course activates template-locked mode",
+      "Block palette replaced with lock message when structure is frozen",
+      "Drag handles, delete, and paste-after controls hidden in locked mode",
+      "Add Module / Add Section buttons disabled in locked courses",
+      "Amber banner in the editor reminds authors that structure is fixed",
+      "Dashboard shows purple 'Template' badge and sky 'Template Locked' badge",
+    ],
+    cta: { label: "Manage your team", href: "/course" },
+  },
+  {
     slug: "review-comments",
     group: "collaboration",
     icon: "MessageSquare",
-    title: "Review & Comments",
     tagline: "Structured threaded feedback with status tracking and priority levels.",
     description:
       "The Review panel gives reviewers a structured place to leave feedback. Comments can be attached to a specific module slide or to the course as a whole. Each comment has a status (open, in-progress, resolved), a priority (low, normal, high), and supports threaded replies. Course owners and authors track progress by filtering by status, slide, or keyword.",

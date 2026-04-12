@@ -110,4 +110,7 @@ Build a modern, full-featured eLearning authoring studio with a visual block edi
 8. **AI Course Generation [COMPLETED]:** `ai-course-generation` added to the Productivity group (`Sparkles` icon). Multi-step guided workflow: describe → upload docs (up to 10) → review objectives → review outline → generate. Generates text, flashcards, accordions, tabs, callouts, MCQ assessments, and image placeholders. Real-time progress as slides are created. Fully editable after generation. Powered by Mistral AI.
 9. **Learner Progress Tracking [COMPLETED]:** `learner-tracking` added to the Productivity group (`BarChart2` icon). Tracks learner progress from public links and iFrame embeds without a traditional LMS. KPI dashboard: Total Sessions, Unique Learners, Average Score, Completion Rate, Time Spent. Charts and a searchable/sortable learner table with CSV/Excel export. Optional email prompt for learner identification (privacy-first).
 
+### Phase 18: GitLab Integration [COMPLETED]
+1. **GitLab Integration [COMPLETED]:** `gitlab-integration` added to the Productivity group (`GitBranch` icon, already imported). Connect any GitLab instance (gitlab.com or self-hosted CE/EE) via personal access token. Map each course to its own repository path. Every save creates a timestamped, author-attributed commit. Full version history with diff view, rollback, and compatibility with existing branching/MR workflows. No OAuth app setup required.
+
 ---

@@ -2069,6 +2069,88 @@ export const FEATURES = [
     ],
     cta: { label: "Publish and track", href: "/course" },
   },
+
+  // ── Integrations ──────────────────────────────────────────────────────────
+  {
+    slug: "gitlab-integration",
+    group: "productivity",
+    icon: "GitBranch",
+    title: "GitLab Integration",
+    tagline: "Push course content to your own GitLab repository for a full version history of every change.",
+    description:
+      "CourseForge can push your course content to any GitLab instance — cloud or self-hosted. Every save creates a commit, giving you a complete audit trail, the ability to roll back to any previous version, and the freedom to use your existing Git workflows for review and sign-off. No vendor lock-in: your content lives in your repository.",
+    howItWorks: [
+      {
+        step: "Connect your GitLab instance",
+        detail:
+          "Enter your GitLab instance URL — gitlab.com or any self-hosted CE/EE server — and authenticate with a personal access token. CourseForge verifies the connection and stores credentials securely before proceeding.",
+      },
+      {
+        step: "Choose or create a repository",
+        detail:
+          "Select an existing repository from your GitLab account or create a new one directly from CourseForge settings. Each course maps to its own repository path, keeping content cleanly separated.",
+      },
+      {
+        step: "Every save becomes a commit",
+        detail:
+          "Each time an author saves, CourseForge commits the current state of the course to the repository. Commit messages include the author name, timestamp, and a summary of what was changed.",
+      },
+      {
+        step: "Browse history and restore",
+        detail:
+          "Use GitLab's built-in diff view, branch comparisons, and merge request workflows to review changes. Roll back a course to any previous commit directly from CourseForge's version history panel.",
+      },
+    ],
+    highlights: [
+      "Works with any GitLab instance — gitlab.com, self-hosted CE, or EE",
+      "Authenticate with a personal access token — no OAuth app setup required",
+      "Every save creates a timestamped, author-attributed commit",
+      "Full version history: browse diffs, compare versions, and roll back in one click",
+      "One repository per course, or organise multiple courses using GitLab subgroups",
+      "Compatible with your existing branching, tagging, and merge request workflows",
+    ],
+    cta: { label: "Connect a repository", href: "/course" },
+  },
+  {
+    slug: "github-integration",
+    group: "productivity",
+    icon: "Github",
+    title: "GitHub Integration",
+    tagline: "Back every course save to a GitHub repository — a full audit trail and version history on the platform your team already uses.",
+    description:
+      "CourseForge integrates natively with GitHub.com so your course content is committed to a repository on every save. Authors get a complete history of every change, the ability to restore any previous version, and access to GitHub's full ecosystem — pull requests for peer review, protected branches for sign-off workflows, GitHub Actions for automation, and Issues for tracking feedback.",
+    howItWorks: [
+      {
+        step: "Connect your GitHub account",
+        detail:
+          "Authenticate with a GitHub personal access token (classic or fine-grained) from your user settings. CourseForge verifies the token scope and stores credentials securely — no OAuth app or organisation-level configuration needed.",
+      },
+      {
+        step: "Choose or create a repository",
+        detail:
+          "Pick an existing repo from your GitHub account or organisation, or create a new one without leaving CourseForge. Each course maps to its own repository so content stays cleanly separated.",
+      },
+      {
+        step: "Every save creates a commit",
+        detail:
+          "When an author saves, CourseForge pushes the current course state as a commit to the configured branch. Commit messages include the author's name, timestamp, and a summary of the changes made.",
+      },
+      {
+        step: "Use GitHub's full workflow toolchain",
+        detail:
+          "Review changes in pull requests, protect the main branch to enforce approvals, trigger GitHub Actions on commit for validation or publishing pipelines, and roll back to any commit directly from CourseForge's version history panel.",
+      },
+    ],
+    highlights: [
+      "Authenticate with a GitHub personal access token — no OAuth app required",
+      "Supports personal accounts, organisations, and GitHub Enterprise Cloud",
+      "Every save → a timestamped, author-attributed commit on your chosen branch",
+      "Full version history: diff view, restore any previous version in one click",
+      "One repository per course, or organise courses using GitHub topics and teams",
+      "Compatible with pull requests, branch protection, GitHub Actions, and Issues",
+    ],
+    cta: { label: "Connect a repository", href: "/course" },
+  },
 ];
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────

@@ -17,6 +17,7 @@ import {
   FolderOpen,
   FolderTree,
   GitBranch,
+  Github,
   Globe,
   Globe2,
   Headphones,
@@ -86,6 +87,7 @@ const ICONS = {
   SendHorizonal, ListChecks, Layers2,
   ClipboardCheck,
   LayoutPanelLeft, Images, Film, Headphones, FolderOpen,
+  Github,
 };
 
 function Icon({ name, className }) {

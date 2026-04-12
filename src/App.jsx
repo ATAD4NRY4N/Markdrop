@@ -9,6 +9,8 @@ import Builder from "@/pages/Builder";
 import ContactPage from "@/pages/ContactUs";
 import CourseBuilder from "@/pages/CourseBuilder";
 import CoursesDashboard from "@/pages/CoursesDashboard";
+import FeatureDetailPage from "@/pages/FeatureDetailPage";
+import FeaturesPage from "@/pages/FeaturesPage";
 // PAGES
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
@@ -46,6 +48,8 @@ function App() {
           <Route path="/course/:id" element={<CourseBuilder />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-services" element={<TermsOfServices />} />
+          <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/features/:slug" element={<FeatureDetailPage />} />
           <Route path="/about" element={<About />} />
           <Route path="*" element={<NotFoundPage />} />
           {/* AUTH */}

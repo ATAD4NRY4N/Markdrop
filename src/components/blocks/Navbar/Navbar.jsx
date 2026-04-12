@@ -3,6 +3,7 @@ import {
   FileText,
   Home,
   Info,
+  Layers,
   LogIn,
   LogOut,
   Menu,
@@ -69,6 +70,8 @@ export default function Navbar() {
     switch (href) {
       case "/":
         return <Home className="h-4 w-4 mr-2" />;
+      case "/features":
+        return <Layers className="h-4 w-4 mr-2" />;
       case "/course":
         return <Wrench className="h-4 w-4 mr-2" />;
       case "/templates":

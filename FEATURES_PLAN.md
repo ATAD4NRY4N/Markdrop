@@ -62,3 +62,10 @@ Build a modern, full-featured eLearning authoring studio with a visual block edi
 5. **Replace Scope [COMPLETED]:** Replacing in the active module calls the existing `applyBlocks` pipeline (preserves undo history). Replacing in a background module persists directly via `updateModule` and updates context's `modules` state, keeping all modules in sync without switching the editor view.
 
 ---
+
+### Phase 10: Accessibility [COMPLETED]
+1. **WCAG Compliance Foundation [COMPLETED]:** CourseForge blocks are structured with semantic HTML, proper ARIA attributes, and heading hierarchy support to align with WCAG 2.1 inclusive-design principles. Interactive elements use correct roles and focus management. Accessibility is treated as an ongoing commitment across all platform updates.
+2. **Alternate Text for Images [COMPLETED]:** The `ImageBlock`, `CarouselBlock`, and `HotspotBlock` all expose an `alt` field directly in the author editing UI. Alt text is included verbatim in SCORM export HTML (`<img alt="...">`) and the inline learner preview. Decorative images may use an empty alt to signal screen readers to skip. Alt text fields are included in XLIFF export for multilingual courses.
+3. **Keyboard-Accessible Learning [COMPLETED]:** All interactive elements in the SCORM player and learner preview — buttons, quiz options, text inputs, navigation controls, and media players — are fully operable via keyboard. Focus rings are preserved. Tab order follows the logical visual layout. Assessment types (MCQ, fill-in-blank, matching, categorization, flashcards) support keyboard interaction without requiring a mouse click. The CourseBuilder itself exposes keyboard shortcuts (Ctrl+S, Ctrl+Z/Y, Ctrl+H, Ctrl+V) for efficient keyboard-driven authoring.
+
+---

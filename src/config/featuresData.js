@@ -54,6 +54,14 @@ export const FEATURE_GROUPS = [
       "A course dashboard to manage all your projects, keyboard-driven search & replace across every module, and copy-paste architecture that works across slides and courses.",
     color: "slate",
   },
+  {
+    id: "accessibility",
+    icon: "Accessibility",
+    title: "Accessibility",
+    description:
+      "CourseForge is built so your courses can reach every learner — including those who rely on assistive technologies. The player, blocks, and authoring tools align with WCAG inclusive-design principles from the ground up.",
+    color: "teal",
+  },
 ];
 
 // ── Feature catalogue ─────────────────────────────────────────────────────────
@@ -790,6 +798,128 @@ export const FEATURES = [
       "Replacing in the active module preserves the full undo/redo history",
     ],
     cta: { label: "Try in the editor", href: "/course" },
+  },
+
+  // ── Accessibility ──────────────────────────────────────────────────────────
+  {
+    slug: "wcag-compliance",
+    group: "accessibility",
+    icon: "ShieldCheck",
+    title: "WCAG Compliance",
+    tagline: "Build inclusive courses on a platform designed with accessible-by-default principles.",
+    description:
+      "CourseForge is designed so your courses can reach as many learners as possible, including those who rely on assistive technologies. The player and content blocks are built with modern accessibility practices in mind, helping you align with WCAG guidelines in day-to-day authoring work \u2014 not as an afterthought, but as part of the foundation.",
+    howItWorks: [
+      {
+        step: "Accessible player foundation",
+        detail:
+          "Navigation, buttons, and interactive elements are structured with semantic HTML so they work well with screen readers and keyboard navigation out of the box.",
+      },
+      {
+        step: "Accessible content patterns",
+        detail:
+          "Core blocks \u2014 text, media, assessments, and navigation \u2014 are designed to encourage clear document structure, proper heading hierarchy, and readable, high-contrast layouts.",
+      },
+      {
+        step: "Author with confidence",
+        detail:
+          "Because accessible structure is baked into the block authoring UI, you\u2019re nudged toward good practices automatically \u2014 labels, roles, and semantic markup are included by default.",
+      },
+      {
+        step: "Continuous improvement",
+        detail:
+          "Accessibility is treated as an ongoing commitment, not a one-off checklist. Updates focus on keeping the experience in line with evolving WCAG standards.",
+      },
+    ],
+    highlights: [
+      "Semantic HTML roles and ARIA attributes used in all interactive blocks",
+      "Screen-reader-friendly structure across the SCORM player and inline preview",
+      "Heading hierarchy encouraged through the ordered block palette (H1 \u2192 H6)",
+      "High-contrast text defaults throughout the default course theme",
+      "Focus indicators preserved on all interactive elements",
+      "Accessibility treated as an iterative, ongoing platform commitment",
+    ],
+    cta: { label: "Start building", href: "/course" },
+  },
+  {
+    slug: "alt-text",
+    group: "accessibility",
+    icon: "ImageWithText",
+    title: "Alternate Text for Images",
+    tagline: "Every image gets a voice \u2014 describe visuals for learners who can\u2019t see them.",
+    description:
+      "Images should never be invisible to learners who can\u2019t see them. CourseForge makes it easy to add meaningful alternate text directly in the image block \u2014 no separate dialog, no extra steps. When a screen reader encounters an image in the SCORM player or learner preview, it reads your alt text aloud, giving every visual a clear voice.",
+    howItWorks: [
+      {
+        step: "Add an Image block",
+        detail:
+          "Insert an Image block from the media section of the block palette. The block immediately shows an Alt Text field alongside the image URL.",
+      },
+      {
+        step: "Write a meaningful description",
+        detail:
+          "Describe what matters about the image in the context of the lesson \u2014 not just what it literally shows. Good alt text conveys meaning, not decoration.",
+      },
+      {
+        step: "Leave decorative images blank",
+        detail:
+          'If an image is purely decorative and adds no informational value, leave alt text empty. CourseForge marks it with alt="" so screen readers correctly skip it.',
+      },
+      {
+        step: "SCORM and preview render it correctly",
+        detail:
+          'Your alt text travels into the exported SCORM ZIP and the inline learner preview. Screen readers encounter a proper <img alt=\"...\"> in all output formats.',
+      },
+    ],
+    highlights: [
+      "Alt text field built directly into the Image block editing UI \u2014 no extra steps",
+      'Alt text included in SCORM export HTML with correct <img alt=\'...\'> attribute',
+      "Decorative images can use empty alt to signal screen readers to skip",
+      "Also supported in Carousel blocks \u2014 per-image alt text for every slide",
+      "Alt text exported as a translatable field in XLIFF for multilingual courses",
+      "Hotspot images also carry an alt attribute for the base image",
+    ],
+    cta: { label: "Add an image block", href: "/course" },
+  },
+  {
+    slug: "keyboard-navigation",
+    group: "accessibility",
+    icon: "Keyboard",
+    title: "Keyboard-Accessible Learning",
+    tagline: "Learners who rely on a keyboard \u2014 not a mouse \u2014 can navigate your course fully.",
+    description:
+      "CourseForge ensures learners who navigate with a keyboard can still move through your courses smoothly and confidently. Consistent tab order, visible focus rings, and keyboard-operable assessments mean that motor-impaired learners and those using alternative input devices get the same complete experience as any other learner.",
+    howItWorks: [
+      {
+        step: "Consistent focus order",
+        detail:
+          "Learners can Tab through every interactive element \u2014 buttons, links, text inputs, quiz options, and media controls \u2014 in a predictable, logical order that follows the visual layout.",
+      },
+      {
+        step: "Keyboard-operable assessments",
+        detail:
+          "All assessment types \u2014 MCQ, Knowledge Check, Fill in the Blank, Matching, Categorization, and Flashcards \u2014 can be fully operated with keyboard keys. No mouse click is ever the only way to interact.",
+      },
+      {
+        step: "Visible focus indicators",
+        detail:
+          "Focus rings are preserved on all interactive elements so keyboard navigators always know exactly where they are on screen.",
+      },
+      {
+        step: "Authoring keyboard shortcuts",
+        detail:
+          "The CourseBuilder itself is keyboard-friendly: Ctrl+S to save, Ctrl+Z/Y to undo/redo, Ctrl+H for Find & Replace, and Ctrl+V to paste blocks \u2014 reducing authoring friction for everyone.",
+      },
+    ],
+    highlights: [
+      "Full Tab key navigation through all interactive elements in the SCORM player",
+      "Visible focus rings on buttons, links, inputs, and quiz controls",
+      "All assessment types operable via keyboard \u2014 no mouse-only interactions",
+      "Course navigation (prev/next) buttons are keyboard-reachable",
+      "Keyboard shortcuts in the builder: Ctrl+S, Ctrl+Z/Y, Ctrl+H, Ctrl+V",
+      "Supports learners with motor impairments and alternative input devices",
+    ],
+    cta: { label: "Try the editor", href: "/course" },
   },
 ];
 

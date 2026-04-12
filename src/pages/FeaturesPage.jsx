@@ -1,4 +1,5 @@
 import {
+  Accessibility,
   ArrowLeftRight,
   ArrowRight,
   Brain,
@@ -8,7 +9,9 @@ import {
   GitBranch,
   Globe,
   HelpCircle,
+  Image,
   Kanban,
+  Keyboard,
   LayoutDashboard,
   LayoutGrid,
   LayoutTemplate,
@@ -19,6 +22,7 @@ import {
   Palette,
   Rocket,
   Search,
+  ShieldCheck,
   Target,
   Type,
   Users,
@@ -36,13 +40,14 @@ import { fadeInUp, staggerContainer, staggerItem } from "@/lib/animations";
 // ── Icon resolver ─────────────────────────────────────────────────────────────
 
 const ICONS = {
-  Brush, Brain, Rocket, Users2, Network, Zap,
+  Accessibility, Brush, Brain, Rocket, Users2, Network, Zap,
   Layers, LayoutTemplate, LayoutGrid, Palette,
   HelpCircle, Type, ArrowLeftRight, Target, Kanban, CreditCard,
   Package, Globe,
   Users, MessageSquare,
   GitBranch, CheckCircle2,
   LayoutDashboard, Search,
+  ShieldCheck, ImageWithText: Image, Keyboard,
 };
 
 function Icon({ name, className }) {
@@ -59,6 +64,7 @@ const GROUP_COLORS = {
   collaboration: { bg: "bg-amber-100 dark:bg-amber-900/30",   text: "text-amber-600 dark:text-amber-400",   border: "border-amber-200 dark:border-amber-800",   badge: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
   adaptive:      { bg: "bg-rose-100 dark:bg-rose-900/30",     text: "text-rose-600 dark:text-rose-400",     border: "border-rose-200 dark:border-rose-800",     badge: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300" },
   productivity:  { bg: "bg-slate-100 dark:bg-slate-800/50",   text: "text-slate-600 dark:text-slate-400",   border: "border-slate-200 dark:border-slate-700",   badge: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300" },
+  accessibility: { bg: "bg-teal-100 dark:bg-teal-900/30",     text: "text-teal-600 dark:text-teal-400",     border: "border-teal-200 dark:border-teal-800",     badge: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300" },
 };
 
 // ── Feature card ──────────────────────────────────────────────────────────────

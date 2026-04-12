@@ -769,6 +769,24 @@ function CourseBuilderInner() {
             </div>
           </motion.header>
 
+          {/* Template mode banner */}
+          {course?.is_template && (
+            <div className="flex items-center gap-3 px-4 py-2 bg-violet-500/10 border-b border-violet-500/20 text-violet-700 dark:text-violet-300 text-xs shrink-0">
+              <Sparkles className="h-3.5 w-3.5 shrink-0" />
+              <span className="font-medium">Template Editor</span>
+              <span className="text-muted-foreground hidden sm:inline">
+                — edits here update the layout for all future uses of this template.
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate("/templates")}
+                className="ml-auto underline underline-offset-2 hover:no-underline transition-colors"
+              >
+                ← Back to Templates
+              </button>
+            </div>
+          )}
+
           {/* Content */}
           <motion.div
             className="flex flex-1 flex-col overflow-hidden"

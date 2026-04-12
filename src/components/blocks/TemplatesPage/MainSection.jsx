@@ -1,4 +1,4 @@
-import { Eye, FileText, Filter, LayoutGrid, Loader2, Plus, Search, Upload, X } from "lucide-react";
+import { Eye, FileText, Filter, Loader2, Pencil, Plus, Search, Upload, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -27,9 +27,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
-
+import { duplicateCourse } from "@/lib/storage";
 import {
   createTemplate,
+  ensureTemplateCourse,
   getAllTemplates,
   getTemplatesByCategory,
   searchTemplates,
@@ -217,7 +218,27 @@ export default function MainSection({ onTemplatesChange }) {
     setShowDetailsDialog(true);
   };
 
-  const handleUseTemplate = (template) => {
+  const handleEditTemplate = async (template) => {
+    if (template.course_id) {
+      navigate(`/course/${template.course_id}`);
+      return;
+    }
+    // Template predates companion-course linking — create one now
+    const loadingToast = toast.loading("Setting up template editor…");
+    const { success, courseId, error } = await ensureTemplateCourse(
+      template.id,
+      template.title,
+      user.id,
+    );
+    toast.dismiss(loadingToast);
+    if (success) {
+      navigate(`/course/${courseId}`);
+    } else {
+      toast.error(`Failed to open template editor: ${error}`);
+    }
+  };
+
+  const handleUseTemplate = async (template) => {
     if (!user) {
       toast.error("Please log in to use templates");
       navigate("/login");
@@ -225,13 +246,24 @@ export default function MainSection({ onTemplatesChange }) {
     }
 
     try {
-      const blocks = JSON.parse(template.content);
-      localStorage.setItem("markdown-blocks", JSON.stringify(blocks));
-      navigate("/course");
-      toast.success(`Using template: ${template.title}`);
+      if (template.course_id) {
+        // Duplicate the companion course into a new draft for this user
+        const loadingToast = toast.loading("Applying template…");
+        const newCourse = await duplicateCourse(template.course_id, user.id);
+        toast.dismiss(loadingToast);
+        navigate(`/course/${newCourse.id}`);
+        toast.success(`Template applied: ${template.title}`);
+      } else {
+        // Legacy path: template only has a flat content blob
+        const blocks = JSON.parse(template.content || "[]");
+        localStorage.setItem("markdown-blocks", JSON.stringify(blocks));
+        navigate("/course");
+        toast.success(`Using template: ${template.title}`);
+      }
     } catch (error) {
+      toast.dismiss();
       console.error("Error using template:", error);
-      toast.error("Failed to load template");
+      toast.error("Failed to apply template");
     }
   };
 
@@ -629,6 +661,19 @@ export default function MainSection({ onTemplatesChange }) {
                 <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
                   Close
                 </Button>
+                {user?.id === selectedTemplate?.user_id && (
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => {
+                      setShowDetailsDialog(false);
+                      handleEditTemplate(selectedTemplate);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit Layout
+                  </Button>
+                )}
                 <Button
                   onClick={() => {
                     handleUseTemplate(selectedTemplate);

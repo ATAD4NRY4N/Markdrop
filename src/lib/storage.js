@@ -270,7 +270,7 @@ export const duplicateCourse = async (courseId, userId) => {
     getCourseModules(courseId),
   ]);
 
-  // 2. Create the new course (always starts as draft)
+  // 2. Create the new course (always starts as a regular draft, never a template)
   const newCourse = await createCourse(
     userId,
     `${original.title} (Copy)`,
@@ -280,7 +280,16 @@ export const duplicateCourse = async (courseId, userId) => {
     original.max_attempts,
   );
 
-  // 3. Duplicate modules if any exist
+  // 3. Copy across extra fields not covered by createCourse
+  const extras = {};
+  if (original.theme_json) extras.theme_json = original.theme_json;
+  if (original.adaptive_config) extras.adaptive_config = original.adaptive_config;
+  if (original.sections_json) extras.sections_json = original.sections_json;
+  if (Object.keys(extras).length) {
+    await supabase.from("courses").update(extras).eq("id", newCourse.id);
+  }
+
+  // 4. Duplicate modules if any exist
   if (modules.length > 0) {
     const { error } = await supabase.from("course_modules").insert(
       modules.map((m) => ({

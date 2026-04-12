@@ -98,7 +98,7 @@ export default function CoursesDashboard() {
         }
       } catch (err) {
         console.error("Error fetching courses:", err);
-        setError("Failed to load courses. Database tables may not exist.");
+        setError(`Failed to load courses: ${err?.message ?? "Unknown error."}`);
       } finally {
         setLoading(false);
       }

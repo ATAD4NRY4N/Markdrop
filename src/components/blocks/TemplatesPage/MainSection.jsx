@@ -27,7 +27,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
-import { getAllUserMarkdowns } from "@/lib/storage";
+
 import {
   createTemplate,
   getAllTemplates,
@@ -46,8 +46,7 @@ export default function MainSection({ onTemplatesChange }) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [userMarkdowns, setUserMarkdowns] = useState([]);
-  const [selectedMarkdownId, setSelectedMarkdownId] = useState("");
+
   const [templateTitle, setTemplateTitle] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
   const [templateCategory, setTemplateCategory] = useState("profile");
@@ -104,24 +103,12 @@ export default function MainSection({ onTemplatesChange }) {
     }
   };
 
-  const handleAddTemplate = async () => {
+  const handleAddTemplate = () => {
     if (!user) {
       toast.error("Please log in to create templates");
       return;
     }
-
-    try {
-      const markdowns = await getAllUserMarkdowns(user.id);
-      if (!markdowns || markdowns.length === 0) {
-        toast.error("You don't have any saved documents. Create one first!");
-        return;
-      }
-      setUserMarkdowns(markdowns);
-      setShowCreateDialog(true);
-    } catch (error) {
-      console.error("Error loading markdowns:", error);
-      toast.error("Failed to load your documents");
-    }
+    setShowCreateDialog(true);
   };
 
   const handleImageUpload = async (e) => {
@@ -183,11 +170,6 @@ export default function MainSection({ onTemplatesChange }) {
   };
 
   const handleCreateTemplate = async () => {
-    if (!selectedMarkdownId) {
-      toast.error("Please select a document");
-      return;
-    }
-
     if (!templateTitle.trim()) {
       toast.error("Please enter a template title");
       return;
@@ -195,17 +177,11 @@ export default function MainSection({ onTemplatesChange }) {
 
     setIsCreating(true);
     try {
-      const selectedMarkdown = userMarkdowns.find((m) => m.id === selectedMarkdownId);
-      if (!selectedMarkdown) {
-        toast.error("Selected document not found");
-        return;
-      }
-
       const templateData = {
         title: templateTitle,
         description: templateDescription,
         category: templateCategory,
-        content: selectedMarkdown.content,
+        content: "[]",
         thumbnail: templateImages[0] || null,
         tags: [],
       };
@@ -219,7 +195,6 @@ export default function MainSection({ onTemplatesChange }) {
       if (success) {
         toast.success("Template created successfully!");
         setShowCreateDialog(false);
-        setSelectedMarkdownId("");
         setTemplateTitle("");
         setTemplateDescription("");
         setTemplateCategory("profile");
@@ -448,30 +423,10 @@ export default function MainSection({ onTemplatesChange }) {
           <DialogHeader>
             <DialogTitle>Create Template</DialogTitle>
             <DialogDescription>
-              Convert one of your saved documents into a reusable template.
+              Create a reusable course template with a title, description, and optional preview images.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="markdown-select">Source Document</Label>
-              <Select value={selectedMarkdownId} onValueChange={setSelectedMarkdownId}>
-                <SelectTrigger id="markdown-select">
-                  <SelectValue placeholder="Choose a document..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <ScrollArea className="h-[200px]">
-                    {userMarkdowns.map((markdown) => (
-                      <SelectItem key={markdown.id} value={markdown.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{markdown.title}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </ScrollArea>
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="template-title">Title</Label>
               <Input
@@ -575,7 +530,7 @@ export default function MainSection({ onTemplatesChange }) {
             >
               Cancel
             </Button>
-            <Button onClick={handleCreateTemplate} disabled={isCreating || !selectedMarkdownId}>
+            <Button onClick={handleCreateTemplate} disabled={isCreating}>
               {isCreating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...

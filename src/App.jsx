@@ -9,8 +9,10 @@ import Builder from "@/pages/Builder";
 import ContactPage from "@/pages/ContactUs";
 import CourseBuilder from "@/pages/CourseBuilder";
 import CoursesDashboard from "@/pages/CoursesDashboard";
+import CourseTemplates from "@/pages/CourseTemplates";
 import FeatureDetailPage from "@/pages/FeatureDetailPage";
 import FeaturesPage from "@/pages/FeaturesPage";
+import BlockTemplates from "@/pages/BlockTemplates";
 // PAGES
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
@@ -22,6 +24,7 @@ import TermsOfServices from "@/pages/TermsOfServices";
 import UserProfile from "@/pages/UserProfile";
 import ReviewerView from "@/pages/ReviewerView";
 import AcceptInvitePage from "@/pages/AcceptInvitePage";
+import BlockTemplateEditor from "@/pages/BlockTemplateEditor";
 
 const Layout = ({ children }) => {
   return (
@@ -40,6 +43,9 @@ function App() {
           {/* UNPROTECTED */}
           <Route path="/" element={<Home />} />
           <Route path="/templates" element={<Templates />} />
+          <Route path="/templates/courses" element={<CourseTemplates />} />
+          <Route path="/templates/blocks" element={<BlockTemplates />} />
+          <Route path="/templates/blocks/:id" element={<BlockTemplateEditor />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/builder" element={<Builder />} />
           <Route path="/builder/:id" element={<Builder />} />

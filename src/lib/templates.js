@@ -6,7 +6,7 @@ import {
   PRE_GENERATED_COURSE_TEMPLATES,
   searchBuiltInCourseTemplates,
 } from "./preGeneratedCourseTemplates";
-import { createCourse, createModule, updateCourse } from "./storage";
+import { createCourse, createModule, deleteCourse, updateCourse } from "./storage";
 import { supabase } from "./supabase";
 
 export const TEMPLATE_CATEGORY_OPTIONS = [
@@ -196,6 +196,7 @@ export async function createTemplate(template) {
         .insert({
           user_id: template.user_id,
           title: template.title,
+          description: template.description || "",
           is_template: true,
         })
         .select()
@@ -239,6 +240,21 @@ export async function updateTemplate(id, updates) {
       .single();
 
     if (error) throw error;
+
+    if (data?.course_id && (updates.title !== undefined || updates.description !== undefined)) {
+      const courseUpdates = {};
+      if (updates.title !== undefined) {
+        courseUpdates.title = updates.title;
+      }
+      if (updates.description !== undefined) {
+        courseUpdates.description = updates.description;
+      }
+
+      if (Object.keys(courseUpdates).length > 0) {
+        await updateCourse(data.course_id, courseUpdates);
+      }
+    }
+
     return { success: true, data };
   } catch (error) {
     console.error("Error updating template:", error);
@@ -254,6 +270,22 @@ export async function deleteTemplate(id) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting template:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteTemplateWithCourse(template) {
+  try {
+    if (template?.course_id) {
+      await deleteCourse(template.course_id);
+    }
+
+    const { error } = await supabase.from("templates").delete().eq("id", template.id);
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting template and companion course:", error);
     return { success: false, error: error.message };
   }
 }

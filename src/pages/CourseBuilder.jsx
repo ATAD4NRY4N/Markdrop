@@ -92,6 +92,12 @@ import {
   pasteBlocksFromClipboard,
   setInAppClipboard,
 } from "@/lib/clipboard";
+import {
+  COURSE_RESOLUTION_PRESETS,
+  DEFAULT_COURSE_DISPLAY_SETTINGS,
+  getCourseCanvasLabel,
+  withNormalizedCourseDisplaySettings,
+} from "@/lib/courseDisplay";
 
 // ---------------------------------------------------------------------------
 // Inner component (needs CourseProvider above it)
@@ -146,6 +152,7 @@ function CourseBuilderInner() {
     primaryColor: "#7c3aed",
     accentColor: "#06b6d4",
     bgColor: "",
+    ...DEFAULT_COURSE_DISPLAY_SETTINGS,
   };
   const [courseTheme, setCourseTheme] = useState(DEFAULT_THEME);
 
@@ -183,7 +190,10 @@ function CourseBuilderInner() {
       setCourseDescription(course.description || "");
       try {
         const parsed = JSON.parse(course.theme_json || "{}");
-        setCourseTheme({ ...DEFAULT_THEME, ...parsed });
+        setCourseTheme({
+          ...DEFAULT_THEME,
+          ...withNormalizedCourseDisplaySettings(parsed),
+        });
       } catch {
         setCourseTheme(DEFAULT_THEME);
       }
@@ -800,7 +810,7 @@ function CourseBuilderInner() {
               </span>
               <button
                 type="button"
-                onClick={() => navigate("/templates")}
+                onClick={() => navigate("/templates/courses")}
                 className="ml-auto underline underline-offset-2 hover:no-underline transition-colors"
               >
                 ← Back to Templates
@@ -1054,6 +1064,56 @@ function CourseBuilderInner() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs">Orientation</Label>
+                  <Select
+                    value={courseTheme.displayOrientation}
+                    onValueChange={(value) =>
+                      setCourseTheme((currentTheme) => ({
+                        ...currentTheme,
+                        displayOrientation: value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="landscape" className="text-xs">
+                        Landscape
+                      </SelectItem>
+                      <SelectItem value="portrait" className="text-xs">
+                        Portrait
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Resolution</Label>
+                  <Select
+                    value={courseTheme.displayResolution}
+                    onValueChange={(value) =>
+                      setCourseTheme((currentTheme) => ({
+                        ...currentTheme,
+                        displayResolution: value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COURSE_RESOLUTION_PRESETS.map((preset) => (
+                        <SelectItem key={preset.value} value={preset.value} className="text-xs">
+                          {preset.label} ({preset.width} x {preset.height})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {/* Live preview swatch */}
               <div
                 className="rounded-md border p-3 text-sm overflow-hidden"
@@ -1077,6 +1137,9 @@ function CourseBuilderInner() {
                     accent colour
                   </span>{" "}
                   is used for highlights and interactive elements.
+                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground/80">
+                  Canvas: {getCourseCanvasLabel(courseTheme)}
                 </p>
               </div>
             </TabsContent>

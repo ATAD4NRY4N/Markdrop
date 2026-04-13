@@ -1,4 +1,4 @@
-import { Eye, FileText, Filter, Loader2, Pencil, Plus, Search, Upload, X } from "lucide-react";
+import { Eye, FileText, Filter, Loader2, Pencil, Plus, Search, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -34,12 +34,14 @@ import {
 import { duplicateCourse } from "@/lib/storage";
 import {
   createTemplate,
+  deleteTemplateWithCourse,
   ensureTemplateCourse,
   getAllTemplates,
   getTemplatesByCategory,
   instantiateBuiltInTemplateCourse,
   searchTemplates,
   TEMPLATE_CATEGORY_OPTIONS,
+  updateTemplate,
 } from "@/lib/templates";
 
 const formatTemplateDate = (template) => {
@@ -117,6 +119,7 @@ export default function MainSection({ onTemplatesChange }) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [editingTemplate, setEditingTemplate] = useState(null);
 
   const [templateTitle, setTemplateTitle] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
@@ -174,6 +177,20 @@ export default function MainSection({ onTemplatesChange }) {
       toast.error("Please log in to create templates");
       return;
     }
+    setEditingTemplate(null);
+    setTemplateTitle("");
+    setTemplateDescription("");
+    setTemplateCategory("onboarding");
+    setTemplateImages([]);
+    setShowCreateDialog(true);
+  };
+
+  const openEditMetadataDialog = (template) => {
+    setEditingTemplate(template);
+    setTemplateTitle(template.title || "");
+    setTemplateDescription(template.description || "");
+    setTemplateCategory(template.category || "onboarding");
+    setTemplateImages(template.images || []);
     setShowCreateDialog(true);
   };
 
@@ -243,39 +260,67 @@ export default function MainSection({ onTemplatesChange }) {
 
     setIsCreating(true);
     try {
-      const templateData = {
-        title: templateTitle,
+      const metadataPayload = {
+        title: templateTitle.trim(),
         description: templateDescription,
         category: templateCategory,
-        content: "[]",
         thumbnail: templateImages[0] || null,
-        tags: [],
-        user_id: user.id,
+        images: templateImages,
       };
 
-      if (templateImages.length > 0) {
-        templateData.images = templateImages;
-      }
+      const result = editingTemplate
+        ? await updateTemplate(editingTemplate.id, {
+            ...metadataPayload,
+            tags: editingTemplate.tags || [],
+          })
+        : await createTemplate({
+            ...metadataPayload,
+            content: "[]",
+            tags: [],
+            user_id: user.id,
+          });
 
-      const { success, error } = await createTemplate(templateData);
-
-      if (success) {
-        toast.success("Template created successfully!");
+      if (result.success) {
+        toast.success(editingTemplate ? "Template updated successfully!" : "Template created successfully!");
         setShowCreateDialog(false);
+        setEditingTemplate(null);
         setTemplateTitle("");
         setTemplateDescription("");
         setTemplateCategory("onboarding");
         setTemplateImages([]);
-        fetchTemplates();
+        await fetchTemplates();
+        if (selectedTemplate?.id === result.data?.id) {
+          setSelectedTemplate(result.data);
+        }
       } else {
-        toast.error(`Failed to create template: ${error}`);
+        toast.error(`Failed to ${editingTemplate ? "update" : "create"} template: ${result.error}`);
       }
     } catch (error) {
-      console.error("Error creating template:", error);
-      toast.error("Failed to create template");
+      console.error("Error saving template:", error);
+      toast.error(`Failed to ${editingTemplate ? "update" : "create"} template`);
     } finally {
       setIsCreating(false);
     }
+  };
+
+  const handleDeleteTemplate = async (template) => {
+    if (!template?.id) return;
+    if (!window.confirm(`Delete "${template.title}"? This cannot be undone.`)) {
+      return;
+    }
+
+    const { success, error } = await deleteTemplateWithCourse(template);
+    if (!success) {
+      toast.error(`Failed to delete template: ${error}`);
+      return;
+    }
+
+    setShowDetailsDialog(false);
+    if (selectedTemplate?.id === template.id) {
+      setSelectedTemplate(null);
+    }
+    await fetchTemplates();
+    toast.success("Template deleted");
   };
 
   const handleTemplateClick = (template) => {
@@ -541,9 +586,11 @@ export default function MainSection({ onTemplatesChange }) {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create Template</DialogTitle>
+            <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
             <DialogDescription>
-              Create a reusable course template with a title, category, and optional preview images.
+              {editingTemplate
+                ? "Update the metadata and preview assets for this reusable course template."
+                : "Create a reusable course template with a title, category, and optional preview images."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -657,10 +704,10 @@ export default function MainSection({ onTemplatesChange }) {
             <Button onClick={handleCreateTemplate} disabled={isCreating}>
               {isCreating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editingTemplate ? "Saving..." : "Creating..."}
                 </>
               ) : (
-                "Create Template"
+                editingTemplate ? "Save Changes" : "Create Template"
               )}
             </Button>
           </DialogFooter>
@@ -744,6 +791,19 @@ export default function MainSection({ onTemplatesChange }) {
                 <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
                   Close
                 </Button>
+                {user?.id === selectedTemplate?.user_id && !selectedTemplate?.is_builtin && (
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => {
+                      setShowDetailsDialog(false);
+                      openEditMetadataDialog(selectedTemplate);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit Details
+                  </Button>
+                )}
                 {user?.id === selectedTemplate?.user_id && (
                   <Button
                     variant="outline"
@@ -755,6 +815,16 @@ export default function MainSection({ onTemplatesChange }) {
                   >
                     <Pencil className="h-4 w-4" />
                     Edit Layout
+                  </Button>
+                )}
+                {user?.id === selectedTemplate?.user_id && !selectedTemplate?.is_builtin && (
+                  <Button
+                    variant="destructive"
+                    className="gap-2"
+                    onClick={() => handleDeleteTemplate(selectedTemplate)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
                   </Button>
                 )}
                 <Button

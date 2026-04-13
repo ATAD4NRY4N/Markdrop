@@ -49,6 +49,11 @@ import {
 import { useEffect, useState } from "react";
 import { Logo, Icon } from "@/components/Logo";
 import { useTheme } from "@/components/ThemeProvider";
+import { useAuth } from "@/context/AuthContext";
+import {
+  getUserBlockTemplates,
+  materializeBlockTemplateBlocks,
+} from "@/lib/blockTemplates";
 import { createDefaultMarpVoiceoverBlock } from "@/lib/marp";
 import {
   materializeTemplateBlocks,
@@ -115,7 +120,10 @@ function DraggableItem({ id, title, icon: Icon, isCollapsed, isMobile, onDoubleC
 export default function AppSidebar({ onBlockAdd, presentationMode = false, readonlyStructure = false, ...props }) {
   const { setNodeRef } = useDroppable({ id: "sidebar" });
   const { theme } = useTheme();
+  const { user } = useAuth();
   const isDarkMode = theme === "dark";
+  const [userBlockTemplates, setUserBlockTemplates] = useState([]);
+  const [isLoadingBlockTemplates, setIsLoadingBlockTemplates] = useState(false);
 
   const TEMPLATE_ICONS = {
     AlertCircle,
@@ -139,6 +147,13 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
   const handleTemplateInsert = (template) => {
     if (!onBlockAdd) return;
     materializeTemplateBlocks(template.blocks).forEach((blockData) => {
+      onBlockAdd(null, blockData);
+    });
+  };
+
+  const handleUserTemplateInsert = (template) => {
+    if (!onBlockAdd) return;
+    materializeBlockTemplateBlocks(template).forEach((blockData) => {
       onBlockAdd(null, blockData);
     });
   };
@@ -378,6 +393,23 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  useEffect(() => {
+    const loadUserBlockTemplates = async () => {
+      if (!user?.id || readonlyStructure) {
+        setUserBlockTemplates([]);
+        setIsLoadingBlockTemplates(false);
+        return;
+      }
+
+      setIsLoadingBlockTemplates(true);
+      const templates = await getUserBlockTemplates(user.id);
+      setUserBlockTemplates(templates);
+      setIsLoadingBlockTemplates(false);
+    };
+
+    loadUserBlockTemplates();
+  }, [readonlyStructure, user?.id]);
+
   const data = {
     headings: [
       { title: "Heading 1", key: "h1", icon: Heading1 },
@@ -515,6 +547,46 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
           {/* Slide Templates section */}
           {showFullContent && !readonlyStructure && (
             <div className="mt-2 border-t pt-3 pb-2">
+              {isLoadingBlockTemplates || userBlockTemplates.length > 0 ? (
+                <>
+                  <div className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">
+                    Block Templates
+                  </div>
+                  <div className="px-2 space-y-1 mt-1 pb-3">
+                    {isLoadingBlockTemplates ? (
+                      <p className="px-2 py-2 text-[11px] text-muted-foreground">
+                        Loading your templates...
+                      </p>
+                    ) : (
+                      userBlockTemplates.map((template) => (
+                        <TooltipProvider key={template.id}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="w-full flex items-start gap-2 px-2 py-2 rounded-md text-left hover:bg-muted/60 transition-colors group"
+                                onClick={() => handleUserTemplateInsert(template)}
+                              >
+                                <FileText className="h-4 w-4 mt-0.5 shrink-0 text-sky-600" />
+                                <div className="min-w-0">
+                                  <p className="text-xs font-medium truncate">{template.title}</p>
+                                  <p className="text-[10px] text-muted-foreground truncate">
+                                    {template.description || "Insert saved block stack"}
+                                  </p>
+                                </div>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="text-xs">
+                              Click to insert saved block template
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))
+                    )}
+                  </div>
+                </>
+              ) : null}
+
               <div className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">
                 Slide Templates
               </div>

@@ -472,6 +472,36 @@ describe("buildPreviewHtml", () => {
     expect(html).toContain("Preview");
   });
 
+  it("applies course display sizing to preview HTML", () => {
+    const html = buildPreviewHtml(makeModule(), "Course", {
+      displayOrientation: "portrait",
+      displayResolution: "1280x720",
+    });
+
+    expect(html).toContain("--course-canvas-width: 720px;");
+    expect(html).toContain("--course-canvas-height: 1280px;");
+    expect(html).toContain("--course-content-max-width: 560px;");
+  });
+
+  it("renders MARP slide breaks as a slide deck in preview HTML", () => {
+    const html = buildPreviewHtml(
+      makeModule({
+        blocks_json: JSON.stringify([
+          { id: "fm", type: "marp-frontmatter", size: "16:9", paginate: true },
+          { id: "slide-1", type: "h1", content: "Slide One" },
+          { id: "break", type: "slide" },
+          { id: "slide-2", type: "h1", content: "Slide Two" },
+        ]),
+      }),
+      "Course"
+    );
+
+    expect(html).toContain("data-marp-deck");
+    expect(html).toContain("marpDeckNext");
+    expect(html).toContain("Slide One");
+    expect(html).toContain("Slide Two");
+  });
+
   it("handles malformed blocks_json gracefully", () => {
     const mod = makeModule({ blocks_json: "not-json{{{" });
     expect(() => buildPreviewHtml(mod, "Course")).not.toThrow();

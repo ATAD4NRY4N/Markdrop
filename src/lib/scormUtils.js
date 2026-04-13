@@ -8,7 +8,16 @@
 
 import JSZip from "jszip";
 import { marked } from "marked";
+import { getCourseCanvasSize, getCourseContentMaxWidth } from "./courseDisplay";
 import { buildModulesMeta, parseAdaptiveConfig } from "./adaptiveUtils";
+import {
+  extractCustomCss,
+  getRenderableSlideBlocks,
+  getSlideBackground,
+  getSlideDirectives,
+  getSlideTitle,
+  splitBlocksIntoSlides,
+} from "./marp";
 
 // ---------------------------------------------------------------------------
 // Block → HTML conversion (reused from exportUtils patterns)
@@ -110,6 +119,11 @@ function blockToHtml(block) {
     case "pdf":
       return buildPdfHtml(block);
     case "marp-voiceover":
+    case "marp-frontmatter":
+    case "slide":
+    case "marp-slide-directive":
+    case "marp-bg-image":
+    case "marp-style":
       return "";
 
     default:
@@ -920,6 +934,66 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2rem 0; }
 .nav-bar-indicator { font-size: 0.8125rem; color: #6b7280; }
 .sco-outer { display: flex; flex-direction: column; min-height: 100vh; }
 .sco-outer .sco-wrapper { flex: 1; }
+.marp-deck { display: flex; flex-direction: column; gap: 1rem; margin: 1rem auto 2rem; width: 100%; }
+.marp-stage { position: relative; width: 100%; max-width: 100%; margin: 0 auto; }
+.marp-slide-section { position: relative; width: 100%; min-height: 100%; border: 1px solid rgba(209, 213, 219, 0.9); border-radius: 24px; background: #ffffff; overflow: hidden; box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12); }
+.marp-slide-section[hidden] { display: none !important; }
+.marp-slide-background { position: absolute; inset: 0; background-repeat: no-repeat; }
+.marp-slide-content { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; min-height: 100%; padding: 3.25rem 2rem 3rem; }
+.marp-slide-header, .marp-slide-footer { font-size: 0.78rem; opacity: 0.75; }
+.marp-slide-header { margin-bottom: 1rem; }
+.marp-slide-footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1rem; }
+.marp-slide-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 0.75rem; }
+.marp-slide-body > *:first-child { margin-top: 0; }
+.marp-slide-body > *:last-child { margin-bottom: 0; }
+.marp-slide-controls { display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+.marp-slide-btn { background: #fff; border: 1px solid #d1d5db; border-radius: 999px; padding: 0.55rem 1rem; cursor: pointer; font-size: 0.875rem; }
+.marp-slide-btn:hover { background: #f8fafc; }
+.marp-slide-btn:disabled { opacity: 0.4; cursor: default; }
+.marp-slide-indicator { min-width: 4rem; text-align: center; font-size: 0.8125rem; color: #6b7280; }
+.marp-slide-empty { display: flex; align-items: center; justify-content: center; min-height: 220px; border: 1px dashed #d1d5db; border-radius: 16px; color: #6b7280; padding: 1.5rem; text-align: center; }
+@media (max-width: 768px) {
+  .marp-slide-content { padding: 2.75rem 1.25rem 2.5rem; }
+}
+`;
+
+const MARP_DECK_RUNTIME_JS = `
+function marpDeckSetSlide(deckId, nextIndex) {
+  var deck = document.getElementById(deckId);
+  if (!deck) return;
+  var slides = deck.querySelectorAll('[data-marp-slide-index]');
+  var total = slides.length;
+  if (!total) return;
+  var clamped = Math.max(0, Math.min(total - 1, nextIndex));
+  slides.forEach(function(slide, index) {
+    slide.hidden = index !== clamped;
+  });
+  deck.setAttribute('data-active-slide', String(clamped));
+  var indicator = deck.querySelector('[data-marp-slide-indicator]');
+  if (indicator) indicator.textContent = (clamped + 1) + ' / ' + total;
+  var prev = deck.querySelector('[data-marp-prev]');
+  var next = deck.querySelector('[data-marp-next]');
+  if (prev) prev.disabled = clamped === 0;
+  if (next) next.disabled = clamped === total - 1;
+}
+function marpDeckPrev(deckId) {
+  var deck = document.getElementById(deckId);
+  if (!deck) return;
+  var current = Number(deck.getAttribute('data-active-slide') || '0');
+  marpDeckSetSlide(deckId, current - 1);
+}
+function marpDeckNext(deckId) {
+  var deck = document.getElementById(deckId);
+  if (!deck) return;
+  var current = Number(deck.getAttribute('data-active-slide') || '0');
+  marpDeckSetSlide(deckId, current + 1);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  var decks = document.querySelectorAll('[data-marp-deck]');
+  decks.forEach(function(deck) {
+    marpDeckSetSlide(deck.id, Number(deck.getAttribute('data-active-slide') || '0'));
+  });
+});
 `;
 
 function buildNavBarHtml(moduleIndex, totalModules, position, showProgress = false) {
@@ -936,7 +1010,107 @@ function buildNavBarHtml(moduleIndex, totalModules, position, showProgress = fal
 </nav>`;
 }
 
-function buildScoHtml(module, courseTitle, cssOverride = "", navBarOptions = null, adaptiveOptions = null) {
+function getMarpBackgroundStyle(background) {
+  if (!background?.url) return "";
+
+  let backgroundPosition = "center";
+  let backgroundSize = "cover";
+
+  if ((background.position || "").includes("fit") || (background.position || "").includes("contain")) {
+    backgroundSize = "contain";
+  }
+
+  if ((background.position || "").startsWith("bg left")) {
+    backgroundPosition = "left center";
+  } else if ((background.position || "").startsWith("bg right")) {
+    backgroundPosition = "right center";
+  } else if (background.position === "bg top") {
+    backgroundPosition = "top center";
+  } else if (background.position === "bg bottom") {
+    backgroundPosition = "bottom center";
+  }
+
+  return [
+    `background-image:url('${escHtml(background.url)}')`,
+    `background-size:${backgroundSize}`,
+    `background-position:${backgroundPosition}`,
+    `opacity:${background.opacity ? Number(background.opacity) : 1}`,
+  ].join(";");
+}
+
+function buildMarpSlideHtml(slideBlocks, slideIndex, frontmatter, contentMaxWidth) {
+  const directives = getSlideDirectives(slideBlocks);
+  const background = getSlideBackground(slideBlocks);
+  const renderableBlocks = getRenderableSlideBlocks(slideBlocks);
+  const slideContent = renderableBlocks.length
+    ? renderableBlocks.map((block) => blockToHtml(block)).join("\n")
+    : `<div class="marp-slide-empty">Add content blocks after the slide break to populate this slide.</div>`;
+  const textColor = directives._color || frontmatter?.color || "#1a1a1a";
+  const backgroundColor = directives._backgroundColor || frontmatter?.backgroundColor || "#ffffff";
+  const headerText = directives._header || frontmatter?.header || getSlideTitle(slideBlocks, slideIndex);
+  const footerText = directives._footer || frontmatter?.footer || "";
+  const showPageNumber = frontmatter?.paginate || directives._paginate === "true" || directives._paginate === "skip";
+  const pageNumber = directives._paginate === "skip" ? "" : `${slideIndex + 1}`;
+  const slideClasses = directives._class ? `marp-slide-section ${escHtml(directives._class)}` : "marp-slide-section";
+
+  return `<section
+    class="${slideClasses}"
+    data-marp-slide-index="${slideIndex}"
+    style="background-color:${escHtml(backgroundColor)};color:${escHtml(textColor)};"
+    ${slideIndex === 0 ? "" : "hidden"}
+  >
+    ${background?.url ? `<div class="marp-slide-background" style="${getMarpBackgroundStyle(background)}"></div>` : ""}
+    <div class="marp-slide-content">
+      <div class="marp-slide-header">${escHtml(headerText)}</div>
+      <div class="marp-slide-body" style="max-width:${contentMaxWidth}px;margin:0 auto;width:100%;">
+        ${slideContent}
+      </div>
+      <div class="marp-slide-footer">
+        <span>${escHtml(footerText)}</span>
+        <span>${showPageNumber ? escHtml(pageNumber) : ""}</span>
+      </div>
+    </div>
+  </section>`;
+}
+
+function buildMarpDeckHtml(blocks, theme) {
+  const { frontmatter, slideGroups } = splitBlocksIntoSlides(blocks);
+  if (!slideGroups.length) {
+    return "<div class=\"marp-slide-empty\">Add slide content below the MARP frontmatter to preview this module.</div>";
+  }
+
+  const deckId = nextHtmlId("marpdeck");
+  const canvasSize = getCourseCanvasSize(theme || {});
+  const aspectRatio = frontmatter?.size === "4:3" ? "4 / 3" : `${canvasSize.width} / ${canvasSize.height}`;
+  const contentMaxWidth = Math.max(320, getCourseContentMaxWidth(theme || {}) - 32);
+  const customCss = extractCustomCss(blocks);
+  const slidesHtml = slideGroups
+    .map((slideBlocks, index) =>
+      buildMarpSlideHtml(slideBlocks, index, frontmatter, contentMaxWidth)
+    )
+    .join("\n");
+
+  return `${customCss ? `<style>${customCss}</style>` : ""}
+  <div class="marp-deck" id="${deckId}" data-marp-deck data-active-slide="0">
+    <div class="marp-stage" style="aspect-ratio:${aspectRatio};max-width:${canvasSize.width}px;">
+      ${slidesHtml}
+    </div>
+    <div class="marp-slide-controls">
+      <button class="marp-slide-btn" type="button" data-marp-prev onclick="marpDeckPrev('${deckId}')">&larr; Previous slide</button>
+      <span class="marp-slide-indicator" data-marp-slide-indicator>1 / ${slideGroups.length}</span>
+      <button class="marp-slide-btn" type="button" data-marp-next onclick="marpDeckNext('${deckId}')">Next slide &rarr;</button>
+    </div>
+  </div>`;
+}
+
+function buildScoHtml(
+  module,
+  courseTitle,
+  cssOverride = "",
+  navBarOptions = null,
+  adaptiveOptions = null,
+  theme = null
+) {
   const blocks = (() => {
     try {
       return JSON.parse(module.blocks_json || "[]");
@@ -945,7 +1119,10 @@ function buildScoHtml(module, courseTitle, cssOverride = "", navBarOptions = nul
     }
   })();
 
-  const bodyHtml = blocks.map((b) => blockToHtml(b)).join("\n");
+  const hasMarpDeck = blocks.some((block) => block?.type === "marp-frontmatter" || block?.type === "slide");
+  const bodyHtml = hasMarpDeck
+    ? buildMarpDeckHtml(blocks, theme)
+    : blocks.map((b) => blockToHtml(b)).join("\n");
 
   const navEnabled = navBarOptions && navBarOptions.position && navBarOptions.position !== "none";
   const navTop = navEnabled && (navBarOptions.position === "top" || navBarOptions.position === "both");
@@ -983,6 +1160,7 @@ window._CURRENT_FILE_INDEX = ${adaptOpts.currentFileIndex};
 ${SCORM_RUNTIME_SHIM}
 ${ADAPTIVE_RUNTIME_JS}
 ${QUIZ_ENGINE_JS}
+${MARP_DECK_RUNTIME_JS}
 </script>
 </body>
 </html>`;
@@ -1123,6 +1301,13 @@ async function _buildAndDownload(course, modules, version, options = {}) {
   const navBarPosition = options.navBar?.position || "none";
   const adaptiveConfig = parseAdaptiveConfig(course);
   const modulesMeta = buildModulesMeta(modules, adaptiveConfig.variants);
+  const courseTheme = (() => {
+    try {
+      return JSON.parse(course?.theme_json || "{}");
+    } catch {
+      return null;
+    }
+  })();
 
   const zip = new JSZip();
   const manifestXml =
@@ -1137,7 +1322,14 @@ async function _buildAndDownload(course, modules, version, options = {}) {
         ? { position: navBarPosition, moduleIndex: i, totalModules: modules.length, showProgress: false }
         : null;
     const adaptiveOptions = { config: adaptiveConfig, modulesMeta, currentFileIndex: i + 1 };
-    const html = buildScoHtml(mod, course.title || "Course", "", navBarOptions, adaptiveOptions);
+    const html = buildScoHtml(
+      mod,
+      course.title || "Course",
+      courseTheme ? buildThemeCss(courseTheme) : "",
+      navBarOptions,
+      adaptiveOptions,
+      courseTheme
+    );
     zip.file(`module_${i + 1}/index.html`, html);
   }
 
@@ -1164,11 +1356,13 @@ async function _buildAndDownload(course, modules, version, options = {}) {
 export function buildPreviewHtml(module, courseTitle, theme, adaptiveOptions = null) {
   const cssOverride = theme ? buildThemeCss(theme) : "";
   const adaptOpts = adaptiveOptions || { config: { variants: [], checkpoints: [] }, modulesMeta: [], currentFileIndex: 1 };
-  return buildScoHtml(module, courseTitle || "Preview", cssOverride, null, adaptOpts);
+  return buildScoHtml(module, courseTitle || "Preview", cssOverride, null, adaptOpts, theme || null);
 }
 
 // Build an inline CSS snippet from a theme object
 function buildThemeCss(theme) {
+  const canvasSize = getCourseCanvasSize(theme || {});
+  const contentMaxWidth = getCourseContentMaxWidth(theme || {});
   const fonts = [];
   if (theme.headingFont && theme.headingFont !== "Inter") fonts.push(theme.headingFont);
   if (theme.bodyFont && theme.bodyFont !== "Inter" && theme.bodyFont !== theme.headingFont) fonts.push(theme.bodyFont);
@@ -1177,9 +1371,15 @@ function buildThemeCss(theme) {
     : "";
   return `
 ${fontImport}
+:root {
+  --course-canvas-width: ${canvasSize.width}px;
+  --course-canvas-height: ${canvasSize.height}px;
+  --course-content-max-width: ${contentMaxWidth}px;
+}
 body { ${theme.bodyFont ? `font-family: '${theme.bodyFont}', sans-serif;` : ""} ${theme.bgColor ? `background-color: ${theme.bgColor};` : ""} }
 h1, h2, h3, h4, h5, h6 { ${theme.headingFont ? `font-family: '${theme.headingFont}', sans-serif;` : ""} ${theme.primaryColor ? `color: ${theme.primaryColor};` : ""} }
 a { ${theme.accentColor ? `color: ${theme.accentColor};` : ""} }
+.sco-wrapper { max-width: var(--course-content-max-width, 860px); }
   `.trim();
 }
 

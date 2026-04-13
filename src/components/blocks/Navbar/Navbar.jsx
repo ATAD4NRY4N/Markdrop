@@ -75,6 +75,8 @@ export default function Navbar() {
       case "/course":
         return <Wrench className="h-4 w-4 mr-2" />;
       case "/templates":
+      case "/templates/courses":
+      case "/templates/blocks":
         return <FileText className="h-4 w-4 mr-2" />;
       case "/about":
         return <Info className="h-4 w-4 mr-2" />;
@@ -82,6 +84,9 @@ export default function Navbar() {
         return null;
     }
   };
+
+  const isActiveLink = (href) =>
+    href.startsWith("/templates") ? currentPath.startsWith("/templates") : currentPath === href;
 
   return (
     <>
@@ -92,20 +97,24 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden lg:flex items-center gap-3 xl:gap-5">
-          {NAV_LINKS.map((link) => (
+          {NAV_LINKS.map((link) => {
+            const isActive = isActiveLink(link.href);
+
+            return (
             <Link
               key={link.href}
               to={link.href}
               className={`font-semibold relative transition-colors duration-500 ease-in-out text-sm xl:text-base
                 ${
-                  currentPath === link.href
+                  isActive
                     ? "text-black dark:text-white"
                     : "text-[#9b9b9b] dark:text-[#a0a0a0] hover:text-black dark:hover:text-white"
                 }`}
             >
               {link.label}
             </Link>
-          ))}
+            );
+          })}
 
           {/* Auth Section */}
           {!loading && (
@@ -156,18 +165,22 @@ export default function Navbar() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            {NAV_LINKS.map((link) => (
+            {NAV_LINKS.map((link) => {
+              const isActive = isActiveLink(link.href);
+
+              return (
               <DropdownMenuItem key={link.href} asChild>
                 <Link
                   to={link.href}
                   className={`cursor-pointer w-full flex items-center
-                    ${currentPath === link.href ? "text-foreground" : "text-muted-foreground"}`}
+                    ${isActive ? "text-foreground" : "text-muted-foreground"}`}
                 >
                   {getNavIcon(link.href)}
                   {link.label}
                 </Link>
               </DropdownMenuItem>
-            ))}
+              );
+            })}
 
             <DropdownMenuSeparator />
 

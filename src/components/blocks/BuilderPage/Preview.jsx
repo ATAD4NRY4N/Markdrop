@@ -1,6 +1,15 @@
-import { AlertCircle, AlertTriangle, BadgeCheck, Info, Lightbulb, OctagonAlert } from "lucide-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  BadgeCheck,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Lightbulb,
+  OctagonAlert,
+} from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
@@ -24,6 +33,23 @@ import PdfBlock from "@/components/blocks/BuilderPage/blocks/PdfBlock";
 import ProgressMarkerBlock from "@/components/blocks/BuilderPage/blocks/ProgressMarkerBlock";
 import QuizBlock from "@/components/blocks/BuilderPage/blocks/QuizBlock";
 import TimeRequirementsBlock from "@/components/blocks/BuilderPage/blocks/TimeRequirementsBlock";
+import { Button } from "@/components/ui/button";
+import {
+  getCourseAspectRatio,
+  getCourseCanvasLabel,
+  getCourseCanvasSize,
+  getCourseContentMaxWidth,
+  isMarpPresentation,
+} from "@/lib/courseDisplay";
+import {
+  extractCustomCss,
+  getSlideBackground,
+  getSlideDirectives,
+  getRenderableSlideBlocks,
+  getSlideTitle,
+  MARP_METADATA_BLOCK_TYPES,
+  splitBlocksIntoSlides,
+} from "@/lib/marp";
 
 function MermaidDiagram({ chart }) {
   const ref = useRef(null);
@@ -674,7 +700,137 @@ function buildThemeStyle(theme) {
   `.trim();
 }
 
+const PREVIEW_HIDDEN_BLOCK_TYPES = new Set(["marp-frontmatter", "slide", ...MARP_METADATA_BLOCK_TYPES]);
+
+function buildSlideBackgroundStyle(background) {
+  if (!background?.url) return null;
+
+  const position = background.position || "bg";
+  let backgroundPosition = "center";
+  let backgroundSize = "cover";
+
+  if (position.includes("fit") || position.includes("contain")) {
+    backgroundSize = "contain";
+  }
+
+  if (position.startsWith("bg left")) {
+    backgroundPosition = "left center";
+  } else if (position.startsWith("bg right")) {
+    backgroundPosition = "right center";
+  } else if (position === "bg top") {
+    backgroundPosition = "top center";
+  } else if (position === "bg bottom") {
+    backgroundPosition = "bottom center";
+  }
+
+  return {
+    backgroundImage: `url(${background.url})`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition,
+    backgroundSize,
+    opacity: background.opacity ? Number(background.opacity) : 1,
+  };
+}
+
+function SlideBlockPreview({
+  slideBlocks,
+  slideIndex,
+  totalSlides,
+  frontmatter,
+  contentMaxWidth,
+  courseAspectRatio,
+  mdComponents,
+  theme,
+}) {
+  const directives = getSlideDirectives(slideBlocks);
+  const background = getSlideBackground(slideBlocks);
+  const renderableBlocks = getRenderableSlideBlocks(slideBlocks);
+  const textColor = directives._color || frontmatter?.color || undefined;
+  const backgroundColor =
+    directives._backgroundColor || frontmatter?.backgroundColor || theme?.bgColor || "#ffffff";
+  const showPageNumber =
+    frontmatter?.paginate || directives._paginate === "true" || directives._paginate === "skip";
+  const pageNumber = directives._paginate === "skip" ? "" : `${slideIndex + 1}`;
+  const backgroundStyle = buildSlideBackgroundStyle(background);
+  const slideTitle = getSlideTitle(slideBlocks, slideIndex);
+
+  return (
+    <div
+      className="course-preview-root relative w-full overflow-hidden rounded-[28px] border border-border/40 bg-background shadow-xl"
+      style={{
+        aspectRatio: frontmatter?.size === "4:3" ? "4 / 3" : courseAspectRatio,
+        backgroundColor,
+      }}
+    >
+      {backgroundStyle && <div className="absolute inset-0" style={backgroundStyle} />}
+
+      <div className="relative z-10 h-full overflow-auto">
+        <div
+          className="absolute left-6 right-6 top-4 text-xs opacity-70 sm:left-10 sm:right-10"
+          style={textColor ? { color: textColor } : undefined}
+        >
+          {directives._header || frontmatter?.header || slideTitle}
+        </div>
+
+        <div
+          className="px-6 pb-12 pt-12 sm:px-10 sm:pb-14 sm:pt-14"
+          style={textColor ? { color: textColor, "--preview-primary": textColor } : undefined}
+        >
+          <div className="mx-auto w-full" style={{ maxWidth: `${contentMaxWidth}px` }}>
+            {renderableBlocks.length === 0 ? (
+              <div className="flex min-h-[240px] items-center justify-center rounded-2xl border border-dashed border-border/40 bg-background/70 px-6 text-center text-sm text-muted-foreground">
+                This slide is empty. Add content blocks after the slide break.
+              </div>
+            ) : (
+              renderableBlocks.map((block) => (
+                <AnimatedBlockPreview key={block.id} block={block} mdComponents={mdComponents} />
+              ))
+            )}
+          </div>
+        </div>
+
+        {(directives._footer || frontmatter?.footer || (showPageNumber && pageNumber)) && (
+          <div
+            className="absolute bottom-4 left-6 right-6 flex items-center justify-between gap-4 text-xs opacity-70 sm:left-10 sm:right-10"
+            style={textColor ? { color: textColor } : undefined}
+          >
+            <span>{directives._footer || frontmatter?.footer || ""}</span>
+            <span className="tabular-nums">{showPageNumber ? pageNumber : ""}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-linear-to-b from-background/10 to-transparent" />
+    </div>
+  );
+}
+
 export default function Preview({ blocks = [], theme }) {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const displaySettings = useMemo(() => theme || {}, [theme]);
+  const themeStyle = buildThemeStyle(theme);
+  const isSlideDeck = useMemo(() => isMarpPresentation(blocks), [blocks]);
+  const customCss = useMemo(() => extractCustomCss(blocks), [blocks]);
+  const { frontmatter, slideGroups } = useMemo(() => splitBlocksIntoSlides(blocks), [blocks]);
+  const courseCanvasSize = useMemo(() => getCourseCanvasSize(displaySettings), [displaySettings]);
+  const courseAspectRatio = useMemo(() => getCourseAspectRatio(displaySettings), [displaySettings]);
+  const contentMaxWidth = useMemo(() => getCourseContentMaxWidth(displaySettings), [displaySettings]);
+  const previewBlocks = useMemo(
+    () => blocks.filter((block) => !PREVIEW_HIDDEN_BLOCK_TYPES.has(block.type)),
+    [blocks]
+  );
+
+  useEffect(() => {
+    if (!slideGroups.length) {
+      setActiveSlide(0);
+      return;
+    }
+
+    if (activeSlide >= slideGroups.length) {
+      setActiveSlide(slideGroups.length - 1);
+    }
+  }, [activeSlide, slideGroups.length]);
+
   // Shared markdown component overrides — defined once, passed to each per-block renderer
   const mdComponents = {
     h1: ({ ...props }) => (
@@ -884,14 +1040,24 @@ export default function Preview({ blocks = [], theme }) {
     },
   };
 
-  const themeStyle = buildThemeStyle(theme);
+  const frameStyle = {
+    width: "100%",
+    maxWidth: `${Math.min(courseCanvasSize.width, 1600)}px`,
+    aspectRatio: courseAspectRatio,
+  };
 
   return (
-    <div className="w-full h-full rounded-lg transition-colors relative">
+    <div className="flex h-full w-full flex-col rounded-lg transition-colors relative">
       {themeStyle && (
         <style
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: themeStyle }}
+        />
+      )}
+      {customCss && (
+        <style
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: customCss }}
         />
       )}
       {blocks.length === 0 ? (
@@ -901,11 +1067,82 @@ export default function Preview({ blocks = [], theme }) {
           </p>
         </div>
       ) : (
-        <div className="h-full overflow-y-auto overflow-x-hidden">
-          <div className="course-preview-root p-2 sm:p-4 space-y-0">
-            {blocks.map((block) => (
-              <AnimatedBlockPreview key={block.id} block={block} mdComponents={mdComponents} />
-            ))}
+        <div className="flex h-full flex-col overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b bg-muted/10 px-4 py-2 text-xs text-muted-foreground">
+            <span>{getCourseCanvasLabel(displaySettings)}</span>
+            {isSlideDeck && slideGroups.length > 0 ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setActiveSlide((currentSlide) => Math.max(0, currentSlide - 1))}
+                  disabled={activeSlide === 0}
+                  aria-label="Previous slide"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="min-w-[88px] text-center font-medium tabular-nums">
+                  {activeSlide + 1} / {slideGroups.length}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() =>
+                    setActiveSlide((currentSlide) =>
+                      Math.min(slideGroups.length - 1, currentSlide + 1)
+                    )
+                  }
+                  disabled={activeSlide >= slideGroups.length - 1}
+                  aria-label="Next slide"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="h-full overflow-auto bg-muted/5 p-4">
+            <div className="flex min-h-full items-start justify-center">
+              {isSlideDeck ? (
+                slideGroups.length > 0 ? (
+                  <div style={frameStyle}>
+                    <SlideBlockPreview
+                      slideBlocks={slideGroups[activeSlide] || []}
+                      slideIndex={activeSlide}
+                      totalSlides={slideGroups.length}
+                      frontmatter={frontmatter}
+                      contentMaxWidth={Math.min(contentMaxWidth, courseCanvasSize.width - 96)}
+                      courseAspectRatio={frontmatter?.size === "4:3" ? "4 / 3" : courseAspectRatio}
+                      mdComponents={mdComponents}
+                      theme={theme}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex min-h-[320px] w-full max-w-3xl items-center justify-center rounded-[28px] border border-dashed border-muted-foreground/20 bg-background px-6 text-center text-sm text-muted-foreground">
+                    Add content blocks after the MARP Frontmatter or insert Slide Break blocks to build the deck preview.
+                  </div>
+                )
+              ) : previewBlocks.length > 0 ? (
+                <div
+                  className="course-preview-root w-full overflow-hidden rounded-[28px] border border-border/40 bg-background shadow-xl"
+                  style={frameStyle}
+                >
+                  <div className="h-full overflow-auto px-4 py-5 sm:px-8 sm:py-6">
+                    <div className="mx-auto w-full" style={{ maxWidth: `${contentMaxWidth}px` }}>
+                      {previewBlocks.map((block) => (
+                        <AnimatedBlockPreview key={block.id} block={block} mdComponents={mdComponents} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex min-h-[320px] w-full max-w-3xl items-center justify-center rounded-[28px] border border-dashed border-muted-foreground/20 bg-background px-6 text-center text-sm text-muted-foreground">
+                  No renderable preview content yet. Add blocks below the course settings or slide metadata.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

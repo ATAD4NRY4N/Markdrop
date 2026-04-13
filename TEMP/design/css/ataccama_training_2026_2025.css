@@ -1,0 +1,244 @@
+/* @theme ataccama_training_2026_2025 */
+/* Generated CSS for Ataccama Training 2026 */
+/* Auto-generated on 2025-11-14 10:07:54 */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+  font-family: 'Poppins', sans-serif;
+
+  /* Primary Palette */
+  --AtaElectricPink: rgb(241, 0, 144);
+  --AtaElectricPurple: rgb(106, 44, 245);
+  --AtaNavy: rgb(26, 12, 66);
+  --AtaPlum: rgb(51, 4, 42);
+  --AtaWhite: rgb(255, 255, 255);
+  --AtaBlack: rgb(0, 0, 0);
+
+  /* Electric Pink Tints */
+  --AtaElectricPink90: rgb(243, 28, 156);
+  --AtaElectricPink80: rgb(244, 57, 169);
+  --AtaElectricPink70: rgb(246, 51, 181);
+  --AtaElectricPink60: rgb(247, 113, 193);
+  --AtaElectricPink50: rgb(249, 142, 206);
+  --AtaElectricPink40: rgb(250, 170, 218);
+  --AtaElectricPink30: rgb(252, 198, 230);
+  --AtaElectricPink20: rgb(253, 227, 243);
+  --AtaElectricPink10: rgb(254, 241, 249);
+
+  /* Navy Tints */
+  --AtaNavy90: rgb(51, 39, 87);
+  --AtaNavy80: rgb(77, 66, 108);
+  --AtaNavy70: rgb(102, 93, 129);
+  --AtaNavy60: rgb(128, 120, 150);
+  --AtaNavy50: rgb(153, 147, 171);
+  --AtaNavy40: rgb(179, 174, 192);
+  --AtaNavy30: rgb(204, 201, 213);
+  --AtaNavy20: rgb(221, 219, 227);
+  --AtaNavy10: rgb(238, 237, 241);
+
+  /* Grayscale */
+  --AtaBlack90: rgb(28, 28, 28);
+  --AtaBlack80: rgb(57, 57, 57);
+  --AtaBlack70: rgb(85, 85, 85);
+  --AtaBlack60: rgb(113, 113, 113);
+  --AtaBlack50: rgb(142, 142, 142);
+  --AtaBlack40: rgb(170, 170, 170);
+  --AtaBlack30: rgb(198, 198, 198);
+  --AtaBlack20: rgb(227, 227, 227);
+  --AtaBlack10: rgb(240, 240, 240);
+}
+
+/* Base Slide Styles */
+section {
+  width: 1920px;
+  height: 1080px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  margin: 0;
+  background-color: var(--AtaWhite);
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* Layout Utilities */
+.container {
+  display: flex;
+  width: 100%;
+  gap: 40px;
+}
+
+.column {
+  padding: 0px;
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+/* Flex Alignment */
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+
+/* Text Alignment */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* Positioning Utilities */
+.text-bottom {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+}
+
+.text-center-left {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 45%;
+}
+
+.row-centre {
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+}
+
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Image Utilities */
+img {
+  border: 3px solid var(--AtaWhite);
+  border-radius: 8px;
+  box-shadow: 0 10px 10px var(--AtaBlack70);
+}
+
+/* Zone Classes */
+.metadata-zone {
+  background-color: rgb(227, 227, 227);
+  padding: 20px;
+  border-radius: 5px;
+}
+
+/* Content Element Styles */
+.marp-slide-content h1,
+.slide-content h1 {
+  font-size: 2.5em;
+  font-weight: 600;
+  margin: 0 0 40px 0;
+  width: fit-content;
+  color: rgb(0, 0, 0);
+  font-family: "Poppins", sans-serif;
+}
+
+.marp-slide-content h2,
+.slide-content h2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: rgb(241, 0, 144);
+  margin: 0;
+  width: fit-content;
+  font-family: "Poppins", sans-serif;
+}
+
+.marp-slide-content p,
+.slide-content p {
+  font-size: 1.2em;
+  font-weight: 400;
+  margin: 0;
+  padding-top: 10px;
+  width: 100%;
+  color: rgb(226, 21, 21);
+  line-height: 1.6;
+  font-family: "Poppins", sans-serif;
+}
+
+.marp-slide-content h3,
+.slide-content h3 {
+  font-size: 1.0em;
+  font-weight: 600;
+  color: rgb(241, 0, 144);
+  margin: 0;
+  width: fit-content;
+  font-family: "Poppins", sans-serif;
+}
+
+.marp-slide-content ul,
+.slide-content ul {
+  margin: 0;
+  padding: 0 40px 20px 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.marp-slide-content ol,
+.slide-content ol {
+  margin: 0;
+  padding: 0 40px 20px 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.marp-slide-content li,
+.slide-content li {
+  color: rgb(0, 0, 0);
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.marp-slide-content code,
+.slide-content code {
+  background: rgb(26, 12, 66);
+  color: rgb(255, 255, 255);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.marp-slide-content pre,
+.slide-content pre {
+  background: rgb(26, 12, 66);
+  color: rgb(255, 255, 255);
+  padding: 20px;
+  border-radius: 8px;
+  overflow: auto;
+  font-family: 'Courier New', monospace;
+  margin: 20px 0;
+}
+
+.marp-slide-content strong,
+.slide-content strong {
+  font-weight: 600;
+  color: rgb(241, 0, 144);
+}
+
+.marp-slide-content em,
+.slide-content em {
+  font-style: italic;
+  color: rgb(57, 57, 57);
+}
+
+.marp-slide-content a,
+.slide-content a {
+  color: rgb(106, 44, 245);
+  text-decoration: none;
+  font-weight: 500;
+}

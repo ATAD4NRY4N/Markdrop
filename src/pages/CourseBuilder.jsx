@@ -15,6 +15,7 @@ import {
   Clipboard,
   Eye,
   FileDown,
+  Film,
   GitBranch,
   Globe,
   GraduationCap,
@@ -46,6 +47,7 @@ import AdaptivePanel from "@/components/blocks/CourseBuilderPage/AdaptivePanel";
 import CollaboratorsDialog from "@/components/blocks/CourseBuilderPage/CollaboratorsDialog";
 import CoursePreview from "@/components/blocks/CourseBuilderPage/CoursePreview";
 import CourseStructurePanel from "@/components/blocks/CourseBuilderPage/CourseStructurePanel";
+import NarratedVideoExportDialog from "@/components/blocks/CourseBuilderPage/NarratedVideoExportDialog";
 import ScormExportDialog from "@/components/blocks/CourseBuilderPage/ScormExportDialog";
 import SearchReplaceDialog from "@/components/blocks/CourseBuilderPage/SearchReplaceDialog";
 import XliffDialog from "@/components/blocks/CourseBuilderPage/XliffDialog";
@@ -77,6 +79,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { CourseProvider, useCourse } from "@/context/CourseContext";
+import { createDefaultMarpVoiceoverBlock } from "@/lib/marp";
 import { updateModule } from "@/lib/storage";
 import {
   replaceAllInModules,
@@ -120,6 +123,7 @@ function CourseBuilderInner() {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [activeId, setActiveId] = useState(null);
   const [showScormDialog, setShowScormDialog] = useState(false);
+  const [showNarratedVideoDialog, setShowNarratedVideoDialog] = useState(false);
   const [showXliffDialog, setShowXliffDialog] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
@@ -526,6 +530,7 @@ function CourseBuilderInner() {
       branching: "Branching Scenario",
       "time-requirements": "Time Requirement",
       categorization: "Categorization",
+      "marp-voiceover": "Slide Narration",
     };
     return labels[blockType] || blockType;
   };
@@ -656,6 +661,22 @@ function CourseBuilderInner() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Find &amp; replace (Ctrl+H)</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => setShowNarratedVideoDialog(true)}
+                      disabled={!blocks.length}
+                    >
+                      <Film className="h-4 w-4" />
+                      <span className="hidden lg:inline">Narrated Video</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Prepare the local narrated render job for the current module</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -868,6 +889,13 @@ function CourseBuilderInner() {
         onOpenChange={setShowScormDialog}
         course={course}
         modules={modules}
+      />
+
+      <NarratedVideoExportDialog
+        open={showNarratedVideoDialog}
+        onOpenChange={setShowNarratedVideoDialog}
+        blocks={blocks}
+        title={activeModule ? `${course?.title || "CourseForge"} - ${activeModule.title}` : course?.title || "CourseForge Presentation"}
       />
 
       <XliffDialog
@@ -1103,6 +1131,7 @@ function buildDefaultBlock(blockType) {
         { id: "c2", label: "" },
       ],
     },
+    "marp-voiceover": createDefaultMarpVoiceoverBlock({ id: Date.now().toString() }),
   };
   return { ...base, ...(extras[blockType] || {}) };
 }

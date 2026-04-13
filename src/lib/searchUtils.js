@@ -79,6 +79,9 @@ export function getBlockTextSegments(block) {
         if (item.content) segs.push({ path: `items.${i}.content`, text: item.content });
       });
       break;
+    case "marp-voiceover":
+      if (block.content) segs.push({ path: "content", text: block.content });
+      break;
     case "learning-objective":
       (block.objectives || []).forEach((obj, i) => {
         if (obj) segs.push({ path: `objectives.${i}`, text: obj });
@@ -329,6 +332,7 @@ const BLOCK_LABELS = {
   matching: "Matching", hotspot: "Hotspot", categorization: "Categorization",
   branching: "Branching", "progress-marker": "Progress Marker",
   "course-nav": "Course Nav", "time-requirements": "Time Requirements",
+  "marp-voiceover": "Slide Narration",
 };
 
 export function getBlockLabel(type) {

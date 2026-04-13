@@ -109,6 +109,8 @@ function blockToHtml(block) {
       return buildCarouselHtml(block);
     case "pdf":
       return buildPdfHtml(block);
+    case "marp-voiceover":
+      return "";
 
     default:
       return `<p>${marked.parseInline(block.content || "")}</p>`;

@@ -1,0 +1,117 @@
+/* @theme ataccama_2024_colours */
+
+@import "default";
+
+:root {
+  /* Primary color palette
+Our palette uses a bold combination of vibrant & bright pink and purple with ultra-dark & sophisticated navy and plum.
+This bright/dark pairing mixed in with white is striking, energetic, and memorable.
+
+Our primary palette should be used across all digital and print executions for the parent Ataccama brand.
+*/
+
+--AtaElectricPink: rgb(241, 0, 144);
+--AtaElectricPurple: rgb(106, 44, 245);
+--AtaNavy: rgb(26, 12, 66);
+--AtaPlum: rgb(51, 4, 42);
+--AtaWhite: rgb(255, 255, 255);
+--AtaBlack: rgb(0, 0, 0);
+
+  /* Secondary color palette
+Our secondary colors are to support our primary colors when necessary. We include a variety of tints of
+our primary palette; these tints can be used to build contrast in print and digital experiences.
+
+Color families
+
+Our palette offers a curated palette, from light and bright to rich darker shades, for maximum flexibility.
+You can create tone-on-tone layouts by using multiple shades from a single-color family.
+Use no more than two color families at a time in a single piece or viewing plane.
+
+Prioritize the use of mid to dark shades as the dominant color. Only use the lighter tones sparingly.
+*/
+
+--AtaElectricPink90: rgb(243, 28, 156);
+--AtaElectricPink80: rgb(244, 57, 169);
+--AtaElectricPink70: rgb(246, 51, 181);
+--AtaElectricPink60: rgb(247, 113, 193);
+--AtaElectricPink50: rgb(249, 142, 206);
+--AtaElectricPink40: rgb(250, 170, 218);
+--AtaElectricPink30: rgb(252, 198, 230);
+--AtaElectricPink20: rgb(253, 227, 243);
+--AtaElectricPink10: rgb(254, 241, 249);
+
+--AtaElectricPurple90: rgb(123, 67, 246);
+--AtaElectricPurple80: rgb(139, 91, 247);
+--AtaElectricPurple70: rgb(156, 114, 248);
+--AtaElectricPurple60: rgb(172, 138, 249);
+--AtaElectricPurple50: rgb(189, 161, 251);
+--AtaElectricPurple40: rgb(205, 185, 252);
+--AtaElectricPurple30: rgb(222, 208, 253);
+--AtaElectricPurple20: rgb(238, 232, 254);
+--AtaElectricPurple10: rgb(247, 243, 255);
+
+--AtaNavy90: rgb(51, 39, 87);
+--AtaNavy80: rgb(77, 66, 108);
+--AtaNavy70: rgb(102, 93, 129);
+--AtaNavy60: rgb(128, 120, 150);
+--AtaNavy50: rgb(153, 147, 171);
+--AtaNavy40: rgb(179, 174, 192);
+--AtaNavy30: rgb(204, 201, 213);
+--AtaNavy20: rgb(221, 219, 227);
+--AtaNavy10: rgb(238, 237, 241);
+
+--AtaPlum90: rgb(74, 29, 66);
+--AtaPlum80: rgb(86, 57, 89);
+--AtaPlum70: rgb(119, 86, 113);
+--AtaPlum60: rgb(142, 114, 137);
+--AtaPlum50: rgb(164, 142, 160);
+--AtaPlum40: rgb(187, 170, 184);
+--AtaPlum30: rgb(210, 199, 208);
+--AtaPlum20: rgb(225, 218, 224);
+--AtaPlum10: rgb(240, 236, 239);
+
+/* Accent colors
+Our neutral colours are to support our primary and secondary colours when necessary. We include a variety
+of grays: tints of these grays which can be used to build contrast on print and digital experiences.
+
+See the examples of how we use these colors in the design treatments for Ataccama website and products.
+*/
+--AtaBlack90: rgb(28, 28, 28);
+--AtaBlack80: rgb(57, 57, 57);
+--AtaBlack70: rgb(85, 85, 85);
+--AtaBlack60: rgb(113, 113, 113);
+--AtaBlack50: rgb(142, 142, 142);
+--AtaBlack40: rgb(170, 170, 170);
+--AtaBlack30: rgb(198, 198, 198);
+--AtaBlack20: rgb(227, 227, 227);
+--AtaBlack10: rgb(240, 240, 240);
+
+/* Highlight colors
+To be used in the design treatments for Ataccama presentations and products only.
+*/
+
+--AtaGreen: rgb(0, 245, 200);
+--AtaGreen80: rgb(51, 247, 211);
+--AtaGreen60: rgb(102, 249, 222);
+--AtaGreen40: rgb(153, 251, 233);
+--AtaGreen20: rgb(204, 253, 244);
+
+--AtaRed: rgb(247, 82, 80);
+--AtaRed80: rgb(249, 117, 115);
+--AtaRed60: rgb(250, 151, 150);
+--AtaRed40: rgb(252, 186, 185);
+--AtaRed20: rgb(253, 220, 220);
+
+--AtaBlue: rgb(51, 161, 253);
+--AtaBlue80: rgb(92, 180, 253);
+--AtaBlue60: rgb(133, 199, 254);
+--AtaBlue40: rgb(173, 217, 254);
+--AtaBlue20: rgb(214, 236, 255);
+
+--AtaYellow: rgb(253, 202, 64);
+--AtaYellow80: rgb(253, 213, 102);
+--AtaYellow60: rgb(254, 223, 140);
+--AtaYellow40: rgb(254, 234, 179);
+--AtaYellow20: rgb(255, 244, 217);
+
+}

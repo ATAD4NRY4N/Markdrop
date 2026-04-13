@@ -34,6 +34,7 @@ import MarpBgImageBlock from "./blocks/MarpBgImageBlock";
 import MarpFrontmatterBlock from "./blocks/MarpFrontmatterBlock";
 import MarpSlideDirectiveBlock from "./blocks/MarpSlideDirectiveBlock";
 import MarpStyleBlock from "./blocks/MarpStyleBlock";
+import MarpVoiceoverBlock from "./blocks/MarpVoiceoverBlock";
 import MathBlock from "./blocks/MathBlock";
 import ParagraphBlock from "./blocks/ParagraphBlock";
 import PdfBlock from "./blocks/PdfBlock";
@@ -261,6 +262,8 @@ const MarkdownBlock = memo(function MarkdownBlock({
         return <MarpBgImageBlock block={block} onUpdate={onUpdate} />;
       case "marp-style":
         return <MarpStyleBlock block={block} onUpdate={onUpdate} />;
+      case "marp-voiceover":
+        return <MarpVoiceoverBlock block={block} onUpdate={onUpdate} />;
       default:
         if (listTypes.includes(block.type)) {
           return <ListBlock block={block} onUpdate={onUpdate} />;

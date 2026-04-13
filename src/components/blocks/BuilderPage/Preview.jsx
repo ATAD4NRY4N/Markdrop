@@ -144,6 +144,8 @@ const blocksToMarkdown = (blocks) => {
           return `[${block.content}](${block.url || ""})`;
         case "table":
           return block.content;
+        case "marp-voiceover":
+          return "";
         case "shield-badge": {
           const badges = block.badges || [];
           const align = block.align || "left";

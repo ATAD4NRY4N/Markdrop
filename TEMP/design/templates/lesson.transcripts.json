@@ -1,0 +1,27 @@
+{
+  "sourceLanguage": "en",
+  "settings": {
+    "audio_format": "ogg"
+  },
+  "generatedAt": "2026-01-01T00:00:00+00:00",
+  "slides": [
+    {
+      "slideIndex": 0,
+      "text": "English narration for slide 1"
+    }
+  ],
+  "translations": {
+    "fr": {
+      "language": "fr",
+      "provider": "pending",
+      "generatedAt": "2026-01-01T00:00:00+00:00",
+      "sourceTranscriptMtime": 0,
+      "slides": [
+        {
+          "slideIndex": 0,
+          "text": ""
+        }
+      ]
+    }
+  }
+}

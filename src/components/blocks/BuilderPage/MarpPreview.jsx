@@ -7,148 +7,13 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
 import { Button } from "@/components/ui/button";
-import { blocksToMarpMarkdown } from "@/lib/exportUtils";
-
-/**
- * Split blocks into slides.
- * Each `slide` block acts as a slide separator.
- * Blocks before the first separator are slide 1.
- * The `marp-frontmatter` block is extracted separately for settings.
- */
-function splitBlocksIntoSlides(blocks) {
-  let frontmatter = null;
-  const slideGroups = [];
-  let current = [];
-
-  for (const block of blocks) {
-    if (block.type === "marp-frontmatter") {
-      frontmatter = block;
-      continue;
-    }
-    if (block.type === "slide") {
-      slideGroups.push(current);
-      current = [];
-    } else {
-      current.push(block);
-    }
-  }
-  if (current.length > 0 || slideGroups.length > 0) {
-    slideGroups.push(current);
-  }
-
-  return { frontmatter, slideGroups };
-}
-
-/**
- * Convert a list of blocks (within one slide) to markdown string.
- */
-function slideBlocksToMarkdown(blocks) {
-  return blocks
-    .map((block) => {
-      switch (block.type) {
-        case "h1":
-          return `# ${block.content}`;
-        case "h2":
-          return `## ${block.content}`;
-        case "h3":
-          return `### ${block.content}`;
-        case "h4":
-          return `#### ${block.content}`;
-        case "h5":
-          return `##### ${block.content}`;
-        case "h6":
-          return `###### ${block.content}`;
-        case "paragraph":
-          return block.content;
-        case "blockquote":
-          return `> ${block.content}`;
-        case "code":
-          return block.content;
-        case "ul":
-          return block.content;
-        case "ol":
-          return block.content;
-        case "task-list":
-          return block.content;
-        case "separator":
-          // horizontal rule within a slide (not a slide break)
-          return "---";
-        case "image": {
-          if (block.width || block.height) {
-            const attrs = [`src="${block.content}"`];
-            if (block.alt) attrs.push(`alt="${block.alt}"`);
-            if (block.width) attrs.push(`width="${block.width}"`);
-            if (block.height) attrs.push(`height="${block.height}"`);
-            return `<img ${attrs.join(" ")} />`;
-          }
-          return `![${block.alt || ""}](${block.content})`;
-        }
-        case "link":
-          return `[${block.content}](${block.url || ""})`;
-        case "table":
-          return block.content;
-        case "math":
-          return block.content;
-        case "marp-slide-directive": {
-          const directives = block.directives || [];
-          return directives
-            .filter((d) => d.key && d.value)
-            .map((d) => `<!-- ${d.key}: ${d.value} -->`)
-            .join("\n");
-        }
-        case "marp-bg-image": {
-          if (!block.content) return "";
-          let alt = block.position || "bg";
-          if (block.opacity) alt += ` opacity:${block.opacity}`;
-          return `![${alt}](${block.content})`;
-        }
-        case "marp-style": {
-          return ""; // CSS handled separately
-        }
-        default:
-          return block.content || "";
-      }
-    })
-    .filter((s) => s !== "")
-    .join("\n\n");
-}
-
-/**
- * Extract custom CSS from marp-style blocks.
- */
-function extractCustomCss(blocks) {
-  return blocks
-    .filter((b) => b.type === "marp-style" && b.content)
-    .map((b) => b.content)
-    .join("\n");
-}
-
-/**
- * Get slide background image from marp-bg-image blocks in a slide.
- */
-function getSlideBackground(slideBlocks) {
-  const bgBlock = slideBlocks.find((b) => b.type === "marp-bg-image" && b.content);
-  if (!bgBlock) return null;
-  return { url: bgBlock.content, position: bgBlock.position || "bg", opacity: bgBlock.opacity };
-}
-
-/**
- * Get per-slide directives (e.g. _class, _backgroundColor, _color).
- */
-function getSlideDirectives(slideBlocks) {
-  const directives = {};
-  for (const block of slideBlocks) {
-    if (block.type === "marp-slide-directive") {
-      for (const d of block.directives || []) {
-        if (d.key && d.value) {
-          // Strip leading underscore for use as a style/class identifier
-          directives[d.key] = d.value;
-        }
-      }
-    }
-  }
-  return directives;
-}
+import {
+  extractCustomCss,
+  getSlideBackground,
+  getSlideDirectives,
+  slideBlocksToMarkdown,
+  splitBlocksIntoSlides,
+} from "@/lib/marp";
 
 const MarpPreview = forwardRef(function MarpPreview(
   { blocks = [], controlledSlide = null },
@@ -393,5 +258,4 @@ const MarpPreview = forwardRef(function MarpPreview(
 
 export default MarpPreview;
 
-// Re-export for use in export utilities
 export { splitBlocksIntoSlides, slideBlocksToMarkdown, extractCustomCss };

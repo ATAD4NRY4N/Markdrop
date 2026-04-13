@@ -1,0 +1,9 @@
+/* @theme audio */
+
+audio {
+    position: absolute;
+    top: 20px; /* Or any distance from the top you prefer */
+    right: 100px; /* Or any distance from the right */
+    width: 200px; /* Adjust width as needed */
+    z-index: 1000; /* Ensure it's on top of other content */
+  }

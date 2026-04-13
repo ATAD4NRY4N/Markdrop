@@ -284,22 +284,50 @@ export const duplicateCourse = async (courseId, userId) => {
   const extras = {};
   if (original.theme_json) extras.theme_json = original.theme_json;
   if (original.adaptive_config) extras.adaptive_config = original.adaptive_config;
-  if (original.sections_json) extras.sections_json = original.sections_json;
-  if (Object.keys(extras).length) {
-    await supabase.from("courses").update(extras).eq("id", newCourse.id);
-  }
+  const sectionBlueprints = (() => {
+    try {
+      const parsed = JSON.parse(original.sections_json || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  })();
 
-  // 4. Duplicate modules if any exist
+  // 4. Duplicate modules if any exist and remap section membership to the new ids
   if (modules.length > 0) {
-    const { error } = await supabase.from("course_modules").insert(
-      modules.map((m) => ({
-        course_id: newCourse.id,
-        title: m.title,
-        order: m.order,
-        blocks_json: m.blocks_json,
+    const moduleIdMap = new Map();
+
+    for (const module of modules) {
+      const createdModule = await createModule(
+        newCourse.id,
+        module.title,
+        module.order,
+        module.blocks_json,
+      );
+      moduleIdMap.set(module.id, createdModule.id);
+    }
+
+    if (sectionBlueprints.length > 0) {
+      extras.sections_json = JSON.stringify(
+        sectionBlueprints.map((section) => ({
+          ...section,
+          moduleIds: (section.moduleIds || [])
+            .map((moduleId) => moduleIdMap.get(moduleId))
+            .filter(Boolean),
+        })),
+      );
+    }
+  } else if (sectionBlueprints.length > 0) {
+    extras.sections_json = JSON.stringify(
+      sectionBlueprints.map((section) => ({
+        ...section,
+        moduleIds: [],
       })),
     );
-    if (error) throw error;
+  }
+
+  if (Object.keys(extras).length) {
+    await supabase.from("courses").update(extras).eq("id", newCourse.id);
   }
 
   return newCourse;

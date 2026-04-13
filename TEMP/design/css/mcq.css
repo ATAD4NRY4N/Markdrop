@@ -1,0 +1,285 @@
+/* @theme mcq */
+
+.mcq-container { /* Base container */
+  width: 100%;
+  margin: 20px auto;
+  position: relative; /* Context for potential absolute elements later */
+}
+
+.question-page {
+  /* Static view: show all questions in normal flow */
+  display: block;
+  position: relative; /* Normal flow */
+  padding: 20px; /* Adjust padding */
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 25px; /* Space between questions */
+  min-height: auto; /* Remove fixed min-height for static */
+  /* Remove animations for static view */
+  /* animation: none; */
+}
+
+.question-page h2 {
+  margin-bottom: 15px;
+  font-size: 1.3em;
+  color: #333;
+}
+
+.question-page .question-text {
+  margin-bottom: 20px;
+}
+
+.choice {
+  margin-bottom: 10px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid transparent; /* Base border */
+}
+
+/* Static view: HIDE interactive elements */
+.choice input[type="radio"],
+.choice input[type="checkbox"],
+.next-button,
+#summary { /* Hide summary section by default */
+  display: none;
+}
+
+.choice label {
+  font-size: 1.1em;
+  cursor: default; /* No pointer needed in static */
+  margin-left: 5px; /* Adjust spacing if input is hidden */
+  width: 100%;
+}
+
+/* Static view: HIGHLIGHT the correct answer */
+.choice.is-correct-answer {
+  background-color: #e8f5e9; /* Light green background */
+  border-left: 4px solid #4caf50; /* Green left border */
+  padding-left: 15px;
+}
+.choice.is-correct-answer label {
+   font-weight: bold; /* Make correct answer text bold */
+   color: #2e7d32; /* Darker green text */
+}
+/* Optional: Add a checkmark */
+.choice.is-correct-answer::before {
+   content: '✅';
+   margin-right: 8px;
+   flex-shrink: 0; /* Prevent checkmark from shrinking */
+}
+
+/* Optional: Dim incorrect choices in static view */
+.choice:not(.is-correct-answer) {
+  opacity: 0.8;
+  color: #666;
+}
+.choice:not(.is-correct-answer) label {
+  font-weight: normal; /* Ensure incorrect are not bold */
+}
+
+
+/* --- INTERACTIVE MODE STYLES (Applied when .mcq-interactive-mode is added) --- */
+
+/* Override static defaults for interactive mode */
+/* Increase specificity to ensure non-visible pages are hidden */
+.mcq-interactive-mode > #quiz-content > .question-page {
+  display: none; /* Hide all pages initially */
+  position: absolute; /* Restore absolute positioning for transitions */
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 500px; /* Restore min-height for consistency */
+  animation: fadeIn 0.5s ease; /* Restore animation */
+  margin-bottom: 0; /* Remove static margin */
+}
+
+/* Ensure the .visible class overrides the display: none */
+.mcq-interactive-mode > #quiz-content > .question-page.visible {
+  display: block; /* Show only the current page */
+  position: relative; /* Or static, depending on desired layout within container */
+}
+
+/* Show interactive elements */
+.mcq-interactive-mode .choice input[type="radio"],
+.mcq-interactive-mode .choice input[type="checkbox"] {
+  display: inline-block; /* Or block depending on layout */
+  transform: scale(1.4);
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.mcq-interactive-mode .next-button {
+  display: inline-block; /* Show the button */
+  /* Add back button styles if they were removed */
+  padding: 12px 25px;
+  background: linear-gradient(to right, #00c6cf, #0084ff);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  margin-top: 20px;
+  transition: all 0.2s ease;
+  font-size: 1.1em;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.mcq-interactive-mode .next-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.mcq-interactive-mode .next-button:active {
+  transform: scale(0.98);
+}
+
+
+/* Reset static highlighting in interactive mode */
+.mcq-interactive-mode .choice.is-correct-answer {
+  background-color: transparent;
+  border-left: none;
+  padding-left: 8px; /* Reset padding */
+}
+.mcq-interactive-mode .choice.is-correct-answer label {
+   font-weight: normal; /* Reset font weight */
+   color: inherit; /* Reset color */
+}
+.mcq-interactive-mode .choice.is-correct-answer::before {
+   content: ''; /* Remove static checkmark */
+   margin-right: 0;
+}
+
+/* Reset dimming of incorrect choices */
+.mcq-interactive-mode .choice:not(.is-correct-answer) {
+  opacity: 1;
+  color: inherit; /* Reset color */
+}
+
+/* Restore cursor for labels in interactive mode */
+.mcq-interactive-mode .choice label {
+  cursor: pointer;
+}
+
+/* Highlight previous correct/incorrect answers on retry */
+.mcq-interactive-mode .choice label.prev-correct {
+  background-color: #d4f8e8; /* light green */
+  border-radius: 4px;
+  padding: 2px 6px;
+  transition: background 0.2s;
+}
+.mcq-interactive-mode .choice label.prev-incorrect {
+  background-color: #fff3cd; /* light yellow/orange */
+  border-radius: 4px;
+  padding: 2px 6px;
+  transition: background 0.2s;
+}
+
+/* --- INTERACTIVE FEEDBACK STYLES --- */
+/* These styles apply *after* the user answers in interactive mode */
+
+/* Feedback for correct answer */
+.mcq-interactive-mode .choice.correct-answer { /* JS adds this class on correct choice */
+  background-color: rgba(40, 167, 69, 0.1); /* Light green */
+  border-color: rgba(40, 167, 69, 0.4);
+}
+.mcq-interactive-mode .choice.correct-answer label::after { /* Append checkmark via CSS */
+    content: ' ✅ Correct!';
+    color: #28a745;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+/* Feedback for incorrect answer */
+.mcq-interactive-mode .choice.incorrect-answer { /* JS adds this class on WRONG choice */
+    background-color: rgba(220, 53, 69, 0.1); /* Light red */
+    border-color: rgba(220, 53, 69, 0.4);
+}
+.mcq-interactive-mode .choice.incorrect-answer label::after { /* Append X via CSS */
+    content: ' ❌ Incorrect';
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+/* Feedback to highlight the *actual* correct answer when user was wrong */
+.mcq-interactive-mode .choice.missed-answer { /* JS adds this to correct choice(s) when user is wrong */
+    background-color: rgba(255, 193, 7, 0.15); /* Light yellow/orange */
+    border: 1px dashed rgba(255, 193, 7, 0.6);
+}
+.mcq-interactive-mode .choice.missed-answer label::after { /* Append notice via CSS */
+    content: ' (Correct Answer)';
+    color: #ffc107;
+    font-style: italic;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+/* --- SUMMARY SECTION (Only visible in interactive mode) --- */
+/* Ensure high specificity */
+body .mcq-container.mcq-interactive-mode #summary {
+  display: none;
+  text-align: left;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  margin-top: 20px;
+}
+
+body .mcq-container.mcq-interactive-mode #summary.visible {
+    display: block; /* Show summary when needed - REMOVED !important */
+}
+
+/* Keep your existing detailed summary styles (.summary-question, #score, etc.) */
+/* but ensure they are prefixed or scoped if necessary to avoid conflicts */
+/* e.g., .mcq-interactive-mode #score { ... } */
+
+/* Ensure summary styles are correctly scoped */
+body .mcq-container.mcq-interactive-mode #summary h2 { /* Style summary title */
+   /* ... your h2 styles ... */
+    color: #0084ff;
+}
+body .mcq-container.mcq-interactive-mode #score { /* Style score display */
+   /* ... your score styles ... */
+    font-weight: bold;
+}
+body .mcq-container.mcq-interactive-mode #review .summary-question { /* Style each review item */
+   /* ... your summary question styles ... */
+    background-color: white;
+}
+/* etc. for all summary elements */
+
+/* Style the inner review container - APPLY SCROLLING HERE */
+body .mcq-container.mcq-interactive-mode #summary #review {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-top: 15px;
+}
+
+/* Style the inner review list */
+body .mcq-container.mcq-interactive-mode #summary #review ul {
+    padding-left: 20px; /* Indent list items slightly */
+    margin: 0; /* Remove default ul margin */
+}
+
+body .mcq-container.mcq-interactive-mode #summary #review li {
+    margin-bottom: 15px; /* Space out review items */
+    padding-bottom: 10px; /* Add padding below each item */
+    border-bottom: 1px solid #eee; /* Separator line */
+}
+
+body .mcq-container.mcq-interactive-mode #summary #review li:last-child {
+    border-bottom: none; /* Remove border from last item */
+}
+
+/* Fade-in animation (used only in interactive mode) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

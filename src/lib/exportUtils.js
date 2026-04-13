@@ -1,171 +1,20 @@
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { marked } from "marked";
+import {
+  blockToMarkdown,
+  blocksToMarpMarkdown,
+  extractCustomCss,
+  getSlideBackground,
+  getSlideDirectives,
+  slideBlocksToMarkdown,
+  splitBlocksIntoSlides,
+} from "./marp";
 
 // ---------------------------------------------------------------------------
 // MARP utilities
 // ---------------------------------------------------------------------------
-
-/**
- * Convert a single block (non-MARP-specific) to its markdown representation.
- * Shared between blocksToMarkdown and blocksToMarpMarkdown.
- */
-const blockToMarkdown = (block) => {
-  switch (block.type) {
-    case "h1":
-      return `# ${block.content}`;
-    case "h2":
-      return `## ${block.content}`;
-    case "h3":
-      return `### ${block.content}`;
-    case "h4":
-      return `#### ${block.content}`;
-    case "h5":
-      return `##### ${block.content}`;
-    case "h6":
-      return `###### ${block.content}`;
-    case "paragraph":
-      return block.content;
-    case "grid": {
-      const rawCols = block.columns || [];
-      // Migrate old {type, content} format
-      const columns = rawCols.map((col, i) => {
-        if (Array.isArray(col.blocks)) return col;
-        const b =
-          col.type === "image"
-            ? { type: "image", content: col.content || "", alt: "" }
-            : { type: "paragraph", content: col.content || "" };
-        return { blocks: [b] };
-      });
-
-      const PREFIX = { h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### " };
-      const getCellText = (col) =>
-        (col.blocks || [])
-          .map((b) => {
-            if (b.type === "separator") return "---";
-            if (b.type === "image") return `![${b.alt || ""}](${b.content || ""})`;
-            if (b.type === "alert")
-              return `> [!${(b.alertType || "note").toUpperCase()}]\n> ${b.content || ""}`;
-            return (PREFIX[b.type] || "") + (b.content || "");
-          })
-          .join("\n\n");
-
-      // Render as an HTML flex row (markdown has no native multi-col support)
-      const colWidth = `${Math.floor(100 / Math.max(columns.length, 1))}%`;
-      const cells = columns
-        .map(
-          (col) =>
-            `<div style="width:${colWidth};display:inline-block;vertical-align:top;padding-right:12px">${getCellText(col).replace(/\n\n/g, "<br><br>")}</div>`
-        )
-        .join("");
-      return `<div style="display:flex;flex-wrap:wrap">${cells}</div>\n\n`;
-    }
-    case "blockquote":
-      return `> ${block.content}`;
-    case "alert": {
-      const alertType = (block.alertType || "note").toUpperCase();
-      const content = block.content || "";
-      const lines = content.split("\n");
-      const quotedLines = lines.map((line) => `> ${line}`).join("\n");
-      return `> [!${alertType}]\n${quotedLines}`;
-    }
-    case "code":
-      return block.content;
-    case "html":
-      return block.content;
-    case "math":
-      return block.content;
-    case "diagram":
-      return block.content;
-    case "ul":
-      return block.content;
-    case "ol":
-      return block.content;
-    case "task-list":
-      return block.content;
-    case "separator":
-      return "---";
-    case "image": {
-      const align = block.align || "left";
-      let imageMarkdown;
-      if (block.width || block.height) {
-        const attrs = [`src="${block.content}"`];
-        if (block.alt) attrs.push(`alt="${block.alt}"`);
-        if (block.width) attrs.push(`width="${block.width}"`);
-        if (block.height) attrs.push(`height="${block.height}"`);
-        imageMarkdown = `<img ${attrs.join(" ")} />`;
-      } else {
-        imageMarkdown = `![${block.alt || ""}](${block.content})`;
-      }
-      if (align === "center") return `<p align="center">\n\n${imageMarkdown}\n\n</p>`;
-      if (align === "right") return `<p align="right">\n\n${imageMarkdown}\n\n</p>`;
-      return imageMarkdown;
-    }
-    case "link":
-      return `[${block.content}](${block.url || ""})`;
-    case "table":
-      return block.content;
-    default:
-      return block.content || "";
-  }
-};
-
-/**
- * Convert blocks (MARP mode) to a valid MARP markdown string.
- * Handles MARP-specific block types: marp-frontmatter, slide,
- * marp-slide-directive, marp-bg-image, marp-style.
- * All standard block types fall through to blockToMarkdown.
- */
-export const blocksToMarpMarkdown = (blocks) => {
-  if (!blocks || blocks.length === 0) return "";
-
-  const parts = [];
-
-  for (const block of blocks) {
-    switch (block.type) {
-      case "marp-frontmatter": {
-        const lines = ["---", "marp: true"];
-        if (block.theme) lines.push(`theme: ${block.theme}`);
-        if (block.size) lines.push(`size: '${block.size}'`);
-        if (block.paginate) lines.push("paginate: true");
-        if (block.header) lines.push(`header: '${block.header}'`);
-        if (block.footer) lines.push(`footer: '${block.footer}'`);
-        if (block.backgroundColor) lines.push(`backgroundColor: '${block.backgroundColor}'`);
-        if (block.color) lines.push(`color: '${block.color}'`);
-        lines.push("---");
-        parts.push(lines.join("\n"));
-        break;
-      }
-      case "slide":
-        parts.push("---");
-        break;
-      case "marp-slide-directive": {
-        const directives = block.directives || [];
-        const comments = directives
-          .filter((d) => d.key && d.value)
-          .map((d) => `<!-- ${d.key}: ${d.value} -->`);
-        if (comments.length > 0) parts.push(comments.join("\n"));
-        break;
-      }
-      case "marp-bg-image": {
-        if (!block.content) break;
-        let alt = block.position || "bg";
-        if (block.opacity) alt += ` opacity:${block.opacity}`;
-        parts.push(`![${alt}](${block.content})`);
-        break;
-      }
-      case "marp-style": {
-        if (block.content) parts.push(`<style>\n${block.content}\n</style>`);
-        break;
-      }
-      default:
-        parts.push(blockToMarkdown(block));
-        break;
-    }
-  }
-
-  return parts.filter(Boolean).join("\n\n");
-};
+export { blocksToMarpMarkdown };
 
 /**
  * Export blocks as a MARP-compatible .md file.
@@ -193,10 +42,7 @@ export const exportToMarpMarkdown = (blocks, filename = "presentation.md") => {
 const buildMarpSlidesHTML = (blocks) => {
   // Collect settings and CSS
   const frontmatter = blocks.find((b) => b.type === "marp-frontmatter");
-  const customCss = blocks
-    .filter((b) => b.type === "marp-style" && b.content)
-    .map((b) => b.content)
-    .join("\n");
+  const customCss = extractCustomCss(blocks);
 
   const isWide = !frontmatter || !frontmatter.size || frontmatter.size === "16:9";
   const globalBg = frontmatter?.backgroundColor || "#ffffff";
@@ -205,44 +51,21 @@ const buildMarpSlidesHTML = (blocks) => {
   const globalHeader = frontmatter?.header || "";
   const globalFooter = frontmatter?.footer || "";
 
-  // Split into slides
-  const slideGroups = [];
-  let current = [];
-  for (const block of blocks) {
-    if (block.type === "marp-frontmatter") continue;
-    if (block.type === "slide") {
-      slideGroups.push(current);
-      current = [];
-    } else {
-      current.push(block);
-    }
-  }
-  slideGroups.push(current);
+  const { slideGroups } = splitBlocksIntoSlides(blocks);
 
   const slidesHtml = slideGroups.map((slideBlocks, idx) => {
-    // Per-slide directives
-    const directives = {};
-    for (const block of slideBlocks) {
-      if (block.type === "marp-slide-directive") {
-        for (const d of block.directives || []) {
-          if (d.key && d.value) directives[d.key] = d.value;
-        }
-      }
-    }
+    const directives = getSlideDirectives(slideBlocks);
 
-    const bgBlock = slideBlocks.find((b) => b.type === "marp-bg-image" && b.content);
+    const bgBlock = getSlideBackground(slideBlocks);
     const bgStyle = bgBlock
-      ? `background-image:url('${bgBlock.content}');background-size:cover;background-position:center;`
+      ? `background-image:url('${bgBlock.url}');background-size:cover;background-position:center;`
       : "";
     const slideColor = directives._color || globalColor;
     const slideBg = directives._backgroundColor || globalBg;
     const header = directives._header || globalHeader;
     const footer = directives._footer || globalFooter;
 
-    const contentBlocks = slideBlocks.filter(
-      (b) => b.type !== "marp-slide-directive" && b.type !== "marp-bg-image" && b.type !== "marp-style"
-    );
-    const mdContent = contentBlocks.map((b) => blockToMarkdown(b)).filter(Boolean).join("\n\n");
+    const mdContent = slideBlocksToMarkdown(slideBlocks);
     const htmlContent = marked.parse(mdContent || "", { breaks: true, gfm: true });
 
     return `
@@ -443,6 +266,8 @@ export const blocksToMarkdown = (blocks, includeAttribution = true) => {
           return `[${block.content}](${block.url || ""})`;
         case "table":
           return block.content;
+        case "marp-voiceover":
+          return "";
         case "shield-badge": {
           const label = block.label || "label";
           const message = block.message || "message";

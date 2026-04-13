@@ -27,14 +27,84 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
+import {
+  buildCourseTemplateStructurePreview,
+  getCourseTemplateStats,
+} from "@/lib/preGeneratedCourseTemplates";
 import { duplicateCourse } from "@/lib/storage";
 import {
   createTemplate,
   ensureTemplateCourse,
   getAllTemplates,
   getTemplatesByCategory,
+  instantiateBuiltInTemplateCourse,
   searchTemplates,
+  TEMPLATE_CATEGORY_OPTIONS,
 } from "@/lib/templates";
+
+const formatTemplateDate = (template) => {
+  if (template?.is_builtin) return "Built-in";
+
+  return new Date(template.created_at).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "2-digit",
+  });
+};
+
+const getTemplateStatsLabel = (template) => {
+  if (Array.isArray(template?.modules) && template.modules.length > 0) {
+    const stats = getCourseTemplateStats(template);
+    const parts = [`${stats.moduleCount} modules`, `${stats.blockCount} blocks`];
+    if (stats.narrationCount > 0) {
+      parts.push(`${stats.narrationCount} narration block${stats.narrationCount === 1 ? "" : "s"}`);
+    }
+    return parts.join(" • ");
+  }
+
+  try {
+    const blocks = JSON.parse(template?.content || "[]");
+    if (Array.isArray(blocks) && blocks.length > 0) {
+      return `${blocks.length} block${blocks.length === 1 ? "" : "s"}`;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
+const buildLegacyStructurePreview = (template) => {
+  try {
+    const blocks = JSON.parse(template.content);
+    return blocks
+      .map((block) => {
+        if (block.type.startsWith("h")) {
+          const level = block.type.slice(1);
+          return `${"#".repeat(level)} ${block.content}`;
+        }
+        if (block.type === "paragraph") return block.content;
+        if (block.type === "blockquote") return `> ${block.content}`;
+        if (block.type === "code") return `\`\`\`\n${block.content}\n\`\`\``;
+        if (block.type === "separator") return "---";
+        return `[${block.type}] ${block.content || ""}`;
+      })
+      .join("\n\n");
+  } catch {
+    return "Preview content unavailable.";
+  }
+};
+
+const buildTemplateStructurePreview = (template) => {
+  if (Array.isArray(template?.modules) && template.modules.length > 0) {
+    return buildCourseTemplateStructurePreview(template);
+  }
+
+  return buildLegacyStructurePreview(template);
+};
+
+const getCategoryLabel = (value) =>
+  TEMPLATE_CATEGORY_OPTIONS.find((category) => category.value === value)?.label || value;
 
 export default function MainSection({ onTemplatesChange }) {
   const { user } = useAuth();
@@ -50,17 +120,12 @@ export default function MainSection({ onTemplatesChange }) {
 
   const [templateTitle, setTemplateTitle] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
-  const [templateCategory, setTemplateCategory] = useState("profile");
+  const [templateCategory, setTemplateCategory] = useState("onboarding");
   const [templateImages, setTemplateImages] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
 
-  const categories = [
-    { value: "all", label: "All Templates" },
-    { value: "profile", label: "Profile README" },
-    { value: "project", label: "Project README" },
-    { value: "misc", label: "Miscellaneous" },
-  ];
+  const categories = TEMPLATE_CATEGORY_OPTIONS;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -199,7 +264,7 @@ export default function MainSection({ onTemplatesChange }) {
         setShowCreateDialog(false);
         setTemplateTitle("");
         setTemplateDescription("");
-        setTemplateCategory("profile");
+        setTemplateCategory("onboarding");
         setTemplateImages([]);
         fetchTemplates();
       } else {
@@ -245,10 +310,18 @@ export default function MainSection({ onTemplatesChange }) {
       return;
     }
 
+    let loadingToast;
+
     try {
-      if (template.course_id) {
+      if (template.is_builtin) {
+        loadingToast = toast.loading("Creating course from built-in template…");
+        const newCourse = await instantiateBuiltInTemplateCourse(template, user.id);
+        toast.dismiss(loadingToast);
+        navigate(`/course/${newCourse.id}`);
+        toast.success(`Template applied: ${template.title}`);
+      } else if (template.course_id) {
         // Duplicate the companion course into a new draft for this user
-        const loadingToast = toast.loading("Applying template…");
+        loadingToast = toast.loading("Applying template…");
         const newCourse = await duplicateCourse(template.course_id, user.id);
         toast.dismiss(loadingToast);
         navigate(`/course/${newCourse.id}`);
@@ -261,7 +334,9 @@ export default function MainSection({ onTemplatesChange }) {
         toast.success(`Using template: ${template.title}`);
       }
     } catch (error) {
-      toast.dismiss();
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
       console.error("Error using template:", error);
       toast.error("Failed to apply template");
     }
@@ -293,7 +368,7 @@ export default function MainSection({ onTemplatesChange }) {
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                Jumpstart your README with community-crafted layouts.
+                Pre-generated course starters and reusable layouts for onboarding, technical training, narration, and compliance.
               </p>
             </div>
 
@@ -302,7 +377,7 @@ export default function MainSection({ onTemplatesChange }) {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
                 <Input
                   type="text"
-                  placeholder="Search templates..."
+                  placeholder="Search course templates..."
                   className="pl-9 h-9"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -368,7 +443,7 @@ export default function MainSection({ onTemplatesChange }) {
               <p className="text-sm text-muted-foreground mb-4">
                 {searchQuery
                   ? "Try adjusting your search or filters"
-                  : "Create your first template to get started"}
+                  : "Create a custom template or switch filters to explore built-in course starters"}
               </p>
               {!searchQuery && user && (
                 <Button onClick={handleAddTemplate} size="sm">
@@ -402,12 +477,22 @@ export default function MainSection({ onTemplatesChange }) {
 
                   <div className="flex-1 p-4 flex flex-col min-h-0">
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <Badge
-                        variant="secondary"
-                        className="rounded-sm px-1.5 py-0.5 text-[10px] font-normal tracking-wide uppercase"
-                      >
-                        {template.category}
-                      </Badge>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge
+                          variant="secondary"
+                          className="rounded-sm px-1.5 py-0.5 text-[10px] font-normal tracking-wide uppercase"
+                        >
+                          {getCategoryLabel(template.category)}
+                        </Badge>
+                        {template.is_builtin && (
+                          <Badge
+                            variant="outline"
+                            className="rounded-sm px-1.5 py-0.5 text-[10px] font-normal tracking-wide uppercase"
+                          >
+                            Built-in
+                          </Badge>
+                        )}
+                      </div>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                         <Eye className="h-4 w-4 text-muted-foreground" />
                       </div>
@@ -420,15 +505,17 @@ export default function MainSection({ onTemplatesChange }) {
                     <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
                       {template.description || "No description provided."}
                     </p>
+
+                    {getTemplateStatsLabel(template) && (
+                      <p className="text-[11px] text-muted-foreground/80 mt-3 line-clamp-2">
+                        {getTemplateStatsLabel(template)}
+                      </p>
+                    )}
                   </div>
 
                   <div className="h-12 px-4 flex items-center justify-between border-t shrink-0 mt-auto">
                     <span className="text-[10px] text-muted-foreground/70 font-mono">
-                      {new Date(template.created_at).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "2-digit",
-                      })}
+                      {formatTemplateDate(template)}
                     </span>
                     <Button
                       variant="ghost"
@@ -456,7 +543,7 @@ export default function MainSection({ onTemplatesChange }) {
           <DialogHeader>
             <DialogTitle>Create Template</DialogTitle>
             <DialogDescription>
-              Create a reusable course template with a title, description, and optional preview images.
+              Create a reusable course template with a title, category, and optional preview images.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -466,7 +553,7 @@ export default function MainSection({ onTemplatesChange }) {
                 id="template-title"
                 value={templateTitle}
                 onChange={(e) => setTemplateTitle(e.target.value)}
-                placeholder="e.g., Modern Developer Profile"
+                placeholder="e.g., New Hire Onboarding Path"
               />
             </div>
 
@@ -476,7 +563,7 @@ export default function MainSection({ onTemplatesChange }) {
                 id="template-description"
                 value={templateDescription}
                 onChange={(e) => setTemplateDescription(e.target.value)}
-                placeholder="What makes this template special?"
+                placeholder="What structure, audience, or delivery pattern does this template support?"
                 className="min-h-20 resize-none"
               />
             </div>
@@ -488,9 +575,13 @@ export default function MainSection({ onTemplatesChange }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="profile">Profile README</SelectItem>
-                  <SelectItem value="project">Project README</SelectItem>
-                  <SelectItem value="misc">Miscellaneous</SelectItem>
+                  {categories
+                    .filter((categoryOption) => categoryOption.value !== "all")
+                    .map((categoryOption) => (
+                      <SelectItem key={categoryOption.value} value={categoryOption.value}>
+                        {categoryOption.label}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -586,11 +677,18 @@ export default function MainSection({ onTemplatesChange }) {
                     <DialogTitle className="text-xl">{selectedTemplate.title}</DialogTitle>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Badge variant="secondary" className="font-normal">
-                        {selectedTemplate.category}
+                        {getCategoryLabel(selectedTemplate.category)}
                       </Badge>
+                      {selectedTemplate.is_builtin && (
+                        <Badge variant="outline" className="font-normal">
+                          Built-in
+                        </Badge>
+                      )}
                       <span>•</span>
                       <span>
-                        Added {new Date(selectedTemplate.created_at).toLocaleDateString()}
+                        {selectedTemplate.is_builtin
+                          ? "Available instantly"
+                          : `Added ${new Date(selectedTemplate.created_at).toLocaleDateString()}`}
                       </span>
                     </div>
                   </div>
@@ -599,6 +697,11 @@ export default function MainSection({ onTemplatesChange }) {
                   <DialogDescription className="mt-3">
                     {selectedTemplate.description}
                   </DialogDescription>
+                )}
+                {getTemplateStatsLabel(selectedTemplate) && (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    {getTemplateStatsLabel(selectedTemplate)}
+                  </p>
                 )}
               </DialogHeader>
 
@@ -630,27 +733,7 @@ export default function MainSection({ onTemplatesChange }) {
                     </h4>
                     <div className="rounded-md border p-4 bg-muted">
                       <pre className="text-[11px] leading-relaxed font-mono text-muted-foreground overflow-x-auto whitespace-pre-wrap">
-                        {(() => {
-                          try {
-                            const blocks = JSON.parse(selectedTemplate.content);
-                            return blocks
-                              .map((block) => {
-                                if (block.type.startsWith("h")) {
-                                  const level = block.type.slice(1);
-                                  return `${"#".repeat(level)} ${block.content}`;
-                                }
-                                if (block.type === "paragraph") return block.content;
-                                if (block.type === "blockquote") return `> ${block.content}`;
-                                if (block.type === "code")
-                                  return `\`\`\`\n${block.content}\n\`\`\``;
-                                if (block.type === "separator") return "---";
-                                return `[${block.type}] ${block.content || ""}`;
-                              })
-                              .join("\n\n");
-                          } catch {
-                            return "Preview content unavailable.";
-                          }
-                        })()}
+                        {buildTemplateStructurePreview(selectedTemplate)}
                       </pre>
                     </div>
                   </div>

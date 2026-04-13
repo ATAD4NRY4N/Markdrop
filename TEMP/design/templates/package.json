@@ -1,0 +1,22 @@
+{
+  "name": "scorm-metrics-verifier",
+  "version": "1.0.0",
+  "description": "Verification tool for Ataccama Space Game completion codes",
+  "main": "verify_metrics_code.js",
+  "scripts": {
+    "verify": "node verify_metrics_code.js",
+    "test": "node test_verification.js"
+  },
+  "keywords": [
+    "scorm",
+    "verification",
+    "metrics",
+    "learning",
+    "ataccama"
+  ],
+  "author": "Ataccama PSGL Curriculum Team",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

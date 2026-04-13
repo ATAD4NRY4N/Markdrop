@@ -64,9 +64,14 @@ export default function CoursesDashboard() {
           .order("updated_at", { ascending: false });
 
         if (fetchError) {
+          if (fetchError.code === "42P17") {
+            setCourses([]);
+            setError("Database RLS policies are outdated. Apply the latest Supabase migrations to restore course access.");
+            return;
+          }
           if (fetchError.message.includes("does not exist") || fetchError.code === "42P01") {
             setCourses([]);
-            setError("Database requires migration. Run 'npx supabase db push'.");
+            setError("Database requires migration. Run 'npm run supabase:sync' or your local startup script.");
             return;
           }
           throw fetchError;
@@ -163,6 +168,11 @@ export default function CoursesDashboard() {
       toast.success("Course created!");
       navigate(`/course/${data.id}`);
     } catch (err) {
+      if (err.code === "42P17") {
+        toast.error("Database policies are outdated. Apply the latest Supabase migrations.");
+        console.error(err);
+        return;
+      }
       if (err.message?.includes("does not exist") || err.code === "42P01") {
         toast.error("Database tables not found. Run migrations first."); return;
       }

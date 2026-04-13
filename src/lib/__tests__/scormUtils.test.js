@@ -121,6 +121,11 @@ describe("_blockToHtml — basic block types", () => {
     const html = _blockToHtml({ type: "unknown-xyz", content: "Fallback" });
     expect(html).toContain("Fallback");
   });
+
+  it("marp-voiceover is omitted from learner output", () => {
+    const html = _blockToHtml({ type: "marp-voiceover", content: "Narration only" });
+    expect(html).toBe("");
+  });
 });
 
 describe("_blockToHtml — eLearning blocks", () => {

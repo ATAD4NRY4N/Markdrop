@@ -1,0 +1,60 @@
+/* @theme glossary */
+
+.flashy-glossary {
+  width: 80%;
+  margin: 20px auto;
+}
+
+.glossary-item {
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.glossary-item label {
+  display: block;
+  padding: 15px;
+  background: linear-gradient(to right, #ff6b6b, #ff8e53);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  text-align: center; /* Center the text */
+}
+
+.glossary-item label:hover {
+  background: linear-gradient(to right, #ff8e53, #ff6b6b);
+  transform: scale(1.02);
+  transform-origin: center; /* Ensure scaling from center */
+}
+
+.glossary-item input[type="checkbox"] {
+  display: none;
+}
+
+.definition {
+  padding: 20px;
+  background-color: #f9f9f9;
+  display: none;
+  animation: slideDown 0.5s ease;
+}
+
+.glossary-item input[type="checkbox"]:checked ~ .definition {
+  display: block;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.definition h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.definition img {
+  margin-top: 15px;
+  border-radius: 5px;
+}

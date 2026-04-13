@@ -1,0 +1,32 @@
+{
+  "levels": [
+    {
+      "giftFile": "162DG01-Business_Glossary.gift",
+      "questionCount": 10
+    },
+    {
+      "giftFile": "162DG01-Catalog_Items.gift",
+      "questionCount": 10
+    },
+    {
+      "giftFile": "162DG01-Data_Catalog.gift",
+      "questionCount": 10
+    },
+    {
+      "giftFile": "162DG01-Data_Discovery&Profiling.gift",
+      "questionCount": 10
+    },
+    {
+      "giftFile": "162DG01-Data_Observability.gift",
+      "questionCount": 10
+    },
+    {
+      "giftFile": "162DG01-ONE_Web_Application.gift",
+      "questionCount": 10
+    },
+    {
+      "giftFile": "162DG01-Reports.gift",
+      "questionCount": 10
+    }
+  ]
+}

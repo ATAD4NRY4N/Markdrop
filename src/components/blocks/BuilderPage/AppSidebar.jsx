@@ -31,6 +31,7 @@ import {
   Minus,
   Network,
   ListOrdered as OrderedList,
+  Mic,
   Palette,
   PenLine,
   Pilcrow,
@@ -48,6 +49,11 @@ import {
 import { useEffect, useState } from "react";
 import { Logo, Icon } from "@/components/Logo";
 import { useTheme } from "@/components/ThemeProvider";
+import { createDefaultMarpVoiceoverBlock } from "@/lib/marp";
+import {
+  materializeTemplateBlocks,
+  PRE_GENERATED_SLIDE_TEMPLATES,
+} from "@/lib/preGeneratedSlideTemplates";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -111,87 +117,29 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
-  // ── Slide Templates ─────────────────────────────────────────────────────
-  const SLIDE_TEMPLATES = [
-    {
-      key: "title-slide",
-      label: "Title Slide",
-      description: "Course title, subtitle, intro paragraph",
-      icon: LayoutGrid,
-      blocks: [
-        { type: "h1", content: "Course Title" },
-        { type: "h3", content: "Subtitle or tagline" },
-        { type: "separator", content: "" },
-        { type: "paragraph", content: "Welcome to this course. In this module you will learn…" },
-        {
-          type: "learning-objective",
-          content: "",
-          objectives: ["Learners will be able to…", "Identify key concepts of…"],
-        },
-      ],
-    },
-    {
-      key: "two-column",
-      label: "Two-Column",
-      description: "Text left, image right (2:1)",
-      icon: Columns2,
-      blocks: [
-        { type: "h2", content: "Section Title" },
-        {
-          type: "grid",
-          content: "",
-          columns: [
-            { type: "text", content: "### Key Point\n\nExplain this concept in detail. Use **bold** for emphasis, bullet points for lists:\n\n- First takeaway\n- Second takeaway\n- Third takeaway" },
-            { type: "image", content: "" },
-          ],
-          weights: [2, 1],
-        },
-      ],
-    },
-    {
-      key: "quote-focus",
-      label: "Quote Focus",
-      description: "Pull quote + supporting paragraph",
-      icon: Quote,
-      blocks: [
-        { type: "h2", content: "Key Insight" },
-        { type: "blockquote", content: "The most powerful tool we have as developers is automation. — Scott Hanselman" },
-        { type: "paragraph", content: "Expand on the quote here. Explain why it matters in the context of this course and how learners can apply this insight." },
-        {
-          type: "knowledge-check",
-          content: "",
-          prompt: "What does this quote highlight about…?",
-          options: ["Option A", "Option B", "Option C"],
-          correctIndex: 0,
-        },
-      ],
-    },
-    {
-      key: "three-step-timeline",
-      label: "3-Step Timeline",
-      description: "Three sequential steps in columns",
-      icon: Layers,
-      blocks: [
-        { type: "h2", content: "Three-Step Process" },
-        {
-          type: "grid",
-          content: "",
-          columns: [
-            { type: "text", content: "**Step 1: Discover**\n\nDescribe the first step in the process." },
-            { type: "text", content: "**Step 2: Design**\n\nDescribe the second step in the process." },
-            { type: "text", content: "**Step 3: Deliver**\n\nDescribe the third step in the process." },
-          ],
-          weights: [1, 1, 1],
-        },
-        { type: "paragraph", content: "Summarise the process and what learners should do next." },
-      ],
-    },
-  ];
+  const TEMPLATE_ICONS = {
+    AlertCircle,
+    ArrowLeftRight,
+    CheckCircle2,
+    Columns2,
+    Crosshair,
+    ImagePlay,
+    LayoutGrid,
+    Layers,
+    ListChecks,
+    Mic,
+    Quote,
+  };
+
+  const SLIDE_TEMPLATES = PRE_GENERATED_SLIDE_TEMPLATES.map((template) => ({
+    ...template,
+    icon: TEMPLATE_ICONS[template.icon] || LayoutGrid,
+  }));
 
   const handleTemplateInsert = (template) => {
     if (!onBlockAdd) return;
-    template.blocks.forEach((blockData) => {
-      onBlockAdd(null, { id: Date.now().toString() + Math.random().toString(36).slice(2), ...blockData });
+    materializeTemplateBlocks(template.blocks).forEach((blockData) => {
+      onBlockAdd(null, blockData);
     });
   };
 
@@ -229,12 +177,14 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
       "marp-slide-directive": "",
       "marp-bg-image": "",
       "marp-style": "",
+      "marp-voiceover": "",
     };
 
     const newBlock = {
       id: Date.now().toString(),
       type: blockType,
       content: defaultContent[blockType] || "",
+      ...(blockType === "marp-voiceover" ? createDefaultMarpVoiceoverBlock({ id: Date.now().toString() }) : {}),
       ...(blockType === "image" && {
         alt: "",
         width: "",
@@ -462,6 +412,14 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
       { title: "PDF Viewer", key: "pdf", icon: FileText },
     ],
     links: [{ title: "Link", key: "link", icon: Link2 }],
+    marp: [
+      { title: "MARP Frontmatter", key: "marp-frontmatter", icon: FileSliders },
+      { title: "Slide Break", key: "slide", icon: Layers },
+      { title: "Slide Directive", key: "marp-slide-directive", icon: MessageSquareCode },
+      { title: "Background Image", key: "marp-bg-image", icon: Image },
+      { title: "Custom CSS", key: "marp-style", icon: Palette },
+      { title: "Slide Narration", key: "marp-voiceover", icon: Mic },
+    ],
     "special blocks": [
       { title: "Shield Badge", key: "shield-badge", icon: Shield },
       { title: "Skill Icons", key: "skill-icons", icon: Sparkles },

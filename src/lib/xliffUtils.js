@@ -1,3 +1,5 @@
+import { normalizeVoiceoverBlock } from "./marp";
+
 // ─── XML helpers ──────────────────────────────────────────────────────────────
 
 function escXml(str) {
@@ -66,6 +68,9 @@ function extractFieldsByType(block, outerBlockId, pathPrefix, segs = []) {
       break;
     case "link":
       add("content", block.content, "Link display text");
+      break;
+    case "marp-voiceover":
+      add("content", block.content, "Slide narration script");
       break;
 
     // ── Media ────────────────────────────────────────────────────────────────
@@ -360,6 +365,10 @@ export function applyTranslationsToModules(modules, parsedXliff) {
       applyDotPath(block, fieldPath, translatedText);
     }
 
-    return { ...mod, blocks_json: JSON.stringify(updated) };
+    const normalized = updated.map((block) =>
+      block.type === "marp-voiceover" ? normalizeVoiceoverBlock(block) : block
+    );
+
+    return { ...mod, blocks_json: JSON.stringify(normalized) };
   });
 }

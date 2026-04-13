@@ -1,0 +1,26 @@
+::Q1 (Easy)::What are catalog items in the context of Ataccama ONE? {
+    =A) Actual data that you plan to analyze, structured into attributes.
+    ~B) Database tables and attributes as columns in a table.
+    ~C) Data sources and their metadata.
+    ~D) Business terms and their definitions.
+    ####[Global Feedback] Catalog items represent the actual data that you plan to analyze, and they are structured into attributes.
+    [Source\: Catalog Items \:\: Ataccama ONE]
+}
+
+::Q2 (Easy)::What is the purpose of the Data Catalog section in Ataccama ONE? {
+    ~A) To manage data sources and their metadata.
+    =B) To view and manage catalog items, including their attributes and rules.
+    ~C) To run data quality evaluation and profiling.
+    ~D) To create data stories and visualizations.
+    ####[Global Feedback] The Data Catalog section is where you can find and manage catalog items, including their attributes, added rules, and terms.
+    [Source\: Catalog Items \:\: Ataccama ONE]
+}
+
+::Q3 (Easy)::How can you view the results of data quality evaluation in Ataccama ONE? {
+    =A) By navigating to the catalog item or attribute and switching to the Data Quality tab.
+    ~B) By running a data quality evaluation report.
+    ~C) By viewing the data quality results in the Data Catalog section.
+    ~D) By using the Data Quality API.
+    ####[Global Feedback] To view the results of data quality evaluation, navigate to the catalog item or attribute and switch to the Data Quality tab.
+    [Source\: View results of DQ evaluation]
+}

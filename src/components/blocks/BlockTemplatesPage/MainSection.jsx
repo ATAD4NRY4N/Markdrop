@@ -32,11 +32,14 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
+import { createDefaultBlock } from "@/lib/blockLibrary";
 import {
-  BLOCK_TEMPLATE_CATEGORY_OPTIONS,
+  BLOCK_TEMPLATE_BASE_BLOCK_OPTIONS,
   buildBlockTemplateStructurePreview,
   createBlockTemplate,
   deleteBlockTemplate,
+  getBlockTemplateBaseType,
+  getBlockTemplateBaseTypeLabel,
   getBlockTemplateStats,
   getUserBlockTemplates,
   updateBlockTemplate,
@@ -49,16 +52,13 @@ const formatTemplateDate = (template) =>
     year: "2-digit",
   });
 
-const getCategoryLabel = (value) =>
-  BLOCK_TEMPLATE_CATEGORY_OPTIONS.find((category) => category.value === value)?.label || value;
-
 export default function MainSection() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedBlockType, setSelectedBlockType] = useState("all");
   const [showFormDialog, setShowFormDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -66,7 +66,7 @@ export default function MainSection() {
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [templateTitle, setTemplateTitle] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
-  const [templateCategory, setTemplateCategory] = useState("general");
+  const [templateBaseBlockType, setTemplateBaseBlockType] = useState("paragraph");
 
   useEffect(() => {
     fetchTemplates();
@@ -89,18 +89,23 @@ export default function MainSection() {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
     return templates.filter((template) => {
-      const matchesCategory =
-        selectedCategory === "all" || template.category === selectedCategory;
+      const matchesBlockType =
+        selectedBlockType === "all" || getBlockTemplateBaseType(template) === selectedBlockType;
       const matchesQuery =
         !normalizedQuery ||
-        [template.title, template.description, ...(template.tags || [])]
+        [
+          template.title,
+          template.description,
+          getBlockTemplateBaseTypeLabel(template),
+          ...(template.tags || []),
+        ]
           .join(" ")
           .toLowerCase()
           .includes(normalizedQuery);
 
-      return matchesCategory && matchesQuery;
+      return matchesBlockType && matchesQuery;
     });
-  }, [searchQuery, selectedCategory, templates]);
+  }, [searchQuery, selectedBlockType, templates]);
 
   const openCreateDialog = () => {
     if (!user) {
@@ -111,7 +116,7 @@ export default function MainSection() {
     setEditingTemplate(null);
     setTemplateTitle("");
     setTemplateDescription("");
-    setTemplateCategory("general");
+    setTemplateBaseBlockType("paragraph");
     setShowFormDialog(true);
   };
 
@@ -119,7 +124,7 @@ export default function MainSection() {
     setEditingTemplate(template);
     setTemplateTitle(template.title || "");
     setTemplateDescription(template.description || "");
-    setTemplateCategory(template.category || "general");
+    setTemplateBaseBlockType(getBlockTemplateBaseType(template) || "paragraph");
     setShowFormDialog(true);
   };
 
@@ -139,7 +144,7 @@ export default function MainSection() {
     const payload = {
       title: templateTitle.trim(),
       description: templateDescription.trim(),
-      category: templateCategory,
+      base_block_type: templateBaseBlockType,
     };
 
     if (editingTemplate) {
@@ -162,7 +167,7 @@ export default function MainSection() {
 
     const { success, data, error } = await createBlockTemplate({
       ...payload,
-      blocks_json: "[]",
+      blocks_json: JSON.stringify([createDefaultBlock(templateBaseBlockType)]),
       user_id: user.id,
     });
 
@@ -228,7 +233,7 @@ export default function MainSection() {
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                Manage reusable, prefilled block stacks that appear inside the builder sidebar.
+                Manage saved variants of a standard block. Each template is tied to one block type and appears under that block in the builder sidebar.
               </p>
             </div>
 
@@ -244,14 +249,14 @@ export default function MainSection() {
                 />
               </div>
 
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedBlockType} onValueChange={setSelectedBlockType}>
                 <SelectTrigger className="h-9 w-[170px] shrink-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {BLOCK_TEMPLATE_CATEGORY_OPTIONS.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
+                  {BLOCK_TEMPLATE_BASE_BLOCK_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -276,7 +281,7 @@ export default function MainSection() {
               <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-semibold mb-2">Sign in to manage block templates</h3>
               <p className="text-sm text-muted-foreground">
-                Block templates are private to each author and appear in the builder sidebar.
+                Block templates are private block variants that appear under their matching standard block in the builder sidebar.
               </p>
             </div>
           ) : filteredTemplates.length === 0 ? (
@@ -285,8 +290,8 @@ export default function MainSection() {
               <h3 className="text-lg font-semibold mb-2">No block templates found</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 {searchQuery
-                  ? "Try adjusting your search or category filters."
-                  : "Create a reusable block stack for lesson intros, interactions, assessments, or MARP slides."}
+                  ? "Try adjusting your search or standard block filter."
+                  : "Create a saved variant for a standard block, like a branded alert, a ready-made quiz, or a prefilled image block."}
               </p>
               <Button onClick={openCreateDialog} size="sm">
                 <Plus className="h-4 w-4 mr-2" />
@@ -314,7 +319,7 @@ export default function MainSection() {
                           variant="secondary"
                           className="rounded-sm px-1.5 py-0.5 text-[10px] font-normal tracking-wide uppercase"
                         >
-                          {getCategoryLabel(template.category)}
+                          {getBlockTemplateBaseTypeLabel(template)}
                         </Badge>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                           <Eye className="h-4 w-4 text-muted-foreground" />
@@ -330,7 +335,7 @@ export default function MainSection() {
                       </p>
 
                       <p className="text-[11px] text-muted-foreground/80 mt-3">
-                        {stats.blockCount} block{stats.blockCount === 1 ? "" : "s"}
+                        Single {stats.baseBlockLabel.toLowerCase()} variant
                       </p>
                     </div>
 
@@ -347,7 +352,7 @@ export default function MainSection() {
                           navigate(`/templates/blocks/${template.id}`);
                         }}
                       >
-                        Edit Blocks
+                        Edit Block
                       </Button>
                     </div>
                   </div>
@@ -369,7 +374,7 @@ export default function MainSection() {
             <DialogDescription>
               {editingTemplate
                 ? "Update the metadata that appears in the sidebar and template library."
-                : "Create a reusable block stack and then fill it using the block template editor."}
+                : "Create a saved variant of a standard block, then edit the contents of that one block."}
             </DialogDescription>
           </DialogHeader>
 
@@ -390,25 +395,34 @@ export default function MainSection() {
                 id="block-template-description"
                 value={templateDescription}
                 onChange={(event) => setTemplateDescription(event.target.value)}
-                placeholder="What kind of block stack does this template create?"
+                placeholder="What makes this block variant reusable?"
                 className="min-h-24 resize-none"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="block-template-category">Category</Label>
-              <Select value={templateCategory} onValueChange={setTemplateCategory}>
-                <SelectTrigger id="block-template-category">
+              <Label htmlFor="block-template-base-type">Standard Block</Label>
+              <Select
+                value={templateBaseBlockType}
+                onValueChange={setTemplateBaseBlockType}
+                disabled={Boolean(editingTemplate)}
+              >
+                <SelectTrigger id="block-template-base-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {BLOCK_TEMPLATE_CATEGORY_OPTIONS.filter((category) => category.value !== "all").map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
+                  {BLOCK_TEMPLATE_BASE_BLOCK_OPTIONS.filter((option) => option.value !== "all").map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {editingTemplate && (
+                <p className="text-[11px] text-muted-foreground">
+                  Standard block type is fixed after creation so existing block content stays valid.
+                </p>
+              )}
             </div>
           </div>
 
@@ -440,7 +454,7 @@ export default function MainSection() {
                 <DialogTitle className="text-xl">{selectedTemplate.title}</DialogTitle>
                 <DialogDescription>{selectedTemplate.description || "No description provided."}</DialogDescription>
                 <p className="text-xs text-muted-foreground mt-2">
-                  {getCategoryLabel(selectedTemplate.category)} • {getBlockTemplateStats(selectedTemplate).blockCount} blocks • Added {formatTemplateDate(selectedTemplate)}
+                  {getBlockTemplateBaseTypeLabel(selectedTemplate)} • single block variant • Added {formatTemplateDate(selectedTemplate)}
                 </p>
               </DialogHeader>
 
@@ -449,7 +463,7 @@ export default function MainSection() {
                   <div>
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
                       <Eye className="h-3.5 w-3.5" />
-                      Structure Preview
+                      Block Preview
                     </h4>
                     <div className="rounded-md border p-4 bg-muted">
                       <pre className="text-[11px] leading-relaxed font-mono text-muted-foreground overflow-x-auto whitespace-pre-wrap">
@@ -484,7 +498,7 @@ export default function MainSection() {
                   }}
                 >
                   <Plus className="h-4 w-4" />
-                  Edit Blocks
+                  Edit Block
                 </Button>
                 <Button
                   variant="destructive"

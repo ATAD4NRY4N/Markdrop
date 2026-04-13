@@ -1,3 +1,8 @@
+import {
+  BLOCK_TEMPLATE_BASE_BLOCK_OPTIONS,
+  createDefaultBlock,
+  getBlockTypeLabel,
+} from "./blockLibrary";
 import { materializeTemplateBlocks } from "./preGeneratedSlideTemplates";
 import { supabase } from "./supabase";
 
@@ -16,16 +21,7 @@ function formatBlockTemplateError(error) {
   return message;
 }
 
-export const BLOCK_TEMPLATE_CATEGORY_OPTIONS = [
-  { value: "all", label: "All Templates" },
-  { value: "general", label: "General" },
-  { value: "layout", label: "Layout" },
-  { value: "lesson", label: "Lesson Flow" },
-  { value: "assessment", label: "Assessment" },
-  { value: "media", label: "Media" },
-  { value: "narration", label: "Narration" },
-  { value: "marp", label: "MARP Slides" },
-];
+export { BLOCK_TEMPLATE_BASE_BLOCK_OPTIONS };
 
 const getTemplateTimestamp = (template) =>
   template?.updated_at || template?.created_at || "1970-01-01T00:00:00.000Z";
@@ -43,13 +39,37 @@ export function sortBlockTemplates(templates = []) {
   });
 }
 
-export function parseBlockTemplateBlocks(template) {
+function parseRawBlockTemplateBlocks(template) {
   try {
     const blocks = JSON.parse(template?.blocks_json || "[]");
-    return Array.isArray(blocks) ? blocks : [];
+    return Array.isArray(blocks) ? blocks.filter(Boolean) : [];
   } catch {
     return [];
   }
+}
+
+export function getBlockTemplateBaseType(template) {
+  const rawBlocks = parseRawBlockTemplateBlocks(template);
+  return template?.base_block_type || rawBlocks[0]?.type || null;
+}
+
+export function getBlockTemplateBaseTypeLabel(template) {
+  return getBlockTypeLabel(getBlockTemplateBaseType(template));
+}
+
+export function parseBlockTemplateBlocks(template) {
+  const rawBlocks = parseRawBlockTemplateBlocks(template);
+  const baseBlockType = template?.base_block_type || rawBlocks[0]?.type || null;
+
+  if (!rawBlocks.length) {
+    return baseBlockType ? [createDefaultBlock(baseBlockType)] : [];
+  }
+
+  const matchingBlock = baseBlockType
+    ? rawBlocks.find((block) => block?.type === baseBlockType)
+    : rawBlocks[0];
+
+  return [matchingBlock || rawBlocks[0]];
 }
 
 export function materializeBlockTemplateBlocks(template) {
@@ -60,6 +80,8 @@ export function getBlockTemplateStats(template) {
   const blocks = parseBlockTemplateBlocks(template);
   return {
     blockCount: blocks.length,
+    baseBlockType: getBlockTemplateBaseType(template),
+    baseBlockLabel: getBlockTemplateBaseTypeLabel(template),
   };
 }
 
@@ -128,6 +150,7 @@ export async function createBlockTemplate(template) {
         title: template.title,
         description: template.description || "",
         category: template.category || "general",
+        base_block_type: template.base_block_type || getBlockTemplateBaseType(template),
         blocks_json: template.blocks_json || "[]",
         thumbnail: template.thumbnail || null,
         tags: template.tags || [],
@@ -146,9 +169,16 @@ export async function createBlockTemplate(template) {
 
 export async function updateBlockTemplate(id, updates) {
   try {
+    const normalizedUpdates = {
+      ...updates,
+      ...(updates.base_block_type
+        ? { base_block_type: updates.base_block_type }
+        : {}),
+    };
+
     const { data, error } = await supabase
       .from("block_templates")
-      .update(updates)
+      .update(normalizedUpdates)
       .eq("id", id)
       .select()
       .single();

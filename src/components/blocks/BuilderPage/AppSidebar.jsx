@@ -46,15 +46,17 @@ import {
   List as UnorderedList,
   Video,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Logo, Icon } from "@/components/Logo";
 import { useTheme } from "@/components/ThemeProvider";
 import { useAuth } from "@/context/AuthContext";
+import { createDefaultBlock } from "@/lib/blockLibrary";
 import {
+  getBlockTemplateBaseType,
+  getBlockTemplateBaseTypeLabel,
   getUserBlockTemplates,
   materializeBlockTemplateBlocks,
 } from "@/lib/blockTemplates";
-import { createDefaultMarpVoiceoverBlock } from "@/lib/marp";
 import {
   materializeTemplateBlocks,
   PRE_GENERATED_SLIDE_TEMPLATES,
@@ -117,7 +119,14 @@ function DraggableItem({ id, title, icon: Icon, isCollapsed, isMobile, onDoubleC
   return itemContent;
 }
 
-export default function AppSidebar({ onBlockAdd, presentationMode = false, readonlyStructure = false, ...props }) {
+export default function AppSidebar({
+  onBlockAdd,
+  presentationMode = false,
+  readonlyStructure = false,
+  readonlyTitle = "Structure locked",
+  readonlyDescription = "This course uses a template. Block structure is fixed — you can only edit content.",
+  ...props
+}) {
   const { setNodeRef } = useDroppable({ id: "sidebar" });
   const { theme } = useTheme();
   const { user } = useAuth();
@@ -160,223 +169,7 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
 
   const handleDoubleClickAdd = (blockType) => {
     if (!onBlockAdd) return;
-
-    const defaultContent = {
-      h1: "Heading 1",
-      h2: "Heading 2",
-      h3: "Heading 3",
-      h4: "Heading 4",
-      h5: "Heading 5",
-      h6: "Heading 6",
-      paragraph: "",
-      blockquote: "",
-      code: "```javascript\n// Your code here\n```",
-      math: "$\\sqrt{3x-1}+(1+x)^2$",
-      diagram: "```mermaid\ngraph TD;\n    A-->B;\n    A-->C;\n    B-->D;\n    C-->D;\n```",
-      alert: "Useful information that users should know, even when skimming content.",
-      ul: "- Item 1\n- Item 2\n- Item 3",
-      ol: "1. First item\n2. Second item\n3. Third item",
-      "task-list": "- [ ] Task 1\n- [x] Task 2\n- [ ] Task 3",
-      separator: "",
-      image: "",
-      video: "",
-      link: "",
-      table: "| Header 1 | Header 2 |\n|----------|----------|\n| Add text..   | Add text..   |",
-      "shield-badge": "",
-      "skill-icons": "",
-      "typing-svg": "",
-      "github-profile-cards": "",
-      // MARP blocks
-      "marp-frontmatter": "",
-      slide: "",
-      "marp-slide-directive": "",
-      "marp-bg-image": "",
-      "marp-style": "",
-      "marp-voiceover": "",
-    };
-
-    const newBlock = {
-      id: Date.now().toString(),
-      type: blockType,
-      content: defaultContent[blockType] || "",
-      ...(blockType === "marp-voiceover" ? createDefaultMarpVoiceoverBlock({ id: Date.now().toString() }) : {}),
-      ...(blockType === "image" && {
-        alt: "",
-        width: "",
-        height: "",
-        align: "left",
-      }),
-      ...(blockType === "video" && { title: "" }),
-      ...(blockType === "link" && { url: "" }),
-      ...(blockType === "shield-badge" && {
-        label: "build",
-        message: "passing",
-        badgeColor: "brightgreen",
-        style: "flat",
-        logo: "",
-      }),
-      ...(blockType === "skill-icons" && {
-        icons: "js,html,css",
-        theme: "dark",
-        perLine: "15",
-      }),
-      ...(blockType === "typing-svg" && {
-        lines: ["Hi there! I'm a developer 👋"],
-        font: "Fira Code",
-        size: "28",
-        duration: "3000",
-        pause: "1000",
-        color: "00FFB3",
-        center: true,
-        vCenter: true,
-        width: "900",
-        height: "80",
-      }),
-      ...(blockType === "github-profile-cards" && {
-        username: "",
-        align: "left",
-        cards: [
-          {
-            cardType: "profile-details",
-            theme: "material_palenight",
-            utcOffset: "8",
-            height: "",
-            width: "",
-          },
-        ],
-      }),
-      ...(blockType === "alert" && {
-        alertType: "note",
-      }),
-      // MARP block defaults
-      ...(blockType === "marp-frontmatter" && {
-        theme: "default",
-        size: "16:9",
-        paginate: false,
-        header: "",
-        footer: "",
-        backgroundColor: "",
-        color: "",
-      }),
-      ...(blockType === "marp-slide-directive" && {
-        directives: [{ key: "_class", value: "" }],
-      }),
-      ...(blockType === "marp-bg-image" && {
-        position: "bg",
-        opacity: "",
-      }),
-      // eLearning block defaults
-      ...(blockType === "grid" && {
-        columns: [
-          { id: "nc_init_0", blocks: [{ id: "nb_init_0", type: "h2", content: "" }, { id: "nb_init_1", type: "paragraph", content: "" }] },
-          { id: "nc_init_1", blocks: [{ id: "nb_init_2", type: "h2", content: "" }, { id: "nb_init_3", type: "paragraph", content: "" }] },
-        ],
-        weights: null,
-      }),
-      // eLearning block defaults
-      ...(blockType === "learning-objective" && {
-        objectives: ["Learners will be able to…"],
-      }),
-      ...(blockType === "quiz" && {
-        title: "",
-        passThreshold: 80,
-        maxAttempts: 0,
-        questions: [
-          {
-            id: `q${Date.now()}`,
-            type: "mcq",
-            prompt: "",
-            options: ["", "", "", ""],
-            correctIndex: 0,
-            feedbackCorrect: "",
-            feedbackIncorrect: "",
-            points: 1,
-          },
-        ],
-      }),
-      ...(blockType === "knowledge-check" && {
-        prompt: "",
-        options: ["", "", ""],
-        correctIndex: 0,
-      }),
-      ...(blockType === "flashcard" && {
-        front: "",
-        back: "",
-      }),
-      ...(blockType === "progress-marker" && {
-        label: "Progress checkpoint",
-      }),
-      ...(blockType === "course-nav" && {
-        prevLabel: "← Previous",
-        nextLabel: "Next →",
-        locked: false,
-        position: "bottom",
-        showProgress: false,
-      }),
-      ...(blockType === "branching" && {
-        prompt: "",
-        choices: [
-          { id: "c1", label: "" },
-          { id: "c2", label: "" },
-        ],
-      }),
-      ...(blockType === "time-requirements" && {
-        requiredMinutes: 2,
-        showProgress: true,
-        hideOnCompleted: false,
-      }),
-      ...(blockType === "categorization" && {
-        prompt: "Sort the following items into the correct categories:",
-        mode: "checklist",
-        categories: [
-          { id: "cat-1", label: "Category A" },
-          { id: "cat-2", label: "Category B" },
-        ],
-        items: [
-          { id: "item-1", content: "", categoryId: "cat-1" },
-          { id: "item-2", content: "", categoryId: "cat-2" },
-          { id: "item-3", content: "", categoryId: "cat-1" },
-          { id: "item-4", content: "", categoryId: "cat-2" },
-        ],
-      }),
-      ...(blockType === "carousel" && {
-        images: [{ url: "", alt: "", caption: "" }],
-        autoPlay: false,
-        interval: 3000,
-        showDots: true,
-      }),
-      ...(blockType === "pdf" && {
-        url: "",
-        title: "",
-        height: "500px",
-        showDownload: true,
-      }),
-      ...(blockType === "fill-in-the-blank" && {
-        sentence: "The ___ is the powerhouse of the cell.",
-        answers: ["mitochondria"],
-        caseSensitive: false,
-        feedbackCorrect: "\u2713 Correct! Well done.",
-        feedbackIncorrect: "\u2717 Not quite \u2014 review and try again.",
-      }),
-      ...(blockType === "matching" && {
-        prompt: "Match each term to its correct definition:",
-        pairs: [
-          { id: "p1", term: "Term 1", definition: "Definition A" },
-          { id: "p2", term: "Term 2", definition: "Definition B" },
-          { id: "p3", term: "Term 3", definition: "Definition C" },
-        ],
-      }),
-      ...(blockType === "hotspot" && {
-        imageUrl: "",
-        alt: "",
-        hotspots: [],
-      }),
-    };
-
-
-    // Add the block using the existing onBlockAdd function structure
-    // We need to modify the Builder's handleBlockAdd to accept a block object
-    onBlockAdd(null, newBlock);
+    onBlockAdd(null, createDefaultBlock(blockType));
   };
 
   // Mobile detection
@@ -409,6 +202,22 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
 
     loadUserBlockTemplates();
   }, [readonlyStructure, user?.id]);
+
+  const userTemplatesByBlockType = useMemo(() => {
+    return userBlockTemplates.reduce((groupedTemplates, template) => {
+      const blockType = getBlockTemplateBaseType(template);
+      if (!blockType) {
+        return groupedTemplates;
+      }
+
+      if (!groupedTemplates[blockType]) {
+        groupedTemplates[blockType] = [];
+      }
+
+      groupedTemplates[blockType].push(template);
+      return groupedTemplates;
+    }, {});
+  }, [userBlockTemplates]);
 
   const data = {
     headings: [
@@ -503,9 +312,9 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
               <Lock className="h-6 w-6 text-muted-foreground/50" />
               {showFullContent && (
                 <>
-                  <p className="text-xs font-medium text-muted-foreground">Structure locked</p>
+                  <p className="text-xs font-medium text-muted-foreground">{readonlyTitle}</p>
                   <p className="text-[11px] text-muted-foreground/60 leading-relaxed">
-                    This course uses a template. Block structure is fixed — you can only edit content.
+                    {readonlyDescription}
                   </p>
                 </>
               )}
@@ -521,17 +330,43 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
                     </div>
                   )}
 
-                  {items.map((item) => (
-                    <DraggableItem
-                      key={item.key}
-                      id={item.key}
-                      title={item.title}
-                      icon={item.icon}
-                      isCollapsed={isCollapsed}
-                      isMobile={isMobile}
-                      onDoubleClick={handleDoubleClickAdd}
-                    />
-                  ))}
+                  {items.map((item) => {
+                    const matchingTemplates = userTemplatesByBlockType[item.key] || [];
+
+                    return (
+                      <div key={item.key}>
+                        <DraggableItem
+                          id={item.key}
+                          title={item.title}
+                          icon={item.icon}
+                          isCollapsed={isCollapsed}
+                          isMobile={isMobile}
+                          onDoubleClick={handleDoubleClickAdd}
+                        />
+
+                        {showFullContent && matchingTemplates.length > 0 && (
+                          <div className="ml-8 mr-4 mt-1 border-l border-border/60 pl-3 space-y-1">
+                            {matchingTemplates.map((template) => (
+                              <button
+                                key={template.id}
+                                type="button"
+                                className="w-full flex items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted/60 transition-colors group"
+                                onClick={() => handleUserTemplateInsert(template)}
+                              >
+                                <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-600" />
+                                <div className="min-w-0">
+                                  <p className="text-[11px] font-medium truncate">{template.title}</p>
+                                  <p className="text-[10px] text-muted-foreground truncate">
+                                    {template.description || `${getBlockTemplateBaseTypeLabel(template)} variant`}
+                                  </p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
 
                   {!showFullContent && i < arr.length - 1 && (
                     <div className="px-3">
@@ -547,45 +382,11 @@ export default function AppSidebar({ onBlockAdd, presentationMode = false, reado
           {/* Slide Templates section */}
           {showFullContent && !readonlyStructure && (
             <div className="mt-2 border-t pt-3 pb-2">
-              {isLoadingBlockTemplates || userBlockTemplates.length > 0 ? (
-                <>
-                  <div className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">
-                    Block Templates
-                  </div>
-                  <div className="px-2 space-y-1 mt-1 pb-3">
-                    {isLoadingBlockTemplates ? (
-                      <p className="px-2 py-2 text-[11px] text-muted-foreground">
-                        Loading your templates...
-                      </p>
-                    ) : (
-                      userBlockTemplates.map((template) => (
-                        <TooltipProvider key={template.id}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                className="w-full flex items-start gap-2 px-2 py-2 rounded-md text-left hover:bg-muted/60 transition-colors group"
-                                onClick={() => handleUserTemplateInsert(template)}
-                              >
-                                <FileText className="h-4 w-4 mt-0.5 shrink-0 text-sky-600" />
-                                <div className="min-w-0">
-                                  <p className="text-xs font-medium truncate">{template.title}</p>
-                                  <p className="text-[10px] text-muted-foreground truncate">
-                                    {template.description || "Insert saved block stack"}
-                                  </p>
-                                </div>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="text-xs">
-                              Click to insert saved block template
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ))
-                    )}
-                  </div>
-                </>
-              ) : null}
+              {isLoadingBlockTemplates && (
+                <p className="px-4 py-2 text-[11px] text-muted-foreground">
+                  Loading saved block variants...
+                </p>
+              )}
 
               <div className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">
                 Slide Templates

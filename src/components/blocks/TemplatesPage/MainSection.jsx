@@ -35,10 +35,11 @@ import { duplicateCourse } from "@/lib/storage";
 import {
   createTemplate,
   deleteTemplateWithCourse,
-  ensureTemplateCourse,
   getAllTemplates,
+  getTemplatePermissions,
   getTemplatesByCategory,
   instantiateBuiltInTemplateCourse,
+  resolveTemplateEditorCourse,
   searchTemplates,
   TEMPLATE_CATEGORY_OPTIONS,
   updateTemplate,
@@ -108,6 +109,12 @@ const buildTemplateStructurePreview = (template) => {
 const getCategoryLabel = (value) =>
   TEMPLATE_CATEGORY_OPTIONS.find((category) => category.value === value)?.label || value;
 
+const DEFAULT_TEMPLATE_PERMISSIONS = {
+  canManageTemplate: false,
+  canEditLayout: false,
+  editCreatesCopy: false,
+};
+
 export default function MainSection({ onTemplatesChange }) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -119,6 +126,8 @@ export default function MainSection({ onTemplatesChange }) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplatePermissions, setSelectedTemplatePermissions] = useState(DEFAULT_TEMPLATE_PERMISSIONS);
+  const [isCheckingSelectedTemplatePermissions, setIsCheckingSelectedTemplatePermissions] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
 
   const [templateTitle, setTemplateTitle] = useState("");
@@ -129,6 +138,14 @@ export default function MainSection({ onTemplatesChange }) {
   const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   const categories = TEMPLATE_CATEGORY_OPTIONS;
+
+  const hydrateTemplatePermissions = async (templateList) =>
+    Promise.all(
+      (templateList || []).map(async (template) => ({
+        ...template,
+        ...(await getTemplatePermissions(template, user?.id)),
+      })),
+    );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -141,7 +158,43 @@ export default function MainSection({ onTemplatesChange }) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: needed
   useEffect(() => {
     fetchTemplates();
-  }, [category, debouncedSearch]);
+  }, [category, debouncedSearch, user?.id]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!showDetailsDialog || !selectedTemplate) {
+      setSelectedTemplatePermissions(DEFAULT_TEMPLATE_PERMISSIONS);
+      setIsCheckingSelectedTemplatePermissions(false);
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    setIsCheckingSelectedTemplatePermissions(true);
+
+    getTemplatePermissions(selectedTemplate, user?.id)
+      .then((permissions) => {
+        if (!isCancelled) {
+          setSelectedTemplatePermissions(permissions);
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking template permissions:", error);
+        if (!isCancelled) {
+          setSelectedTemplatePermissions(DEFAULT_TEMPLATE_PERMISSIONS);
+        }
+      })
+      .finally(() => {
+        if (!isCancelled) {
+          setIsCheckingSelectedTemplatePermissions(false);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedTemplate, showDetailsDialog, user?.id]);
 
   const fetchTemplates = async () => {
     setLoading(true);
@@ -158,6 +211,8 @@ export default function MainSection({ onTemplatesChange }) {
       } else {
         data = await getTemplatesByCategory(category);
       }
+
+      data = await hydrateTemplatePermissions(data);
 
       setTemplates(data);
       if (onTemplatesChange) {
@@ -325,23 +380,26 @@ export default function MainSection({ onTemplatesChange }) {
 
   const handleTemplateClick = (template) => {
     setSelectedTemplate(template);
+    setSelectedTemplatePermissions({
+      canManageTemplate: Boolean(template?.canManageTemplate),
+      canEditLayout: Boolean(template?.canEditLayout),
+    });
     setShowDetailsDialog(true);
   };
 
   const handleEditTemplate = async (template) => {
-    if (template.course_id) {
-      navigate(`/course/${template.course_id}`);
-      return;
-    }
-    // Template predates companion-course linking — create one now
-    const loadingToast = toast.loading("Setting up template editor…");
-    const { success, courseId, error } = await ensureTemplateCourse(
-      template.id,
-      template.title,
+    const loadingToast = toast.loading("Opening template editor…");
+    const { success, courseId, error, repaired, copied } = await resolveTemplateEditorCourse(
+      template,
       user.id,
     );
     toast.dismiss(loadingToast);
     if (success) {
+      if (copied) {
+        toast.success("Created editable template copy");
+      } else if (repaired) {
+        toast.success("Template editor link restored");
+      }
       navigate(`/course/${courseId}`);
     } else {
       toast.error(`Failed to open template editor: ${error}`);
@@ -568,10 +626,14 @@ export default function MainSection({ onTemplatesChange }) {
                       className="h-7 px-2"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleUseTemplate(template);
+                        if (template.canEditLayout) {
+                          handleEditTemplate(template);
+                        } else {
+                          handleUseTemplate(template);
+                        }
                       }}
                     >
-                      Use Template
+                      {template.canEditLayout ? "Edit Layout" : "Use Template"}
                     </Button>
                   </div>
                 </div>
@@ -791,7 +853,7 @@ export default function MainSection({ onTemplatesChange }) {
                 <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
                   Close
                 </Button>
-                {user?.id === selectedTemplate?.user_id && !selectedTemplate?.is_builtin && (
+                {selectedTemplatePermissions.canManageTemplate && !selectedTemplate?.is_builtin && (
                   <Button
                     variant="outline"
                     className="gap-2"
@@ -804,10 +866,11 @@ export default function MainSection({ onTemplatesChange }) {
                     Edit Details
                   </Button>
                 )}
-                {user?.id === selectedTemplate?.user_id && (
+                {selectedTemplatePermissions.canEditLayout && (
                   <Button
                     variant="outline"
                     className="gap-2"
+                    disabled={isCheckingSelectedTemplatePermissions}
                     onClick={() => {
                       setShowDetailsDialog(false);
                       handleEditTemplate(selectedTemplate);
@@ -817,7 +880,7 @@ export default function MainSection({ onTemplatesChange }) {
                     Edit Layout
                   </Button>
                 )}
-                {user?.id === selectedTemplate?.user_id && !selectedTemplate?.is_builtin && (
+                {selectedTemplatePermissions.canManageTemplate && !selectedTemplate?.is_builtin && (
                   <Button
                     variant="destructive"
                     className="gap-2"

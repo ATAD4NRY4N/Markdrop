@@ -41,6 +41,199 @@ const sortTemplates = (templates = []) =>
 const mergeTemplateCollections = (remoteTemplates = [], builtInTemplates = PRE_GENERATED_COURSE_TEMPLATES) =>
   sortTemplates([...builtInTemplates, ...(remoteTemplates || [])]);
 
+const TEMPLATE_EDITOR_COURSE_SELECT = "id, user_id, is_template";
+
+const parseLegacyTemplateBlocks = (template) => {
+  try {
+    const blocks = JSON.parse(template?.content || "[]");
+    return Array.isArray(blocks) ? blocks : [];
+  } catch {
+    return [];
+  }
+};
+
+async function getTemplateEditorCourse(courseId, expectedUserId = null) {
+  if (!courseId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("courses")
+    .select(TEMPLATE_EDITOR_COURSE_SELECT)
+    .eq("id", courseId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  if (expectedUserId && data.user_id !== expectedUserId) {
+    return null;
+  }
+
+  if (!data.is_template) {
+    return null;
+  }
+
+  return data;
+}
+
+async function seedTemplateCourse(courseId, sourceTemplate = null) {
+  const materializedModules = materializeCourseTemplateModules(sourceTemplate);
+  const createdModules = [];
+
+  if (materializedModules.length > 0) {
+    for (const module of materializedModules) {
+      const createdModule = await createModule(
+        courseId,
+        module.title,
+        module.order,
+        JSON.stringify(module.blocks),
+      );
+      createdModules.push({ ...createdModule, key: module.key });
+    }
+  } else {
+    const initialBlocks = parseLegacyTemplateBlocks(sourceTemplate);
+    const firstModule = await createModule(
+      courseId,
+      "Module 1",
+      0,
+      JSON.stringify(initialBlocks),
+    );
+    createdModules.push(firstModule);
+  }
+
+  const updates = {};
+
+  if (sourceTemplate?.theme) {
+    updates.theme_json = JSON.stringify(sourceTemplate.theme);
+  }
+
+  const sections = materializeCourseTemplateSections(sourceTemplate, createdModules);
+  if (sections.length > 0) {
+    updates.sections_json = JSON.stringify(sections);
+  }
+
+  if (sourceTemplate?.adaptiveConfig) {
+    updates.adaptive_config = JSON.stringify(sourceTemplate.adaptiveConfig);
+  }
+
+  if (Object.keys(updates).length > 0) {
+    await updateCourse(courseId, updates);
+  }
+}
+
+async function createLinkedTemplateCourse({ templateId, title, description = "", userId, sourceTemplate = null }) {
+  const { data: courseData, error: courseError } = await supabase
+    .from("courses")
+    .insert({
+      user_id: userId,
+      title,
+      description: description || "",
+      is_template: true,
+    })
+    .select()
+    .single();
+
+  if (courseError) {
+    throw courseError;
+  }
+
+  await seedTemplateCourse(courseData.id, sourceTemplate);
+
+  const { data: linkedTemplate, error: linkError } = await supabase
+    .from("templates")
+    .update({ course_id: courseData.id })
+    .eq("id", templateId)
+    .select()
+    .single();
+
+  if (linkError) {
+    throw linkError;
+  }
+
+  return {
+    courseId: courseData.id,
+    template: linkedTemplate,
+  };
+}
+
+async function createEditableTemplateCopy(sourceTemplate, userId) {
+  const { data: templateData, error } = await supabase
+    .from("templates")
+    .insert({
+      title: sourceTemplate.title,
+      description: sourceTemplate.description,
+      category: sourceTemplate.category,
+      content: sourceTemplate.content,
+      thumbnail: sourceTemplate.thumbnail,
+      images: sourceTemplate.images || [],
+      tags: sourceTemplate.tags || [],
+      user_id: userId,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  const { courseId, template } = await createLinkedTemplateCourse({
+    templateId: templateData.id,
+    title: sourceTemplate.title,
+    description: sourceTemplate.description,
+    userId,
+    sourceTemplate,
+  });
+
+  return {
+    courseId,
+    template: template || templateData,
+  };
+}
+
+export async function getTemplatePermissions(template, userId) {
+  const canManageTemplate = Boolean(
+    userId && !template?.is_builtin && template?.user_id === userId,
+  );
+
+  if (!userId) {
+    return {
+      canManageTemplate,
+      canEditLayout: false,
+      editCreatesCopy: false,
+    };
+  }
+
+  if (canManageTemplate) {
+    return {
+      canManageTemplate: true,
+      canEditLayout: true,
+      editCreatesCopy: false,
+    };
+  }
+
+  if (template?.is_builtin) {
+    return {
+      canManageTemplate: false,
+      canEditLayout: true,
+      editCreatesCopy: true,
+    };
+  }
+
+  const templateCourse = await getTemplateEditorCourse(template?.course_id, userId);
+
+  return {
+    canManageTemplate: false,
+    canEditLayout: true,
+    editCreatesCopy: !templateCourse,
+  };
+}
+
 export async function getAllTemplates() {
   const builtInTemplates = PRE_GENERATED_COURSE_TEMPLATES;
 
@@ -191,35 +384,18 @@ export async function createTemplate(template) {
     // 2. Create a companion is_template course so the owner can open the full
     //    CourseBuilder to set up modules and page layouts.
     if (template.user_id) {
-      const { data: courseData, error: courseError } = await supabase
-        .from("courses")
-        .insert({
-          user_id: template.user_id,
+      try {
+        const { template: linkedTemplate } = await createLinkedTemplateCourse({
+          templateId: templateData.id,
           title: template.title,
-          description: template.description || "",
-          is_template: true,
-        })
-        .select()
-        .single();
-
-      if (!courseError && courseData) {
-        // 3. Seed with a first module so the editor isn't empty
-        await supabase.from("course_modules").insert({
-          course_id: courseData.id,
-          title: "Module 1",
-          order: 0,
-          blocks_json: "[]",
+          description: template.description,
+          userId: template.user_id,
+          sourceTemplate: template,
         });
 
-        // 4. Link the course back to the template
-        const { data: linked } = await supabase
-          .from("templates")
-          .update({ course_id: courseData.id })
-          .eq("id", templateData.id)
-          .select()
-          .single();
-
-        return { success: true, data: linked || templateData };
+        return { success: true, data: linkedTemplate || templateData };
+      } catch (courseError) {
+        console.error("Error creating companion template course:", courseError);
       }
     }
 
@@ -251,7 +427,23 @@ export async function updateTemplate(id, updates) {
       }
 
       if (Object.keys(courseUpdates).length > 0) {
-        await updateCourse(data.course_id, courseUpdates);
+        try {
+          const templateCourse = await getTemplateEditorCourse(data.course_id, data.user_id);
+
+          if (templateCourse) {
+            await updateCourse(templateCourse.id, courseUpdates);
+          } else if (data.user_id) {
+            await createLinkedTemplateCourse({
+              templateId: data.id,
+              title: data.title,
+              description: data.description,
+              userId: data.user_id,
+              sourceTemplate: data,
+            });
+          }
+        } catch (courseSyncError) {
+          console.error("Error syncing companion template course:", courseSyncError);
+        }
       }
     }
 
@@ -290,38 +482,65 @@ export async function deleteTemplateWithCourse(template) {
   }
 }
 
+export async function resolveTemplateEditorCourse(template, userId) {
+  try {
+    if (!template?.id) {
+      throw new Error("Template not found");
+    }
+
+    if (!userId) {
+      throw new Error("A signed-in user is required to edit templates");
+    }
+
+    const templateCourse = await getTemplateEditorCourse(template.course_id, userId);
+    if (templateCourse) {
+      return { success: true, courseId: templateCourse.id, repaired: false, copied: false };
+    }
+
+    if (!template.is_builtin && template.user_id === userId) {
+      const { courseId } = await createLinkedTemplateCourse({
+        templateId: template.id,
+        title: template.title,
+        description: template.description,
+        userId,
+        sourceTemplate: template,
+      });
+
+      return {
+        success: true,
+        courseId,
+        repaired: !!template.course_id,
+        copied: false,
+      };
+    }
+
+    const { courseId } = await createEditableTemplateCopy(template, userId);
+
+    return {
+      success: true,
+      courseId,
+      repaired: false,
+      copied: true,
+    };
+  } catch (error) {
+    console.error("Error resolving template editor course:", error);
+    return { success: false, error: error.message };
+  }
+}
+
 // For templates created before migration 010 (no course_id), creates and links
 // a companion course on the fly so the owner can open the layout editor.
-export async function ensureTemplateCourse(templateId, title, userId) {
+export async function ensureTemplateCourse(templateId, title, userId, description = "") {
   try {
-    const { data: courseData, error: courseError } = await supabase
-      .from("courses")
-      .insert({
-        user_id: userId,
-        title,
-        is_template: true,
-      })
-      .select()
-      .single();
-
-    if (courseError) throw courseError;
-
-    await supabase.from("course_modules").insert({
-      course_id: courseData.id,
-      title: "Module 1",
-      order: 0,
-      blocks_json: "[]",
+    const { courseId } = await createLinkedTemplateCourse({
+      templateId,
+      title,
+      description,
+      userId,
+      sourceTemplate: { title, description },
     });
 
-    const { data: linked, error: linkError } = await supabase
-      .from("templates")
-      .update({ course_id: courseData.id })
-      .eq("id", templateId)
-      .select()
-      .single();
-
-    if (linkError) throw linkError;
-    return { success: true, courseId: courseData.id };
+    return { success: true, courseId };
   } catch (error) {
     console.error("Error ensuring template course:", error);
     return { success: false, error: error.message };

@@ -37,10 +37,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCourse } from "@/context/CourseContext";
 import { copyBlocksToClipboard, pasteBlocksFromClipboard } from "@/lib/clipboard";
+import {
+  buildLessonPathPreview,
+  buildLessonRelativePath,
+  buildModuleCurriculumTags,
+  normalizeModuleCurriculumMetadata,
+  parseCourseCurriculumMetadata,
+  parseModuleCurriculumMetadata,
+} from "@/lib/curriculumUtils";
 import { cn } from "@/lib/utils";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -68,6 +85,7 @@ function SortableModuleItem({
   onAssignSection,
   onCopyModuleBlocks,
   onPasteIntoModule,
+  onEditMetadata,
   readonlyStructure = false,
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -185,7 +203,15 @@ function SortableModuleItem({
               Rename
             </DropdownMenuItem>
           )}
-          {!readonlyStructure && <DropdownMenuSeparator />}
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditMetadata(module);
+            }}
+          >
+            Lesson metadata
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
@@ -313,6 +339,7 @@ function CollapsibleSection({
   onAssignSection,
   onCopyModuleBlocks,
   onPasteIntoModule,
+  onEditMetadata,
   readonlyStructure = false,
 }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -409,6 +436,7 @@ function CollapsibleSection({
                 onAssignSection={onAssignSection}
                 onCopyModuleBlocks={onCopyModuleBlocks}
                 onPasteIntoModule={onPasteIntoModule}
+                onEditMetadata={onEditMetadata}
                 readonlyStructure={readonlyStructure}
               />
             ))}
@@ -437,9 +465,14 @@ export default function CourseStructurePanel({ className }) {
     assignModuleToSection,
     persistSections,
     pasteBlocksIntoModule,
+    updateModuleRecord,
   } = useCourse();
 
   const isTemplateLocked = !!course?.template_id;
+  const courseCurriculum = parseCourseCurriculumMetadata(course?.curriculum_metadata_json);
+  const [editingMetadataModule, setEditingMetadataModule] = useState(null);
+  const [lessonFolder, setLessonFolder] = useState("");
+  const [markdownFileName, setMarkdownFileName] = useState("");
 
   const handleCopyModuleBlocks = async (module) => {
     const blocks = (() => {
@@ -465,6 +498,36 @@ export default function CourseStructurePanel({ className }) {
     }
     await pasteBlocksIntoModule(moduleId, pasted);
     toast.success(`${pasted.length} block${pasted.length !== 1 ? "s" : ""} pasted`);
+  };
+
+  const openLessonMetadataDialog = (module) => {
+    const metadata = parseModuleCurriculumMetadata(module.curriculum_metadata_json);
+    setEditingMetadataModule(module);
+    setLessonFolder(metadata.lessonFolder || "");
+    setMarkdownFileName(metadata.markdownFileName || "");
+  };
+
+  const handleSaveLessonMetadata = async () => {
+    if (!editingMetadataModule?.id) {
+      return;
+    }
+
+    const metadata = normalizeModuleCurriculumMetadata({
+      lessonFolder,
+      markdownFileName,
+    });
+
+    try {
+      await updateModuleRecord(editingMetadataModule.id, {
+        curriculum_metadata_json: JSON.stringify(metadata),
+        curriculum_tags: buildModuleCurriculumTags(courseCurriculum, metadata),
+      });
+      setEditingMetadataModule(null);
+      toast.success("Lesson metadata saved");
+    } catch (error) {
+      console.error("Failed to save lesson metadata:", error);
+      toast.error("Failed to save lesson metadata");
+    }
   };
 
   const [draggedId, setDraggedId] = useState(null);
@@ -574,6 +637,18 @@ export default function CourseStructurePanel({ className }) {
   };
 
   const draggedModule = modules.find((m) => m.id === draggedId);
+  const lessonPathPreview = buildLessonPathPreview(courseCurriculum, {
+    lessonFolder,
+    markdownFileName,
+  });
+  const savedLessonPath = buildLessonRelativePath(courseCurriculum, {
+    lessonFolder,
+    markdownFileName,
+  });
+  const derivedLessonTags = buildModuleCurriculumTags(courseCurriculum, {
+    lessonFolder,
+    markdownFileName,
+  });
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -619,6 +694,7 @@ export default function CourseStructurePanel({ className }) {
                     onAssignSection={assignModuleToSection}
                     onCopyModuleBlocks={handleCopyModuleBlocks}
                     onPasteIntoModule={handlePasteIntoModule}
+                    onEditMetadata={openLessonMetadataDialog}
                     readonlyStructure={isTemplateLocked}
                   />
                 ))}
@@ -646,6 +722,7 @@ export default function CourseStructurePanel({ className }) {
                   onAssignSection={assignModuleToSection}
                   onCopyModuleBlocks={handleCopyModuleBlocks}
                   onPasteIntoModule={handlePasteIntoModule}
+                  onEditMetadata={openLessonMetadataDialog}
                   readonlyStructure={isTemplateLocked}
                 />
               );
@@ -694,6 +771,71 @@ export default function CourseStructurePanel({ className }) {
           Add Section
         </Button>
       </div>
+
+      <Dialog
+        open={Boolean(editingMetadataModule)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingMetadataModule(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[560px]">
+          <DialogHeader>
+            <DialogTitle>Lesson Metadata</DialogTitle>
+            <DialogDescription>
+              Define the lesson folder and markdown filename used for the curriculum repo.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Lesson Folder</Label>
+              <Input
+                value={lessonFolder}
+                onChange={(event) => setLessonFolder(event.target.value)}
+                placeholder="01q Introduction to the ONE Runtime Server MCQ"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Markdown File Name</Label>
+              <Input
+                value={markdownFileName}
+                onChange={(event) => setMarkdownFileName(event.target.value)}
+                placeholder="163DQ06-01-Introduction to the ONE Runtime Server MCQ.md"
+              />
+            </div>
+
+            <div className="rounded-md border bg-muted/40 p-3 space-y-2">
+              <div>
+                <p className="text-xs font-medium text-foreground">Repo Path Preview</p>
+                <p className="text-[11px] font-mono text-muted-foreground break-all">
+                  {lessonPathPreview}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-foreground">Derived Module Tags</p>
+                <p className="text-[11px] text-muted-foreground break-words">
+                  {derivedLessonTags.join(" • ") || "No lesson tags yet"}
+                </p>
+              </div>
+              {!savedLessonPath && (
+                <p className="text-[11px] text-muted-foreground">
+                  Save the course curriculum metadata first to replace the path placeholders.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingMetadataModule(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveLessonMetadata}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

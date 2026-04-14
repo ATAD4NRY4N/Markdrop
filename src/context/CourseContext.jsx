@@ -120,6 +120,12 @@ export function CourseProvider({ children }) {
     setModules((prev) => prev.map((m) => (m.id === moduleId ? updated : m)));
   }, []);
 
+  const updateModuleRecord = useCallback(async (moduleId, updates) => {
+    const updated = await updateModule(moduleId, updates);
+    setModules((prev) => prev.map((module) => (module.id === moduleId ? updated : module)));
+    return updated;
+  }, []);
+
   // Delete a module
   const removeModule = useCallback(
     async (moduleId) => {
@@ -290,6 +296,7 @@ export function CourseProvider({ children }) {
         saveActiveModuleBlocks,
         addModule,
         renameModule,
+        updateModuleRecord,
         removeModule,
         reorderModuleList,
         getActiveModuleBlocks,

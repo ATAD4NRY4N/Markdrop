@@ -207,7 +207,13 @@ export const deleteCourse = async (courseId) => {
 // ---------------------------------------------------------------------------
 
 // Create a module in a course
-export const createModule = async (courseId, title, order = 0, blocksJson = "[]") => {
+export const createModule = async (
+  courseId,
+  title,
+  order = 0,
+  blocksJson = "[]",
+  extraFields = {},
+) => {
   const { data, error } = await supabase
     .from("course_modules")
     .insert({
@@ -215,6 +221,7 @@ export const createModule = async (courseId, title, order = 0, blocksJson = "[]"
       title,
       order,
       blocks_json: blocksJson,
+      ...extraFields,
     })
     .select()
     .single();
@@ -284,6 +291,18 @@ export const duplicateCourse = async (courseId, userId) => {
   const extras = {};
   if (original.theme_json) extras.theme_json = original.theme_json;
   if (original.adaptive_config) extras.adaptive_config = original.adaptive_config;
+  if (original.curriculum_metadata_json) {
+    extras.curriculum_metadata_json = original.curriculum_metadata_json;
+  }
+  if (Array.isArray(original.curriculum_tags)) {
+    extras.curriculum_tags = original.curriculum_tags;
+  }
+  if (Array.isArray(original.tags)) {
+    extras.tags = original.tags;
+  }
+  if (Array.isArray(original.version_tags)) {
+    extras.version_tags = original.version_tags;
+  }
   const sectionBlueprints = (() => {
     try {
       const parsed = JSON.parse(original.sections_json || "[]");
@@ -303,6 +322,13 @@ export const duplicateCourse = async (courseId, userId) => {
         module.title,
         module.order,
         module.blocks_json,
+        {
+          curriculum_metadata_json:
+            module.curriculum_metadata_json || JSON.stringify({}),
+          curriculum_tags: Array.isArray(module.curriculum_tags)
+            ? module.curriculum_tags
+            : [],
+        },
       );
       moduleIdMap.set(module.id, createdModule.id);
     }

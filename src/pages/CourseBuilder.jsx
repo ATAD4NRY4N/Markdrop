@@ -98,6 +98,12 @@ import {
   getCourseCanvasLabel,
   withNormalizedCourseDisplaySettings,
 } from "@/lib/courseDisplay";
+import {
+  buildCourseCurriculumTags,
+  buildCourseFolderPreview,
+  normalizeCourseCurriculumMetadata,
+  parseCourseCurriculumMetadata,
+} from "@/lib/curriculumUtils";
 
 // ---------------------------------------------------------------------------
 // Inner component (needs CourseProvider above it)
@@ -143,6 +149,9 @@ function CourseBuilderInner() {
   const isTemplateLocked = !!course?.template_id;
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
+  const [courseCurriculum, setCourseCurriculum] = useState(
+    normalizeCourseCurriculumMetadata({}),
+  );
   const [initialized, setInitialized] = useState(false);
 
   // Per-course theme (persisted in course.theme_json)
@@ -188,6 +197,7 @@ function CourseBuilderInner() {
     if (course) {
       setCourseTitle(course.title || "");
       setCourseDescription(course.description || "");
+      setCourseCurriculum(parseCourseCurriculumMetadata(course.curriculum_metadata_json));
       try {
         const parsed = JSON.parse(course.theme_json || "{}");
         setCourseTheme({
@@ -286,10 +296,26 @@ function CourseBuilderInner() {
 
   const handleSaveSettings = async () => {
     try {
+      const normalizedCurriculum = normalizeCourseCurriculumMetadata(courseCurriculum);
+      const previousCurriculum = parseCourseCurriculumMetadata(course?.curriculum_metadata_json);
+      const previousVersionTag = previousCurriculum.productVersion;
+      const existingVersionTags = Array.isArray(course?.version_tags)
+        ? course.version_tags
+        : [];
+      const preservedVersionTags = previousVersionTag
+        ? existingVersionTags.filter((tag) => tag !== previousVersionTag)
+        : existingVersionTags;
+      const nextVersionTags = normalizedCurriculum.productVersion
+        ? [...new Set([...preservedVersionTags, normalizedCurriculum.productVersion])]
+        : preservedVersionTags;
+
       await saveCourse({
         title: courseTitle.trim() || "Untitled Course",
         description: courseDescription,
         theme_json: JSON.stringify(courseTheme),
+        curriculum_metadata_json: JSON.stringify(normalizedCurriculum),
+        curriculum_tags: buildCourseCurriculumTags(normalizedCurriculum),
+        version_tags: nextVersionTags,
       });
       setShowSettingsDialog(false);
       toast.success("Course settings saved");
@@ -962,6 +988,7 @@ function CourseBuilderInner() {
           <Tabs defaultValue="general" className="mt-1">
             <TabsList className="w-full">
               <TabsTrigger value="general" className="flex-1 text-xs">General</TabsTrigger>
+              <TabsTrigger value="curriculum" className="flex-1 text-xs">Curriculum</TabsTrigger>
               <TabsTrigger value="appearance" className="flex-1 text-xs">Appearance</TabsTrigger>
             </TabsList>
 
@@ -983,6 +1010,90 @@ function CourseBuilderInner() {
                   placeholder="What will learners learn?"
                   className="resize-none min-h-[80px]"
                 />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="curriculum" className="space-y-4 pt-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Product Version</Label>
+                  <Input
+                    value={courseCurriculum.productVersion}
+                    onChange={(event) =>
+                      setCourseCurriculum((current) => ({
+                        ...current,
+                        productVersion: event.target.value,
+                      }))
+                    }
+                    placeholder="163"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Product Module</Label>
+                  <Input
+                    value={courseCurriculum.productModule}
+                    onChange={(event) =>
+                      setCourseCurriculum((current) => ({
+                        ...current,
+                        productModule: event.target.value,
+                      }))
+                    }
+                    placeholder="DQ"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Product Feature Folder</Label>
+                <Input
+                  value={courseCurriculum.productFeatureFolder}
+                  onChange={(event) =>
+                    setCourseCurriculum((current) => ({
+                      ...current,
+                      productFeatureFolder: event.target.value,
+                    }))
+                  }
+                  placeholder="163DQ06-01-Introduction to the ONE Runtime Server"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Course ID is inferred from the product feature prefix.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Derived Course ID</Label>
+                  <Input
+                    value={normalizeCourseCurriculumMetadata(courseCurriculum).courseCode}
+                    readOnly
+                    className="bg-muted"
+                    placeholder="163DQ06"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Version Tag</Label>
+                  <Input
+                    value={normalizeCourseCurriculumMetadata(courseCurriculum).productVersion}
+                    readOnly
+                    className="bg-muted"
+                    placeholder="163"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-md border bg-muted/40 p-3 space-y-2">
+                <div>
+                  <p className="text-xs font-medium text-foreground">Repo Folder Preview</p>
+                  <p className="text-[11px] font-mono text-muted-foreground break-all">
+                    {buildCourseFolderPreview(courseCurriculum)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-foreground">Derived Course Tags</p>
+                  <p className="text-[11px] text-muted-foreground break-words">
+                    {buildCourseCurriculumTags(courseCurriculum).join(" • ") || "No curriculum tags yet"}
+                  </p>
+                </div>
               </div>
             </TabsContent>
 
